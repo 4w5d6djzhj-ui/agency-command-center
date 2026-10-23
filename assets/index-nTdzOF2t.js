@@ -418,8 +418,8 @@ function xBestNow(scenario, style, lead, now) {
   if (step.win === "now" || step.win === "soon") {
     const L = XLEGAL.call, W = XWIN[step.win];
     if (now >= L[0] && now < L[1] - 10) return { ch: "call", when: "Now", why: W.why, ref: W.ref, then: src === "RF" ? "an intro email about 20 minutes after the call, naming who sent them" : "the quote by email at ~20 minutes; call again at 30\u201360 minutes" };
-    if (consent.email) return { ch: "email", when: "Now", why: "After 8 pm calls and texts wait for the morning; the quote can still go by email tonight", ref: "T7", then: "Call at 8:00 AM" };
-    return { ch: "call", when: "8:00 AM", why: "Calls open at 8 am their time", ref: "T7", then: null };
+    if (consent.email) return { ch: "email", when: "Now", why: "After 8 pm calls and texts wait for the morning; the quote can still go by email tonight", ref: "T7", then: "Call at 9:00 AM, when the office opens" };
+    return { ch: "call", when: "9:00 AM", why: "The office opens at 9; calls are legal from 8 am their time", ref: "T7", then: null };
   }
   let allowed = step.ch.filter((c) => xAllowed(c, pseudo));
   if (!contacted && allowed.length > 1) allowed = allowed.filter((c) => c !== "text");
@@ -506,7 +506,7 @@ function xSeedUpTo(minutes, silent) {
   apply({ ...base, done, asks });
 }
 function xStartOver() {
-  xSet({ clock: 8 * 60 + 30, clockAt: Date.now() });
+  xSet({ clock: 9 * 60, clockAt: Date.now() });
   xSeedUpTo(null, false);
 }
 function xSetClock(v) {
@@ -561,7 +561,8 @@ function xParseAt(s) {
 }
 const XREF = {};
 const XLEGAL = { call: [8 * 60, 20 * 60], text: [8 * 60, 20 * 60], email: [0, 24 * 60] };
-const XDAY = { open: 8 * 60, close: 18 * 60 };
+const XDAY = { open: 9 * 60, close: 17 * 60, lunch: [12 * 60, 13 * 60] };
+const XOPEN_LABEL = "9:00 AM";
 const XWIN = {};
 const XSRC = {
   IL: { label: "Internet lead", anchor: "the minute the lead arrives", steps: [
@@ -572,10 +573,10 @@ const XSRC = {
     { n: 5, day: 1, win: "call", ch: ["call"], what: "Fourth call", ref: "T3" },
     { n: 6, day: 4, win: "email", ch: ["email"], what: "Second email", ref: "T3" },
     { n: 7, day: 5, win: "reach", ch: ["call"], what: "Fifth call", ref: "T3" },
-    { n: 8, day: 8, win: "email", ch: ["email"], what: "Third email", ref: "T3" },
+    { n: 8, day: 8, win: "emailpm", ch: ["email"], what: "Third email", ref: "T3" },
     { n: 9, day: 14, win: "email", ch: ["email"], what: "Fourth email", ref: "T3" },
     { n: 10, day: 15, win: "reach", ch: ["call"], what: "Sixth and last call", ref: "T3", vm: 30 },
-    { n: 11, day: 22, win: "email", ch: ["email"], what: "Last email: an easy out", ref: "T3" },
+    { n: 11, day: 22, win: "emailpm", ch: ["email"], what: "Last email: an easy out", ref: "T3" },
     { n: 12, day: 45, win: "email", ch: ["email", "text"], what: "Nurture: a short burst again", ref: "T15" },
     { n: 13, day: 180, win: "email", ch: ["email", "text"], what: "Six months: re-quote, or the X-date steps", ref: "T12" }
   ] },
@@ -587,16 +588,16 @@ const XSRC = {
     { n: 5, day: 1, win: "call", ch: ["call"], what: "Third call", ref: "T3" },
     { n: 6, day: 4, win: "email", ch: ["email"], what: "Second email", ref: "T3" },
     { n: 7, day: 5, win: "reach", ch: ["call"], what: "Fourth call", ref: "T3" },
-    { n: 8, day: 8, win: "email", ch: ["email"], what: "Third email", ref: "T3" },
+    { n: 8, day: 8, win: "emailpm", ch: ["email"], what: "Third email", ref: "T3" },
     { n: 9, day: 10, win: "call", ch: ["call"], what: "Fifth call", ref: "T3" },
     { n: 10, day: 14, win: "email", ch: ["email"], what: "Fourth email", ref: "T3" },
     { n: 11, day: 15, win: "reach", ch: ["call"], what: "Sixth and last call", ref: "T3", vm: 30 },
-    { n: 12, day: 22, win: "email", ch: ["email"], what: "Last email: an easy out", ref: "T3" }
+    { n: 12, day: 22, win: "emailpm", ch: ["email"], what: "Last email: an easy out", ref: "T3" }
   ] },
   XD: { label: "X-date", anchor: "their renewal date, counting back", steps: [
     { n: 1, day: -60, win: "call", ch: ["call"], what: "Confirm the date and ask to reach out before it", ref: "T12" },
     { n: 2, day: -45, win: "email", ch: ["email"], what: "Email the proposal", ref: "T12" },
-    { n: 3, day: -30, win: "text", ch: ["text", "call"], what: "One small ask", ref: "T12" },
+    { n: 3, day: -30, win: "textpm", ch: ["text", "call"], what: "One small ask", ref: "T12" },
     { n: 4, day: -21, win: "reach", ch: ["call"], what: "Call: the proposal is ready", ref: "T12", vm: 15 },
     { n: 5, day: -14, win: "call", ch: ["call"], what: "Their style's question, then the ask", ref: "T12" },
     { n: 6, day: -7, win: "text", ch: ["text", "email"], what: "One small ask", ref: "T12" },
@@ -606,7 +607,7 @@ const XSRC = {
   WB: { label: "Win-back", anchor: "the anniversary of leaving", steps: [
     { n: 1, day: -21, win: "email", ch: ["email"], what: "Before the anniversary", ref: "T13" },
     { n: 2, day: 0, win: "email", ch: ["email"], what: "Email the quote: the discount back or a bundle", ref: "T13" },
-    { n: 3, day: 2, win: "text", ch: ["text", "call"], what: "One small ask", ref: "T10" },
+    { n: 3, day: 2, win: "textpm", ch: ["text", "call"], what: "One small ask", ref: "T10" },
     { n: 4, day: 5, win: "reach", ch: ["call"], what: "Ask why they switched", ref: "T13", vm: 15 },
     { n: 5, day: 10, win: "emailpm", ch: ["text", "email"], what: "Easy out", ref: "T9" },
     { n: 6, day: 180, win: "email", ch: ["email"], what: "Before their next renewal", ref: "T12" }
@@ -616,15 +617,15 @@ const XSRC = {
     { n: 2, day: 0, win: "m20", ch: ["email"], what: "Email the recap and the quote", ref: "T9" },
     { n: 3, day: 1, win: "text", ch: ["text", "call"], what: "Did the quote come through?", ref: "T10" },
     { n: 4, day: 3, win: "reach", ch: ["call"], what: "Call for the decision", ref: "T10", vm: 15 },
-    { n: 5, day: 7, win: "text", ch: ["text", "email"], what: "One small ask", ref: "T10" },
+    { n: 5, day: 7, win: "textpm", ch: ["text", "email"], what: "One small ask", ref: "T10" },
     { n: 6, day: 14, win: "emailpm", ch: ["text", "email"], what: "Easy out", ref: "T3" },
     { n: 7, day: 90, win: "email", ch: ["email"], what: "Re-quote at three months", ref: "T12" },
     { n: 8, day: 180, win: "email", ch: ["email", "text"], what: "Six months: re-quote or X-date steps", ref: "T12" }
   ] },
   QN: { label: "Quoted, no decision", anchor: "the day the quote went out", steps: [
-    { n: 1, day: 1, win: "text", ch: ["text", "call"], what: "Did they see it?", ref: "T10" },
+    { n: 1, day: 1, win: "textpm", ch: ["text", "call"], what: "Did they see it?", ref: "T10" },
     { n: 2, day: 3, win: "reach", ch: ["call"], what: "Their style's question, then the ask", ref: "T3", vm: 15 },
-    { n: 3, day: 5, win: "email", ch: ["email"], what: "One reason to look again", ref: "T9" },
+    { n: 3, day: 5, win: "emailpm", ch: ["email"], what: "One reason to look again", ref: "T9" },
     { n: 4, day: 8, win: "call", ch: ["call"], what: "Find the one concern", ref: "T3" },
     { n: 5, day: 12, win: "emailpm", ch: ["text", "email"], what: "One small ask", ref: "T9" },
     { n: 6, day: 15, win: "reach", ch: ["call"], what: "Last call", ref: "T3", vm: 30 },
@@ -635,20 +636,20 @@ const XSRC = {
   CC: { label: "Current customer", anchor: "the review date", steps: [
     { n: 1, day: 0, win: "call", ch: ["call"], what: "What the review showed", ref: "T12" },
     { n: 2, day: 0, win: "m20", ch: ["email"], what: "Email the proposal", ref: "T2" },
-    { n: 3, day: 4, win: "text", ch: ["text", "call"], what: "One small ask", ref: "T10" },
+    { n: 3, day: 4, win: "textpm", ch: ["text", "call"], what: "One small ask", ref: "T10" },
     { n: 4, day: 10, win: "reach", ch: ["call"], what: "Find the one concern", ref: "T3", vm: 15 },
-    { n: 5, day: 21, win: "email", ch: ["email"], what: "No pressure; the option stays open", ref: "T9" },
+    { n: 5, day: 21, win: "emailpm", ch: ["email"], what: "No pressure; the option stays open", ref: "T9" },
     { n: 6, day: 365, win: "call", ch: ["call"], what: "Next review", ref: "T12" }
   ] },
   LE: { label: "Life event", anchor: "the day they told you", steps: [
     { n: 1, day: 0, win: "soon", ch: ["call"], what: "Congratulate, then ask what changed", ref: "T12" },
     { n: 2, day: 1, win: "email", ch: ["email"], what: "What changes, and the options", ref: "T9" },
-    { n: 3, day: 4, win: "text", ch: ["call", "text"], what: "One small ask, then stop", ref: "T12" }
+    { n: 3, day: 4, win: "textpm", ch: ["call", "text"], what: "One small ask, then stop", ref: "T12" }
   ] },
   RI: { label: "Renewal, rate up", anchor: "their renewal date, counting back", steps: [
     { n: 1, day: -35, win: "call", ch: ["call"], what: "Call before the notice lands", ref: "T12" },
     { n: 2, day: -35, win: "m20", ch: ["email"], what: "Options side by side", ref: "T2" },
-    { n: 3, day: -21, win: "text", ch: ["text", "call"], what: "One small ask", ref: "T12" },
+    { n: 3, day: -21, win: "textpm", ch: ["text", "call"], what: "One small ask", ref: "T12" },
     { n: 4, day: -14, win: "reach", ch: ["call"], what: "Find the one concern", ref: "T12", vm: 15 },
     { n: 5, day: -7, win: "emailpm", ch: ["text", "email"], what: "Last check", ref: "T12" }
   ] }
@@ -694,10 +695,10 @@ function xWindowFor(step, ch) {
   const w = step.win;
   if (w === "now" || w === "soon" || XWIN[w] && XWIN[w].rel) return w;
   if ((XCHWIN[ch] || []).includes(w)) return w;
-  const late = w === "reach" || w === "emailpm";
+  const late = w === "reach" || w === "emailpm" || w === "textpm";
   if (ch === "call") return late ? "reach" : "call";
   if (ch === "email") return late ? "emailpm" : "email";
-  return "text";
+  return late ? "textpm" : "text";
 }
 const XVM_ANY = { CC: 1, LE: 1, RI: 1 };
 function xVoicemail(t) {
@@ -730,9 +731,10 @@ function xBuildDay(leads, clock) {
     return true;
   };
   const dur = { call: 10, text: 5, email: 5 };
-  const place = (lo, hi, edge, len) => {
+  const inLunch = (t, len) => t < XDAY.lunch[1] && t + len > XDAY.lunch[0];
+  const place = (lo, hi, edge, len, thruLunch) => {
     const slots = [];
-    for (let t = Math.ceil(lo / 5) * 5; t <= hi - len; t += 5) slots.push(t);
+    for (let t = Math.ceil(lo / 5) * 5; t <= hi - len; t += 5) if (thruLunch || !inLunch(t, len)) slots.push(t);
     if (edge === "late") slots.reverse();
     for (const t of slots) if (isFree(t, len)) {
       take(t, len);
@@ -740,6 +742,7 @@ function xBuildDay(leads, clock) {
     }
     return null;
   };
+  const open = (ch) => Math.max(XLEGAL[ch][0], XDAY.open), tomorrowLabel = `Tomorrow ${XOPEN_LABEL}`;
   const talked = (lead) => Object.keys(XS.done).some((k) => k.startsWith(lead.id + "#") && /talked|quoted|signed|notnow/.test(XS.done[k].k));
   const doneAt = (lead, step) => {
     const d = XS.done[`${lead.id}#${step.n}`];
@@ -769,17 +772,17 @@ function xBuildDay(leads, clock) {
       label = xFmt(slot);
     } else if (wk === "now") {
       const arrived = lead.seen != null ? Math.max(0, xLanded(lead)) : now;
-      const by = Math.max(arrived, now);
+      const by = Math.max(arrived, now), op = open(ch);
       if (by >= legal[1] - 10) {
-        slot = legal[0];
+        slot = op;
         tomorrow = true;
-        label = "Tomorrow 8:00 AM";
-      } else if (by < legal[0]) {
-        slot = legal[0];
+        label = tomorrowLabel;
+      } else if (by < op) {
+        slot = op;
         take(slot, dur[ch]);
         label = xFmt(slot);
       } else {
-        slot = Math.max(arrived, legal[0]);
+        slot = Math.max(arrived, op);
         take(Math.max(slot, now), dur[ch]);
         label = "Now";
       }
@@ -788,11 +791,11 @@ function xBuildDay(leads, clock) {
         p.anchorTomorrow = false;
       }
     } else if (wk === "soon") {
-      const lo = Math.max(now, legal[0]);
+      const lo = Math.max(now, open(ch));
       if (lo >= legal[1] - 10) {
-        slot = legal[0];
+        slot = open(ch);
         tomorrow = true;
-        label = "Tomorrow 8:00 AM";
+        label = tomorrowLabel;
       } else {
         slot = place(lo, Math.min(lo + 120, legal[1]), "early", dur[ch]);
         if (slot == null) slot = lo;
@@ -809,6 +812,8 @@ function xBuildDay(leads, clock) {
         const base = p.anchor != null ? p.anchor : lead.seen != null ? xLanded(lead) : XDAY.open;
         const lo = Math.max(base + W.rel[0], legal[0]), hi = Math.min(base + W.rel[1], legal[1]);
         slot = lo < hi ? place(lo, hi, "early", dur[ch]) : null;
+        if (slot == null && lo < hi) slot = place(lo, Math.min(hi + 30, legal[1]), "early", dur[ch]);
+        if (slot == null && lo < hi) slot = place(lo, Math.min(hi + 30, legal[1]), "early", dur[ch], true);
         if (slot == null && lo < legal[1]) slot = lo;
         if (slot == null) return;
       } else {
@@ -846,8 +851,8 @@ function xBuildDay(leads, clock) {
     const L = XLEGAL[t.ch];
     if (t.slot >= L[1] || t.slot <= now && now >= L[1] - 10) {
       t.tomorrow = true;
-      t.slot = L[0];
-      t.label = "Tomorrow 8:00 AM";
+      t.slot = open(t.ch);
+      t.label = tomorrowLabel;
       t.late = true;
     }
   }
@@ -869,7 +874,7 @@ function xNextLabel(p) {
 function xTouchWhy(t) {
   if (t.booked && !t.late) return "They picked this time. Be early.";
   const w = XWIN[t.wk];
-  const parts = [t.tomorrow ? "After 8 pm, calls and texts wait for 8 am their time" : w ? w.why : ""];
+  const parts = [t.tomorrow ? "After 8 pm, calls and texts wait for the morning: the office opens at 9" : w ? w.why : ""];
   if (t.chReason) parts.push(t.chReason);
   return parts.filter(Boolean).map((s) => s.replace(/\.$/, "")).join(". ") + ".";
 }
@@ -968,7 +973,7 @@ function xPlanCanon(leads) {
 }
 function xCompare(leads, seed) {
   const plan = xPlanCanon(leads), usual = xUsualDay(leads, seed);
-  const inBest = (m) => m >= 10 * 60 && m < 11 * 60 || m >= 16 * 60 && m < 18 * 60;
+  const inBest = (m) => m >= XWIN.call.lo && m < XWIN.call.hi || m >= XWIN.reach.lo && m < XWIN.reach.hi;
   const newIds = Object.keys(plan.arrive).filter((id) => plan.touches.some((t) => t.lead.id === id && t.wk === "now"));
   const planFirst = newIds.map((id) => {
     const c = plan.touches.filter((t) => t.lead.id === id && t.ch === "call").sort((a, b) => a.slot - b.slot)[0];
@@ -994,7 +999,7 @@ function xCompare(leads, seed) {
     { k: "Touches on a new lead's first day", plan: `${planDayOne.toFixed(0)}: a call now, the quote by email at ~20 min, calls at 30\u201360 min and 1\u20132 h`, usual: "1", why: "Three tries on day one is the floor; the emailed quote makes the next call likelier to connect", ref: ["T2", "T3"] },
     { k: "Calls before the plan stops", plan: `${callsIL} calls and ${emailsIL} emails over 22 days, then a short burst at 45`, usual: `about ${XUSUAL.attempts}`, why: "93% of eventual buyers were reached by the sixth call; insurers audited averaged 1.45 attempts", ref: ["T3", "T15"] },
     { k: "Words fitted to the person", plan: "Every draft, for the style on file", usual: `${pct(usualFit, usualAll)}% (one template fits about one style in four)`, why: "Adapting tracks with sales, but a wrong style guess about halves the response: set it on a clear signal", ref: ["T11"] },
-    { k: "Later calls in the best hours", plan: `${pct(planCalls.filter((t) => inBest(t.slot)).length, planCalls.length)}% at 10\u201311 am or 4\u20136 pm`, usual: `${pct(usualCalls.filter((u) => inBest(u.slot)).length, usualCalls.length)}%`, why: "The hour matters least of these (about 2.6 contact points), but it costs nothing", ref: ["T4", "T5"] },
+    { k: "Later calls in their windows", plan: `${pct(planCalls.filter((t) => inBest(t.slot)).length, planCalls.length)}% at 10\u2013noon or 3\u20135 pm, lunch free`, usual: `${pct(usualCalls.filter((u) => inBest(u.slot)).length, usualCalls.length)}%`, why: "The hour matters least of these (about 2.6 contact points), but it costs nothing", ref: ["T4", "T5"] },
     { k: "Touches that skip consent", plan: `${planBreaks}`, usual: `${usualBreaks}`, why: "Washington: no commercial text without their OK in advance, $100 a text; the plan can't pick a channel they haven't okayed", ref: ["T7"] },
     { k: "People with no touch today", plan: `${planMissed}`, usual: `${usualMissed}`, why: "Without an order, the end of the list is whoever the day runs out on; audits found 39% of leads never called", ref: ["T15"] }
   ];
@@ -1092,7 +1097,7 @@ const XQ = [
     day: 3,
     done: 1,
     contacted: true,
-    at: "11:30 AM",
+    at: "3:30 PM",
     scenario: "following",
     stage: "proposed",
     reason: "Callback \xB7 auto + life walkthrough",
@@ -1457,11 +1462,11 @@ function xOutcomeText(v) {
   return `${XOUT[d.k]} \xB7 ${nx}`;
 }
 function xStatusOf(t, now) {
-  if (t.tomorrow) return { cls: "", text: "Tomorrow 8:00 AM" };
+  if (t.tomorrow) return { cls: "", text: "Tomorrow 9:00 AM" };
   if (t.wk === "now" && t.lead.seen != null) {
     const waited = Math.max(0, now - xLanded(t.lead)), left = 5 - waited;
     if (now < XLEGAL.call[0]) return { cls: "", text: `Calls open at ${xFmt(XLEGAL.call[0])}` };
-    if (now >= XLEGAL.call[1] - 10) return { cls: "", text: "Calls reopen 8:00 AM" };
+    if (now >= XLEGAL.call[1] - 10) return { cls: "", text: "Calls reopen 9:00 AM" };
     if (left > 0) {
       const sec = Math.floor(left * 60);
       return { cls: "sla-green", text: `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")} left` };
@@ -1477,7 +1482,7 @@ function XViewBar({ view }) {
 function XPath({ v, now }) {
   return /* @__PURE__ */ I.createElement("span", { className: "x-path", "aria-label": "Today's sequence" }, v.ts.map((t, i) => {
     const d = XS.done[t.id], skipped = !d && !v.current ? true : false, cur = v.current && v.current.id === t.id;
-    return /* @__PURE__ */ I.createElement("span", { key: t.id, className: `x-path-step x-path-${t.ch}${d ? " is-done" : ""}${cur ? " is-cur" : ""}${skipped ? " is-off" : ""}`, title: `${XCH[t.ch]} \xB7 ${t.label} \xB7 ${t.step.what}` }, i > 0 && /* @__PURE__ */ I.createElement("span", { className: "x-path-arrow", "aria-hidden": "true" }, "\u2192"), /* @__PURE__ */ I.createElement("span", { className: "x-path-ch" }, XCH[t.ch]), /* @__PURE__ */ I.createElement("span", { className: "x-path-t" }, d ? "\u2713" : t.tomorrow ? "8:00 AM" : t.wk === "now" ? "now" : t.label.replace(":00", "")));
+    return /* @__PURE__ */ I.createElement("span", { key: t.id, className: `x-path-step x-path-${t.ch}${d ? " is-done" : ""}${cur ? " is-cur" : ""}${skipped ? " is-off" : ""}`, title: `${XCH[t.ch]} \xB7 ${t.label} \xB7 ${t.step.what}` }, i > 0 && /* @__PURE__ */ I.createElement("span", { className: "x-path-arrow", "aria-hidden": "true" }, "\u2192"), /* @__PURE__ */ I.createElement("span", { className: "x-path-ch" }, XCH[t.ch]), /* @__PURE__ */ I.createElement("span", { className: "x-path-t" }, d ? "\u2713" : t.tomorrow ? "9:00 AM" : t.wk === "now" ? "now" : t.label.replace(":00", "")));
   }));
 }
 function XWhen({ t, now }) {
@@ -1786,8 +1791,8 @@ function xProgress(day, now) {
   const dueNow = plan.filter((t) => t.slot <= now).length;
   const doneNow = done.filter((t) => at(t) <= now + 0.01).length;
   const hours = [];
-  for (let h = 8; h <= 19; h++) {
-    const inH = (m) => m >= h * 60 && m < (h + 1) * 60;
+  for (let h = 9; h <= 16; h++) {
+    const inH = (m) => h === 9 ? m < 10 * 60 : h === 16 ? m >= 16 * 60 : m >= h * 60 && m < (h + 1) * 60;
     hours.push({ h, plan: plan.filter((t) => inH(t.slot)).length, done: done.filter((t) => inH(at(t))).length });
   }
   const calls = plan.filter((t) => t.ch === "call"), callsDone = calls.filter((t) => XS.done[t.id]);
@@ -1822,7 +1827,7 @@ function XBurnUp({ pr, now, height }) {
   const [hov, setHov] = I.useState(null);
   const [box, W] = useBoxWidth(610);
   const H = height || 165, L = 34, R = 76, T = 13, B = 26;
-  const x0 = 8 * 60, x1 = 20 * 60, total = Math.max(1, pr.plan.length);
+  const x0 = XDAY.open, x1 = XDAY.close, total = Math.max(1, pr.plan.length);
   const sx = (m) => L + (Math.max(x0, Math.min(x1, m)) - x0) / (x1 - x0) * (W - L - R);
   const sy = (n) => T + (1 - n / total) * (H - T - B);
   const steps = (times) => {
@@ -1839,7 +1844,7 @@ function XBurnUp({ pr, now, height }) {
   const donePts = steps(pr.done.map((t) => pr.at(t)).filter((m) => m <= now + 0.01));
   donePts.push([Math.min(Math.max(now, x0), x1), pr.doneNow]);
   const path = (pts) => pts.map(([m, n], i) => `${i ? "L" : "M"}${sx(m).toFixed(1)},${sy(n).toFixed(1)}`).join("");
-  const ticks = [8, 10, 12, 14, 16, 18, 20];
+  const ticks = W < 430 ? [9, 11, 13, 15, 17] : [9, 10, 11, 12, 13, 14, 15, 16, 17];
   const yt = [0, Math.round(total / 2), total];
   const cum = (m) => ({ plan: pr.plan.filter((t) => t.slot <= m).length, done: pr.done.filter((t) => pr.at(t) <= Math.min(m, now)).length });
   const move = (e) => {
@@ -1928,19 +1933,19 @@ function XTable({ caption, cols, rows }) {
   return /* @__PURE__ */ I.createElement("details", { className: "x-table" }, /* @__PURE__ */ I.createElement("summary", null, "Show as a table"), /* @__PURE__ */ I.createElement("table", null, /* @__PURE__ */ I.createElement("caption", null, caption), /* @__PURE__ */ I.createElement("thead", null, /* @__PURE__ */ I.createElement("tr", null, cols.map((c) => /* @__PURE__ */ I.createElement("th", { key: c, scope: "col" }, c)))), /* @__PURE__ */ I.createElement("tbody", null, rows.map((r, i) => /* @__PURE__ */ I.createElement("tr", { key: i }, r.map((c, j) => j ? /* @__PURE__ */ I.createElement("td", { key: j }, c) : /* @__PURE__ */ I.createElement("th", { key: j, scope: "row" }, c)))))));
 }
 function xOpenBlocks(day) {
-  const lo = 8 * 60, hi = 18 * 60;
-  const slots = day.touches.filter((t) => !t.tomorrow).map((t) => t.slot).sort((a, b) => a - b);
+  const lo = XDAY.open, hi = XDAY.close;
+  const used = day.touches.filter((t) => !t.tomorrow).map((t) => [t.slot, t.slot + 10]).concat([[XDAY.lunch[0], XDAY.lunch[1]], [lo, lo + 10]]).sort((a, b) => a[0] - b[0]);
   const gaps = [];
   let prev = lo;
-  for (const s of slots.concat([hi])) {
+  for (const [s, e] of used.concat([[hi, hi]])) {
     const end = Math.min(s, hi);
-    if (end - prev >= 45) {
+    if (end - prev >= 30) {
       if (end - prev > 110) {
         const mid = Math.round((prev + end) / 2 / 5) * 5;
         gaps.push([prev, mid], [mid, end]);
       } else gaps.push([prev, end]);
     }
-    prev = Math.max(prev, s + 10);
+    prev = Math.max(prev, Math.min(e, hi));
     if (prev >= hi) break;
   }
   return gaps.slice(0, 3);
@@ -1965,7 +1970,7 @@ function xProTasks(day) {
   const lib = [
     { id: "quotes", k: c.owe.length ? `Send the quote${c.owe.length === 1 ? "" : "s"} to ${names}` : "Send this morning's quotes", min: 5, t: c.owe.length ? `${c.owe.length === 1 ? xFirst(c.owe[0].name) + " talked this morning and has" : "Both talked this morning and have"} no quote out yet. The follow-up plan starts the moment it goes out.` : "Anyone who talked this morning and has no quote out yet; the plan starts the moment it goes out.", slot: 0 },
     { id: "consent", k: "Consent check, once", min: 2, t: c.stops ? `${c.stops} STOP came in at 7:42 today; texts are off for her and the record shows it. Read the five lines once; nothing to fix.` : "Read the five lines once; nothing to fix.", slot: 0 },
-    { id: "tomorrow", k: "Pick tomorrow's first three calls", min: 5, t: "They are already first on tomorrow's plan. Read their words once now, so the 8 AM calls start warm.", slot: 1 },
+    { id: "tomorrow", k: "Pick tomorrow's first three calls", min: 5, t: "They are already first on tomorrow's plan. Read their words once now, so the first calls at 9 start warm.", slot: 1 },
     { id: "renewals", k: `Next week's renewals: ${c.renewals}`, min: 5, t: `${c.renewals} on your list renew within two weeks. Line up the re-quotes today so each gets its call before the notice lands.`, slot: 1 },
     { id: "referrals", k: "Two referral asks", min: 5, t: "Call two customers who signed this month and ask for one name each. Asked is the measure, not received.", slot: 1 },
     { id: "life", k: c.life ? `Book ${xFirst(c.life.name)}'s life review` : "Book one life review", min: 5, t: c.life ? `${xFirst(c.life.name)} had a baby this month. Ten minutes: auto protects the car, home protects the house, life protects the payments.` : "One household with a new baby, home or driver: ten minutes on what protects the payments.", slot: 2 },
@@ -1997,7 +2002,7 @@ function XOpenTime({ day, now, coach }) {
 }
 function XDayStrip({ pr, now, mix, clock }) {
   const [ref, W] = useBoxWidth(960);
-  const H = 72, L = 16, R = 16, top = 14, bottom = 20, lo = 8 * 60, hi = 20 * 60;
+  const H = 72, L = 16, R = 16, top = 14, bottom = 20, lo = XDAY.open, hi = XDAY.close;
   const sx = (m) => L + (Math.min(hi, Math.max(lo, m)) - lo) / (hi - lo) * (W - L - R);
   const touches = pr.plan.slice().sort((a, b) => a.slot - b.slot || a.id.localeCompare(b.id));
   const buckets = {};
@@ -2008,9 +2013,9 @@ function XDayStrip({ pr, now, mix, clock }) {
   });
   const rowH = (H - top - bottom - 10) / 3;
   const y = (i) => H - bottom - 7 - Math.min(i, 3) * rowH;
-  const hours = [8, 10, 12, 14, 16, 18, 20];
+  const hours = W < 600 ? [9, 11, 13, 15, 17] : [9, 10, 11, 12, 13, 14, 15, 16, 17];
   const inDay = now >= lo && now <= hi;
-  return /* @__PURE__ */ I.createElement("div", { className: "x-strip", ref }, /* @__PURE__ */ I.createElement("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", height: H, role: "img", "aria-label": `${touches.length} touches planned today, ${pr.doneNow} done, ${pr.behind} late`, style: { display: "block" } }, xOpenBlocks(pr.day || { touches: pr.plan }).map((g, i) => /* @__PURE__ */ I.createElement("g", { key: i, className: "x-strip-open" }, /* @__PURE__ */ I.createElement("rect", { x: sx(g[0]), y: top - 2, width: Math.max(0, sx(g[1]) - sx(g[0])), height: H - bottom - top + 2, fill: "var(--paper-warm)", rx: "3" }), sx(g[1]) - sx(g[0]) > 70 && /* @__PURE__ */ I.createElement("text", { x: (sx(g[0]) + sx(g[1])) / 2, y: top + 9, textAnchor: "middle", fontSize: "9.5", fill: "var(--ink-3)", fontFamily: "IBM Plex Mono, monospace", letterSpacing: ".06em" }, "OPEN \xB7 5-MIN WORK"))), /* @__PURE__ */ I.createElement("line", { x1: L, x2: W - R, y1: H - bottom, y2: H - bottom, stroke: "var(--line)" }), hours.map((h) => /* @__PURE__ */ I.createElement("g", { key: h }, /* @__PURE__ */ I.createElement("line", { x1: sx(h * 60), x2: sx(h * 60), y1: H - bottom - 3, y2: H - bottom + 3, stroke: "var(--ink-4)" }), /* @__PURE__ */ I.createElement("text", { x: sx(h * 60), y: H - 5, textAnchor: "middle", fontSize: "10", fill: "var(--ink-3)", fontFamily: "IBM Plex Mono, monospace" }, (h > 12 ? h - 12 : h) + (h >= 12 ? " PM" : " AM")))), dots.map(({ t, i }) => {
+  return /* @__PURE__ */ I.createElement("div", { className: "x-strip", ref }, /* @__PURE__ */ I.createElement("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", height: H, role: "img", "aria-label": `${touches.length} touches planned today, ${pr.doneNow} done, ${pr.behind} late`, style: { display: "block" } }, /* @__PURE__ */ I.createElement("defs", null, /* @__PURE__ */ I.createElement("pattern", { id: "x-lunch-hatch", width: "6", height: "6", patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, /* @__PURE__ */ I.createElement("line", { x1: "0", y1: "0", x2: "0", y2: "6", stroke: "var(--line)", strokeWidth: "1.5" }))), /* @__PURE__ */ I.createElement("g", { className: "x-strip-lunch" }, /* @__PURE__ */ I.createElement("rect", { x: sx(XDAY.lunch[0]), y: top - 2, width: Math.max(0, sx(XDAY.lunch[1]) - sx(XDAY.lunch[0])), height: H - bottom - top + 2, fill: "url(#x-lunch-hatch)", rx: "3" }), sx(XDAY.lunch[1]) - sx(XDAY.lunch[0]) > 44 && /* @__PURE__ */ I.createElement("text", { x: (sx(XDAY.lunch[0]) + sx(XDAY.lunch[1])) / 2, y: top + 9, textAnchor: "middle", fontSize: "9.5", fill: "var(--ink-3)", fontFamily: "IBM Plex Mono, monospace", letterSpacing: ".06em" }, "LUNCH")), xOpenBlocks(pr.day || { touches: pr.plan }).map((g, i) => /* @__PURE__ */ I.createElement("g", { key: i, className: "x-strip-open" }, /* @__PURE__ */ I.createElement("rect", { x: sx(g[0]), y: top - 2, width: Math.max(0, sx(g[1]) - sx(g[0])), height: H - bottom - top + 2, fill: "var(--paper-warm)", rx: "3" }), sx(g[1]) - sx(g[0]) > 110 ? /* @__PURE__ */ I.createElement("text", { x: (sx(g[0]) + sx(g[1])) / 2, y: top + 9, textAnchor: "middle", fontSize: "9.5", fill: "var(--ink-3)", fontFamily: "IBM Plex Mono, monospace", letterSpacing: ".06em" }, "OPEN \xB7 5-MIN WORK") : sx(g[1]) - sx(g[0]) > 36 ? /* @__PURE__ */ I.createElement("text", { x: (sx(g[0]) + sx(g[1])) / 2, y: top + 9, textAnchor: "middle", fontSize: "9.5", fill: "var(--ink-3)", fontFamily: "IBM Plex Mono, monospace", letterSpacing: ".06em" }, "OPEN") : null)), /* @__PURE__ */ I.createElement("line", { x1: L, x2: W - R, y1: H - bottom, y2: H - bottom, stroke: "var(--line)" }), hours.map((h) => /* @__PURE__ */ I.createElement("g", { key: h }, /* @__PURE__ */ I.createElement("line", { x1: sx(h * 60), x2: sx(h * 60), y1: H - bottom - 3, y2: H - bottom + 3, stroke: "var(--ink-4)" }), /* @__PURE__ */ I.createElement("text", { x: sx(h * 60), y: H - 5, textAnchor: h === hours[0] ? "start" : h === hours[hours.length - 1] ? "end" : "middle", fontSize: "10", fill: "var(--ink-3)", fontFamily: "IBM Plex Mono, monospace" }, (h > 12 ? h - 12 : h) + (h >= 12 ? " PM" : " AM")))), dots.map(({ t, i }) => {
     const d = XS.done[t.id], late = !d && t.slot <= now - 30, c = XCOL[t.ch];
     return /* @__PURE__ */ I.createElement("circle", { key: t.id, cx: sx(t.slot), cy: y(i), r: 5, fill: d ? c : "var(--surface)", stroke: late ? "var(--signal)" : c, strokeWidth: late ? 2 : 1.5, className: "x-strip-dot" + (d ? " is-done" : late ? " is-late" : "") }, /* @__PURE__ */ I.createElement("title", null, `${xFmt(t.slot)} \xB7 ${XCH[t.ch]} \xB7 ${t.lead.name}${d ? " \xB7 done" : late ? " \xB7 late" : ""}`));
   }), inDay && /* @__PURE__ */ I.createElement("g", { className: "x-strip-now" }, /* @__PURE__ */ I.createElement("line", { x1: sx(now), x2: sx(now), y1: top - 6, y2: H - bottom, stroke: "var(--signal)", strokeWidth: "1.5" }), /* @__PURE__ */ I.createElement("text", { x: sx(now), y: top - 8 + 4, textAnchor: "middle", fontSize: "9.5", fontWeight: "600", fill: "var(--signal)", fontFamily: "IBM Plex Mono, monospace", letterSpacing: ".08em" }, "NOW"))), /* @__PURE__ */ I.createElement("div", { className: "x-strip-cap" }, /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("b", null, touches.length), " touches today \xB7 ", mix.call, " calls \xB7 ", mix.text + mix.email, " messages drafted for you", clock != null ? ` \xB7 demo clock ${xFmt(now)}` : "", " \xB7 ", /* @__PURE__ */ I.createElement("span", { className: "greeting x-strip-model", title: "The day's model: 20 prospects, 7 quotes, 4 applications, 2 households protected" }, `${Ef.funnel.leads} prospects \xB7 ${Ef.funnel.quoted} quotes \xB7 ${Ef.funnel.apps} apps / ${Ef.funnel.households} HH protected`)), /* @__PURE__ */ I.createElement("span", { className: "x-strip-key" }, /* @__PURE__ */ I.createElement("i", { style: { background: XCOL.call } }), "call ", /* @__PURE__ */ I.createElement("i", { style: { background: XCOL.email } }), "email ", /* @__PURE__ */ I.createElement("i", { style: { background: XCOL.text } }), "text ", /* @__PURE__ */ I.createElement("em", null, "filled = done \xB7 red ring = late"))));
@@ -2020,7 +2025,7 @@ const XRULES = [];
 const XHOURS = [];
 const XTEST = [];
 const XDESIGN = [];
-const XCLOCKS = [["Live", null], ["8:30 AM", 8 * 60 + 30], ["11:00 AM", 11 * 60], ["2:30 PM", 14 * 60 + 30], ["4:30 PM", 16 * 60 + 30], ["8:15 PM", 20 * 60 + 15]];
+const XCLOCKS = [["Live", null], ["9:00 AM", 9 * 60], ["11:00 AM", 11 * 60], ["2:30 PM", 14 * 60 + 30], ["4:30 PM", 16 * 60 + 30], ["8:15 PM", 20 * 60 + 15]];
 function XRefs({ ids }) {
   const list = (ids || []).filter((k, i, a) => k && XREF[k] && a.indexOf(k) === i);
   if (!list.length) return null;
@@ -2033,7 +2038,7 @@ function XClockBar() {
 function XPlanRow({ t, now }) {
   const lead = t.lead, d = XS.done[t.id];
   const v = { cls: d ? "is-done" : !t.tomorrow && t.slot <= now ? "is-due" : "" };
-  return /* @__PURE__ */ I.createElement("div", { className: `x-plan-row x-st-${lead.style} ${v.cls}` }, /* @__PURE__ */ I.createElement("div", { className: "x-plan-time mono" }, t.tomorrow ? "8:00 AM" : t.doneAt != null ? xFmt(t.slot) : t.wk === "now" ? t.slot <= now ? "Now" : xFmt(t.slot) : t.label), /* @__PURE__ */ I.createElement("div", { className: "x-plan-main" }, /* @__PURE__ */ I.createElement("div", { className: "x-row-line1" }, /* @__PURE__ */ I.createElement("span", { className: `x-chip x-chip-${t.ch}` }, XCH[t.ch]), /* @__PURE__ */ I.createElement("span", { className: "x-name" }, lead.name), /* @__PURE__ */ I.createElement("span", { className: `style-pill ${lead.style}` }, rf[lead.style].label), /* @__PURE__ */ I.createElement("span", { className: "x-plan-src" }, XSRC[lead.source].label), d && /* @__PURE__ */ I.createElement("span", { className: "x-check" }, "\u2713 ", XOUT[d.k]), XS.chan[t.id] && /* @__PURE__ */ I.createElement("span", { className: "x-override", title: "A team member changed the channel; the plan keeps the hour that fits it" }, "changed by you")), /* @__PURE__ */ I.createElement("div", { className: "x-plan-step mono" }, t.booked ? `Booked call \xB7 ${lead.at}` : `Step ${t.step.n} of ${t.p.N} \xB7 ${xDayLabel(lead)} \xB7 ${t.step.what}`), !d && !t.tomorrow && t.slot < now - 30 && /* @__PURE__ */ I.createElement("label", { className: "x-miss" }, "Late \xB7 why?", /* @__PURE__ */ I.createElement("select", { value: XS.miss[t.id] || "", onChange: (e) => xSet((st) => ({ miss: { ...st.miss, [t.id]: e.target.value } })) }, ["", "On another call", "Waiting on them", "Walk-in or service", "Moved it on purpose", "Other"].map((o) => /* @__PURE__ */ I.createElement("option", { key: o, value: o }, o || "Pick one")))), /* @__PURE__ */ I.createElement("div", { className: "x-plan-why" }, xTouchWhy(t), " ", /* @__PURE__ */ I.createElement(XRefs, { ids: [t.step.ref, t.chReason && /style rule/.test(t.chReason) ? t.p.style.ref : null, t.chReason === XSTYLE.noTextFirst ? "T10" : null, t.wk && XWIN[t.wk] && XWIN[t.wk].ref] }))));
+  return /* @__PURE__ */ I.createElement("div", { className: `x-plan-row x-st-${lead.style} ${v.cls}` }, /* @__PURE__ */ I.createElement("div", { className: "x-plan-time mono" }, t.tomorrow ? "9:00 AM" : t.doneAt != null ? xFmt(t.slot) : t.wk === "now" ? t.slot <= now ? "Now" : xFmt(t.slot) : t.label), /* @__PURE__ */ I.createElement("div", { className: "x-plan-main" }, /* @__PURE__ */ I.createElement("div", { className: "x-row-line1" }, /* @__PURE__ */ I.createElement("span", { className: `x-chip x-chip-${t.ch}` }, XCH[t.ch]), /* @__PURE__ */ I.createElement("span", { className: "x-name" }, lead.name), /* @__PURE__ */ I.createElement("span", { className: `style-pill ${lead.style}` }, rf[lead.style].label), /* @__PURE__ */ I.createElement("span", { className: "x-plan-src" }, XSRC[lead.source].label), d && /* @__PURE__ */ I.createElement("span", { className: "x-check" }, "\u2713 ", XOUT[d.k]), XS.chan[t.id] && /* @__PURE__ */ I.createElement("span", { className: "x-override", title: "A team member changed the channel; the plan keeps the hour that fits it" }, "changed by you")), /* @__PURE__ */ I.createElement("div", { className: "x-plan-step mono" }, t.booked ? `Booked call \xB7 ${lead.at}` : `Step ${t.step.n} of ${t.p.N} \xB7 ${xDayLabel(lead)} \xB7 ${t.step.what}`), !d && !t.tomorrow && t.slot < now - 30 && /* @__PURE__ */ I.createElement("label", { className: "x-miss" }, "Late \xB7 why?", /* @__PURE__ */ I.createElement("select", { value: XS.miss[t.id] || "", onChange: (e) => xSet((st) => ({ miss: { ...st.miss, [t.id]: e.target.value } })) }, ["", "On another call", "Waiting on them", "Walk-in or service", "Moved it on purpose", "Other"].map((o) => /* @__PURE__ */ I.createElement("option", { key: o, value: o }, o || "Pick one")))), /* @__PURE__ */ I.createElement("div", { className: "x-plan-why" }, xTouchWhy(t), " ", /* @__PURE__ */ I.createElement(XRefs, { ids: [t.step.ref, t.chReason && /style rule/.test(t.chReason) ? t.p.style.ref : null, t.chReason === XSTYLE.noTextFirst ? "T10" : null, t.wk && XWIN[t.wk] && XWIN[t.wk].ref] }))));
 }
 function XRhythm({ day, now }) {
   const done = (t) => !!XS.done[t.id];
@@ -2044,8 +2049,8 @@ function XRhythm({ day, now }) {
   const left = day.touches.filter((t) => !done(t) && !t.tomorrow && t.slot >= now).length;
   const first = day.touches.filter((t) => !t.tomorrow).sort((a, b) => a.slot - b.slot)[0];
   const pts = [
-    { at: 8 * 60, k: "Start \xB7 huddle", t: `${day.touches.length} touches planned, the first at ${first ? first.label === "Now" ? xFmt(Math.max(now, 8 * 60)) : first.label : "8:00 AM"}; ${XQ.filter((l) => l.seen != null && l.day === 0).length} new leads, ${XQ.filter((l) => l.at).length} booked calls${Object.keys(XS.help).length ? `, ${Object.keys(XS.help).length} help asked` : ""}. Read your two commitments. Nothing to sort or set up.`, ref: ["T26", "T35"] },
-    { at: 12 * 60, k: "Midday check", t: overdue ? `${overdue} lead${overdue === 1 ? "" : "s"} with a touch past due by more than 30 minutes. They are at the top of the queue.` : "Nothing past due. The afternoon calls start at 4.", ref: ["T18"] },
+    { at: 9 * 60, k: "Start \xB7 huddle", t: `${day.touches.length} touches planned, the first at ${first ? first.label === "Now" ? xFmt(Math.max(now, 9 * 60)) : first.label : "9:00 AM"}; ${XQ.filter((l) => l.seen != null && l.day === 0).length} new leads, ${XQ.filter((l) => l.at).length} booked calls${Object.keys(XS.help).length ? `, ${Object.keys(XS.help).length} help asked` : ""}. Read your two commitments. Nothing to sort or set up.`, ref: ["T26", "T35"] },
+    { at: 12 * 60, k: "Midday check", t: overdue ? `${overdue} lead${overdue === 1 ? "" : "s"} with a touch past due by more than 30 minutes. They are at the top of the queue.` : "Nothing past due. Lunch is off; messages at 1, calls from 3.", ref: ["T18"] },
     { at: 17 * 60, k: "Wrap-up", t: `${touched} of ${XQ.length} touched${left ? `, ${left} touch${left === 1 ? "" : "es"} still ahead today` : ""}. Every lead already has its next step set.`, ref: ["T34"] }
   ];
   return /* @__PURE__ */ I.createElement("div", { className: "card x-rhythm" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The day's three pause points"), /* @__PURE__ */ I.createElement("span", { className: "count" }, xFmt(now))), /* @__PURE__ */ I.createElement("ol", { className: "x-rhythm-list" }, pts.map((p) => /* @__PURE__ */ I.createElement("li", { key: p.k, className: now >= p.at && (p.at === 17 * 60 || now < p.at + 4 * 60) ? "is-now" : now > p.at ? "is-past" : "" }, /* @__PURE__ */ I.createElement("span", { className: "x-rhythm-at mono" }, xFmt(p.at)), /* @__PURE__ */ I.createElement("span", { className: "x-rhythm-k" }, p.k), /* @__PURE__ */ I.createElement("span", { className: "x-rhythm-t" }, p.t, " ", /* @__PURE__ */ I.createElement(XRefs, { ids: p.ref })), p.at === 17 * 60 && /* @__PURE__ */ I.createElement(XReflect, null)))));
@@ -2109,9 +2114,9 @@ function XDayPlan({ persona }) {
   return /* @__PURE__ */ I.createElement("section", { className: "view active x-plan" }, /* @__PURE__ */ I.createElement("div", { className: "page-head" }, /* @__PURE__ */ I.createElement("div", null, /* @__PURE__ */ I.createElement("h1", null, "The whole day, planned."), /* @__PURE__ */ I.createElement("div", { className: "greeting" }, day.touches.length, " touches for ", people, " people \xB7 ", mix.call, " calls \xB7 ", mix.text, " texts \xB7 ", mix.email, " emails. Different people get different channels, at different hours, in a different order.")), /* @__PURE__ */ I.createElement("div", { className: "x-head-side" }, /* @__PURE__ */ I.createElement(XClockBar, null), /* @__PURE__ */ I.createElement(XCompliance, { day }))), /* @__PURE__ */ I.createElement("div", { className: "x-plan-grid" }, /* @__PURE__ */ I.createElement("div", { className: "x-plan-main-col" }, /* @__PURE__ */ I.createElement("div", { className: "card x-progress" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Plan vs done"), /* @__PURE__ */ I.createElement("span", { className: "count" }, pr.doneNow, " done \xB7 ", pr.dueNow, " planned by now \xB7 ", pr.plan.length, " today")), /* @__PURE__ */ I.createElement("div", { className: "x-progress-body" }, /* @__PURE__ */ I.createElement(XStatusLine, { pr, next, now, onOpen: (id) => xSet({ view: "queue", open: id }) }), /* @__PURE__ */ I.createElement("div", { className: "x-chart-title" }, "Through the day", /* @__PURE__ */ I.createElement("span", null, "touches done against the plan; the gap is how far behind or ahead ", /* @__PURE__ */ I.createElement(XRefs, { ids: ["T33", "T28"] }))), /* @__PURE__ */ I.createElement(XBurnUp, { pr, now }), /* @__PURE__ */ I.createElement("div", { className: "x-chart-title" }, "Hour by hour", /* @__PURE__ */ I.createElement("span", null, "planned and done in each hour, like a lean production board ", /* @__PURE__ */ I.createElement(XRefs, { ids: ["T22", "T32"] }))), /* @__PURE__ */ I.createElement(XHourBars, { pr, now }))), /* @__PURE__ */ I.createElement("div", { className: "card x-timeline" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Today, hour by hour"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "now ", xFmt(now))), rightNow.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "x-hour is-now x-hour-right-now" }, /* @__PURE__ */ I.createElement("div", { className: "x-hour-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-hour-time mono" }, "Now"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-label" }, "New leads: the first call, inside a minute"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-why" }, XWIN.now.why, ". ", /* @__PURE__ */ I.createElement(XRefs, { ids: [XWIN.now.ref] }))), rightNow.slice().sort((a, b) => xFreshKey(a.lead, now) - xFreshKey(b.lead, now)).map((t) => /* @__PURE__ */ I.createElement(XPlanRow, { key: t.id, t, now }))), hours.map((hr) => {
     const rows = (byHour[hr.h] || []).slice().sort((a, b) => a.slot - b.slot);
     const isNow = nowH === hr.h;
-    if (hr.h >= 20 && !rows.length) return null;
+    if ((hr.h >= 18 || hr.h < 9) && !rows.length) return null;
     return /* @__PURE__ */ I.createElement("div", { key: hr.h, className: "x-hour" + (rows.length ? "" : " is-empty") + (isNow ? " is-now" : "") }, /* @__PURE__ */ I.createElement("div", { className: "x-hour-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-hour-time mono" }, xFmt(hr.h * 60)), /* @__PURE__ */ I.createElement("span", { className: "x-hour-label" }, hr.label, isNow && /* @__PURE__ */ I.createElement("span", { className: "x-now-tag" }, "now")), /* @__PURE__ */ I.createElement("span", { className: "x-hour-why" }, hr.why, " ", hr.ref && /* @__PURE__ */ I.createElement(XRefs, { ids: [].concat(hr.ref) }))), rows.map((t) => /* @__PURE__ */ I.createElement(XPlanRow, { key: t.id, t, now })));
-  }), tomorrow.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "x-hour is-now" }, /* @__PURE__ */ I.createElement("div", { className: "x-hour-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-hour-time mono" }, "8:00 AM"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-label" }, "Tomorrow, first thing"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-why" }, "After 8 pm, calls and texts wait for the morning; email can still go out. ", /* @__PURE__ */ I.createElement(XRefs, { ids: ["T7"] }))), tomorrow.map((t) => /* @__PURE__ */ I.createElement(XPlanRow, { key: t.id, t, now }))), /* @__PURE__ */ I.createElement("div", { className: "x-queue-foot" }, /* @__PURE__ */ I.createElement("span", null, "This is the same plan the Action queue runs. Change the clock, a lead's style or its consent, and the step, channel and hour move with it.")))), /* @__PURE__ */ I.createElement("div", { className: "x-side x-plan-side" }, /* @__PURE__ */ I.createElement(XRhythm, { day, now }), /* @__PURE__ */ I.createElement("div", { className: "card x-commit" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "This week's two commitments"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "if-then")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules" }, /* @__PURE__ */ I.createElement("li", null, /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, "If a new lead lands while I'm on a call, then I call it within five minutes of hanging up.")), /* @__PURE__ */ I.createElement("li", null, /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, "If a quoted lead hasn't answered by day 3, then I call at 4 pm with their style's question."))), /* @__PURE__ */ I.createElement("div", { className: "x-commit-foot" }, `Set in the weekly WIG session, written as "if X, then I'll do Y at a time." Demo examples. `, /* @__PURE__ */ I.createElement(XRefs, { ids: ["T35"] }))), /* @__PURE__ */ I.createElement("div", { className: "card x-strategy" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The strategy"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "every lead type")), /* @__PURE__ */ I.createElement("div", { className: "x-strategy-body" }, /* @__PURE__ */ I.createElement(XCadence, { keys: XSTRAT_FWD, lo: 0, hi: 22, zoom: true, ticks: [1, 5, 10, 15, 22], title: "From the first touch", sub: "Day 0 opens up to show the minutes: call now, email at 20, call at 30\u201360 and 1\u20132 hours" }), /* @__PURE__ */ I.createElement(XCadence, { keys: XSTRAT_BACK, lo: -60, hi: 10, ticks: [-60, -45, -30, -21, -14, -7, 0, 10], title: "Around their date", sub: "Days before and after the renewal date or the anniversary" }), /* @__PURE__ */ I.createElement("div", { className: "x-strategy-note" }, "Same pace for every communication style; the style changes the words. Texts only once they've talked to you."))), /* @__PURE__ */ I.createElement("div", { className: "card" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The formula"), /* @__PURE__ */ I.createElement("span", { className: "count" }, XRULES.length, " rules")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules" }, XRULES.map((r, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-k" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, r.t, " ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))))), /* @__PURE__ */ I.createElement("div", { className: "card x-vs" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The plan vs. the usual day"), /* @__PURE__ */ I.createElement("button", { className: "btn ghost x-vs-shuffle", onClick: () => setSeed((x) => x + 1) }, "Run another usual day")), /* @__PURE__ */ I.createElement("div", { className: "x-vs-body" }, /* @__PURE__ */ I.createElement("div", { className: "x-vs-head" }, /* @__PURE__ */ I.createElement("span", null), /* @__PURE__ */ I.createElement("span", null, "Usual day"), /* @__PURE__ */ I.createElement("span", null, "Hakobian plan")), cmp.map((r, i) => /* @__PURE__ */ I.createElement("div", { key: i, className: "x-vs-row" }, /* @__PURE__ */ I.createElement("div", { className: "x-vs-lever" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-vs-guess" }, r.usual), /* @__PURE__ */ I.createElement("div", { className: "x-vs-hak" }, r.plan), /* @__PURE__ */ I.createElement("div", { className: "x-vs-ev" }, r.why, ". ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))), /* @__PURE__ */ I.createElement("div", { className: "x-vs-note" }, "Same 20 people, same day. The usual day is a model of a team member without a plan: starts at 9:15, works the list in whatever order it sits, checks the lead inbox every two hours, picks a channel out of habit (6 calls, 2\u20133 emails, 1\u20132 texts in 10), sends one template, stops after about two tries. These are process numbers, not results, and this usual day is generous: a secret shop of 25 insurers found 1.45 call attempts per lead and 2.3 days to a first call. Whether the plan closes more households is what the test below measures."))), /* @__PURE__ */ I.createElement("div", { className: "card x-test" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "How to prove it"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "the test")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules x-test-steps" }, XTEST.map((t, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, t)))), /* @__PURE__ */ I.createElement(XTestCalc, null)), XDESIGN.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "card x-design" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Built to need no training"), /* @__PURE__ */ I.createElement("span", { className: "count" }, XDESIGN.length, " rules")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules x-design-rules" }, XDESIGN.map((r, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-k" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, r.t, " ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))))), /* @__PURE__ */ I.createElement("div", { className: "card x-sources" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "What the tags mean"), /* @__PURE__ */ I.createElement("span", { className: "count" }, Object.keys(XREF).length, " sources")), /* @__PURE__ */ I.createElement("ul", { className: "x-source-list" }, Object.values(XREF).map((r) => /* @__PURE__ */ I.createElement("li", { key: r.k }, /* @__PURE__ */ I.createElement("span", { className: "x-ref" }, r.k), /* @__PURE__ */ I.createElement("span", null, r.s))))))));
+  }), tomorrow.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "x-hour is-now" }, /* @__PURE__ */ I.createElement("div", { className: "x-hour-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-hour-time mono" }, "9:00 AM"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-label" }, "Tomorrow, first thing"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-why" }, "After 8 pm, calls and texts wait for the morning; email can still go out. ", /* @__PURE__ */ I.createElement(XRefs, { ids: ["T7"] }))), tomorrow.map((t) => /* @__PURE__ */ I.createElement(XPlanRow, { key: t.id, t, now }))), /* @__PURE__ */ I.createElement("div", { className: "x-queue-foot" }, /* @__PURE__ */ I.createElement("span", null, "This is the same plan the Action queue runs. Change the clock, a lead's style or its consent, and the step, channel and hour move with it.")))), /* @__PURE__ */ I.createElement("div", { className: "x-side x-plan-side" }, /* @__PURE__ */ I.createElement(XRhythm, { day, now }), /* @__PURE__ */ I.createElement("div", { className: "card x-commit" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "This week's two commitments"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "if-then")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules" }, /* @__PURE__ */ I.createElement("li", null, /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, "If a new lead lands while I'm on a call, then I call it within five minutes of hanging up.")), /* @__PURE__ */ I.createElement("li", null, /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, "If a quoted lead hasn't answered by day 3, then I call at 4 pm with their style's question."))), /* @__PURE__ */ I.createElement("div", { className: "x-commit-foot" }, `Set in the weekly WIG session, written as "if X, then I'll do Y at a time." Demo examples. `, /* @__PURE__ */ I.createElement(XRefs, { ids: ["T35"] }))), /* @__PURE__ */ I.createElement("div", { className: "card x-strategy" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The strategy"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "every lead type")), /* @__PURE__ */ I.createElement("div", { className: "x-strategy-body" }, /* @__PURE__ */ I.createElement(XCadence, { keys: XSTRAT_FWD, lo: 0, hi: 22, zoom: true, ticks: [1, 5, 10, 15, 22], title: "From the first touch", sub: "Day 0 opens up to show the minutes: call now, email at 20, call at 30\u201360 and 1\u20132 hours" }), /* @__PURE__ */ I.createElement(XCadence, { keys: XSTRAT_BACK, lo: -60, hi: 10, ticks: [-60, -45, -30, -21, -14, -7, 0, 10], title: "Around their date", sub: "Days before and after the renewal date or the anniversary" }), /* @__PURE__ */ I.createElement("div", { className: "x-strategy-note" }, "Same pace for every communication style; the style changes the words. Texts only once they've talked to you."))), /* @__PURE__ */ I.createElement("div", { className: "card" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The formula"), /* @__PURE__ */ I.createElement("span", { className: "count" }, XRULES.length, " rules")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules" }, XRULES.map((r, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-k" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, r.t, " ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))))), /* @__PURE__ */ I.createElement("div", { className: "card x-vs" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The plan vs. the usual day"), /* @__PURE__ */ I.createElement("button", { className: "btn ghost x-vs-shuffle", onClick: () => setSeed((x) => x + 1) }, "Run another usual day")), /* @__PURE__ */ I.createElement("div", { className: "x-vs-body" }, /* @__PURE__ */ I.createElement("div", { className: "x-vs-head" }, /* @__PURE__ */ I.createElement("span", null), /* @__PURE__ */ I.createElement("span", null, "Usual day"), /* @__PURE__ */ I.createElement("span", null, "Hakobian plan")), cmp.map((r, i) => /* @__PURE__ */ I.createElement("div", { key: i, className: "x-vs-row" }, /* @__PURE__ */ I.createElement("div", { className: "x-vs-lever" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-vs-guess" }, r.usual), /* @__PURE__ */ I.createElement("div", { className: "x-vs-hak" }, r.plan), /* @__PURE__ */ I.createElement("div", { className: "x-vs-ev" }, r.why, ". ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))), /* @__PURE__ */ I.createElement("div", { className: "x-vs-note" }, "Same 20 people, same day. The usual day is a model of a team member without a plan: starts at 9:15, works the list in whatever order it sits, checks the lead inbox every two hours, picks a channel out of habit (6 calls, 2\u20133 emails, 1\u20132 texts in 10), sends one template, stops after about two tries. These are process numbers, not results, and this usual day is generous: a secret shop of 25 insurers found 1.45 call attempts per lead and 2.3 days to a first call. Whether the plan closes more households is what the test below measures."))), /* @__PURE__ */ I.createElement("div", { className: "card x-test" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "How to prove it"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "the test")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules x-test-steps" }, XTEST.map((t, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, t)))), /* @__PURE__ */ I.createElement(XTestCalc, null)), XDESIGN.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "card x-design" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Built to need no training"), /* @__PURE__ */ I.createElement("span", { className: "count" }, XDESIGN.length, " rules")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules x-design-rules" }, XDESIGN.map((r, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-k" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, r.t, " ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))))), /* @__PURE__ */ I.createElement("div", { className: "card x-sources" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "What the tags mean"), /* @__PURE__ */ I.createElement("span", { className: "count" }, Object.keys(XREF).length, " sources")), /* @__PURE__ */ I.createElement("ul", { className: "x-source-list" }, Object.values(XREF).map((r) => /* @__PURE__ */ I.createElement("li", { key: r.k }, /* @__PURE__ */ I.createElement("span", { className: "x-ref" }, r.k), /* @__PURE__ */ I.createElement("span", null, r.s))))))));
 }
 function XNowBar() {
   useXS();
@@ -2184,11 +2189,14 @@ Object.assign(XWIN, {
   m45: { rel: [30, 60], label: "30\u201360 min after", why: "Second call 30\u201360 minutes after the first", ref: "T2" },
   m90: { rel: [60, 120], label: "1\u20132 h after", why: "Third call one to two hours after the first: three tries on day one is the floor", ref: "T2" },
   soon: { label: "Today, first open slot", why: "Same day, and name who sent them in the first sentence", ref: "T6" },
-  email: { lo: 8 * 60, hi: 10 * 60, label: "8\u201310 am", why: "Email reads best 8\u201310 am on weekdays", ref: "T9" },
-  call: { lo: 10 * 60, hi: 11 * 60, label: "10\u201311 am", why: "10\u201311 am is one of the two best calling windows", ref: "T5" },
-  text: { lo: 10 * 60, hi: 13 * 60, label: "10 am\u20131 pm", why: "Text replies peak near noon", ref: "T8" },
-  reach: { lo: 16 * 60, hi: 18 * 60, label: "4\u20136 pm", why: "4\u20136 pm is the strongest calling window", ref: "T5" },
-  emailpm: { lo: 17 * 60, hi: 19 * 60, label: "5\u20137 pm", why: "Consumers read email 5\u20137 pm, after work", ref: "T9" },
+  // a 9-to-5 day with lunch off: emails at 9, calls and texts until noon, messages after lunch, calls 3–5.
+  // The evidence's 4–6 pm calling window is traded for a day that ends at 5; the hour is worth 2.6 points at most.
+  email: { lo: 9 * 60, hi: 10 * 60, label: "9\u201310 am", why: "Email reads best 8\u201310 am on weekdays; the morning's emails go out at 9, after the huddle", ref: "T9" },
+  call: { lo: 10 * 60, hi: 12 * 60, label: "10 am\u2013noon", why: "10\u201311 am is one of the two best calling windows, and the best and worst hours differ by only about 2.6 points, so the morning's calls run to noon", ref: "T5" },
+  text: { lo: 10 * 60, hi: 12 * 60, label: "10 am\u2013noon", why: "Text replies peak near noon", ref: "T8" },
+  textpm: { lo: 13 * 60, hi: 15 * 60, label: "1\u20133 pm", why: "After lunch: texts are read within minutes at any hour, with a small 3\u20134 pm bump in financial services", ref: "T8" },
+  emailpm: { lo: 13 * 60, hi: 15 * 60, label: "1\u20133 pm", why: "Sent after lunch, it is waiting when they read email at 5\u20137 pm", ref: "T9" },
+  reach: { lo: 15 * 60, hi: 17 * 60, label: "3\u20135 pm", why: "4\u20136 pm is the strongest calling window; the afternoon's calls run 3\u20135 so the day ends at 5", ref: "T5" },
   open: { label: "First open slot", why: "The good windows were full, so this is the first open slot; the hour matters least", ref: "T4" }
 });
 Object.assign(XSTYLE, {
@@ -2230,24 +2238,24 @@ XRULES.push(...[
   { k: "1\u201320\u201360, then 6-5-3 in 22", t: "A new internet lead: call inside a minute (five at most), email the quote at 20 minutes, call again at 30\u201360 minutes and once more by two hours. Then six calls and five emails over about 22 days, and at most three texts, only after they've talked to you and okayed texts. Then a short burst again at about 45 days. A default built from the largest lead datasets, not a proven formula; the test below is how it gets proven.", ref: ["T1", "T2", "T3", "T15"] },
   { k: "Lead type starts the clock", t: "Referral: same day, naming who sent them, the same six calls and five emails. X-date: 60 and 45 days out, then through the 30 days after the renewal notice. Rate increase: before the notice lands. Life event: within days, three touches. Win-back: three weeks before the anniversary, then the quote. Quoted, no decision: within 24 hours, then at three and six months.", ref: ["T6", "T12", "T13"] },
   { k: "Style changes the words, never the pace", t: "All four styles get the same cadence. Style changes the words, the length, the ask, and which channel carries the substance: a side-by-side email for a Thinker, logistics by text for a Doer once texts are okayed, voice first for a Storyteller, the numbers in writing for a Questioner. A wrong style guess about halves the response, so the style is set on a clear signal: what they said, how and how fast they reply.", ref: ["T11"] },
-  { k: "Speed, then persistence, then the hour", t: "The best and worst hours differ by about 2.6 contact points; the full six-call sequence is worth about +110%. So the hour is set last and never delays a first call. Later touches go where they work: calls 10\u201311 am and 4\u20136 pm, texts 10 am\u20131 pm, emails 8\u201310 am or 5\u20137 pm.", ref: ["T4", "T5", "T8", "T9"] },
+  { k: "Speed, then persistence, then the hour", t: "The best and worst hours differ by about 2.6 contact points; the full six-call sequence is worth about +110%. So the hour is set last and never delays a first call. Later touches fit a 9-to-5 day: emails at 9, calls and texts 10 to noon, lunch off, texts and emails 1\u20133, calls 3\u20135. The evidence's 4\u20136 pm calling window is traded for a day that ends at 5; a new lead still gets its first call inside a minute, lunch or not.", ref: ["T4", "T5", "T8", "T9"] },
   { k: "Consent and the law set the walls", t: "Washington: no commercial text without their clear OK in advance, and asking for a quote is not that OK; $100 a text. Texts only after the first conversation. Calls and texts 8 am\u20138 pm their time; after 8 pm they wait for the morning. A Do Not Call number is not called.", ref: ["T7", "T10"] },
   { k: "Two voicemails at most", t: "None on the first call to a new lead. About 15 seconds on the second; one more, under 30 seconds, on a later call. Customers can always get one.", ref: ["T14"] },
   { k: "Priority sets the order", t: "New leads inside their first five minutes (freshest first), then booked calls, then X-dates within three days, then today's referrals, then the day's due steps, then renewals and win-backs. The queue is this order; the Now bar is its first line.", ref: ["T1", "T12"] }
 ]);
 XHOURS.push(...[
-  { h: 8, label: "Emails", why: XWIN.email.why, ref: "T9" },
-  { h: 9, label: "Emails and booked calls", why: XWIN.email.why, ref: "T9" },
+  { h: 8, label: "Before opening: nothing planned", why: "The office opens at 9; a lead that lands early gets its call at 9:00 sharp. Calls are legal from 8 am", ref: ["T1", "T7"] },
+  { h: 9, label: "Huddle, then emails", why: "90 seconds at 9: the plan is already set. Then the morning's emails; a new lead gets its first call inside a minute at any hour", ref: ["T26", "T9", "T1"] },
   { h: 10, label: "Calls and texts", why: "10\u201311 am is a calling window; text replies build toward noon", ref: ["T5", "T8"] },
-  { h: 11, label: "Texts and booked calls", why: XWIN.text.why, ref: "T8" },
-  { h: 12, label: "Texts until 1 pm", why: "Calls connect worst from noon to 3 pm; texts still land until 1", ref: ["T5", "T8"] },
-  { h: 13, label: "Quotes and callbacks", why: "Midday is the weakest calling time: build quotes, return callbacks", ref: "T5" },
-  { h: 14, label: "Quotes, callbacks, booked calls", why: "Calls still connect worst until 3 pm", ref: "T5" },
-  { h: 15, label: "Get the 4\u20136 pm calls ready", why: "The strongest calling window opens at 4", ref: "T5" },
-  { h: 16, label: "Calls", why: XWIN.reach.why, ref: "T5" },
-  { h: 17, label: "Calls, then evening emails", why: "Calls until 6; consumers read email 5\u20137 pm", ref: ["T5", "T9"] },
-  { h: 18, label: "Evening emails", why: "Email 5\u20137 pm; calls and texts are legal until 8 pm", ref: ["T9", "T7"] },
-  { h: 19, label: "Last hour for calls and texts", why: "Washington: calls 8 am\u20138 pm their time", ref: "T7" },
+  { h: 11, label: "Calls and texts until noon", why: XWIN.call.why, ref: ["T5", "T4"] },
+  { h: 12, label: "Lunch", why: "Nothing planned over lunch; a new lead still gets its first call inside a minute", ref: "T1" },
+  { h: 13, label: "Texts and afternoon emails", why: "Calls connect worst from noon to 3 pm, so the first hours after lunch carry the messages and the five-minute work", ref: ["T5", "T4"] },
+  { h: 14, label: "Texts, emails, booked calls", why: XWIN.emailpm.why, ref: "T9" },
+  { h: 15, label: "Calls", why: "Text replies get a small 3\u20134 pm bump; the afternoon's calls start at 3", ref: ["T8", "T5"] },
+  { h: 16, label: "Calls until 5", why: XWIN.reach.why, ref: "T5" },
+  { h: 17, label: "Wrap-up: one line on what worked", why: "The plan ends at 5; a few minutes of reflection improved later performance", ref: "T34" },
+  { h: 18, label: "Evening: nothing planned", why: "Calls and texts are legal until 8 pm; the plan keeps them inside the day", ref: "T7" },
+  { h: 19, label: "Last legal hour for calls and texts", why: "Washington: calls 8 am\u20138 pm their time", ref: "T7" },
   { h: 20, label: "After 8 pm: email only", why: "Calls and texts wait for 8 am; email can still go out", ref: "T7" }
 ]);
 XTEST.push(...[
