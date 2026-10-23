@@ -459,7 +459,22 @@ function XBestNow({ scenario, style, lead, channel, setChannel }) {
   const canSwitch = b.ch !== "call" && b.ch !== draftCh && setChannel;
   return /* @__PURE__ */ I.createElement("div", { className: `x-best x-best-${b.ch}`, "aria-live": "polite" }, /* @__PURE__ */ I.createElement("div", { className: "x-best-top" }, /* @__PURE__ */ I.createElement("span", { className: "x-best-k" }, b.when === "Now" ? "Now" : `Best at ${b.when}`), /* @__PURE__ */ I.createElement("span", { className: `x-chip x-chip-${b.ch}` }, XCH[b.ch]), /* @__PURE__ */ I.createElement("span", { className: "x-best-clock mono" }, xFmt(now))), /* @__PURE__ */ I.createElement("div", { className: "x-best-why" }, b.why, "."), b.chWhy && /* @__PURE__ */ I.createElement("div", { className: "x-best-then" }, b.chWhy, "."), b.then && /* @__PURE__ */ I.createElement("div", { className: "x-best-then" }, "Then: ", b.then), b.ch === "call" && /* @__PURE__ */ I.createElement("div", { className: "x-best-then" }, "This draft is the follow-up after the call."), canSwitch && /* @__PURE__ */ I.createElement("button", { className: "x-best-switch", onClick: () => setChannel(b.ch === "text" ? "sms" : "email") }, "Show the ", b.ch === "text" ? "text" : "email", " draft"));
 }
-const XS = { done: {}, chan: {}, open: null, clock: null, focus: false, bump: {}, view: "queue", seed: 7 };
+function xCoachSaved() {
+  try {
+    const v = window.localStorage.getItem("acc.coach");
+    return v == null ? true : v === "1";
+  } catch (e) {
+    return true;
+  }
+}
+const XS = { done: {}, chan: {}, asks: {}, help: {}, miss: {}, open: null, clock: 8 * 60 + 30, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved() };
+function xSetCoach(on) {
+  try {
+    window.localStorage.setItem("acc.coach", on ? "1" : "0");
+  } catch (e) {
+  }
+  xSet({ coach: on });
+}
 const XSubs = /* @__PURE__ */ new Set();
 function xSet(patch) {
   Object.assign(XS, typeof patch === "function" ? patch(XS) : patch);
@@ -482,7 +497,7 @@ function xRealClock() {
   return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
 }
 function xClock() {
-  return XS.clock != null ? XS.clock : xRealClock();
+  return XS.clock != null ? XS.clock + (XS.clockAt ? Math.max(0, Date.now() - XS.clockAt) / 6e4 : 0) : xRealClock();
 }
 const XLOAD = xRealClock();
 function xLanded(lead) {
@@ -516,7 +531,8 @@ const XSRC = {
     { n: 9, day: 14, win: "email", ch: ["email"], what: "Fourth email", ref: "T3" },
     { n: 10, day: 15, win: "reach", ch: ["call"], what: "Sixth and last call", ref: "T3", vm: 30 },
     { n: 11, day: 22, win: "email", ch: ["email"], what: "Last email: an easy out", ref: "T3" },
-    { n: 12, day: 45, win: "email", ch: ["email", "text"], what: "Nurture: a short burst again", ref: "T15" }
+    { n: 12, day: 45, win: "email", ch: ["email", "text"], what: "Nurture: a short burst again", ref: "T15" },
+    { n: 13, day: 180, win: "email", ch: ["email", "text"], what: "Six months: re-quote, or the X-date steps", ref: "T12" }
   ] },
   RF: { label: "Referral", anchor: "the day the referral comes in", steps: [
     { n: 1, day: 0, win: "soon", ch: ["call"], what: "Thank the referrer", ref: "T6", vm: 15 },
@@ -880,16 +896,18 @@ function xPlanCanon(leads) {
   leads.forEach((l) => {
     if (l.seen != null && l.day === 0) arrive[l.id] = XARRIVE[k.i++ % XARRIVE.length];
   });
-  const saved = { done: XS.done, clock: XS.clock, chan: XS.chan };
+  const saved = { done: XS.done, clock: XS.clock, clockAt: XS.clockAt, chan: XS.chan };
   XS.done = {};
   XS.chan = {};
   XS.clock = 8 * 60;
+  XS.clockAt = null;
   let day;
   try {
     day = xBuildDay(leads.map((l) => arrive[l.id] != null ? { ...l, seen: 0 } : l), 8 * 60);
   } finally {
     XS.done = saved.done;
     XS.clock = saved.clock;
+    XS.clockAt = saved.clockAt;
     XS.chan = saved.chan;
   }
   for (const t of day.touches) {
@@ -954,7 +972,7 @@ const XQ = [
     stage: "lead",
     reason: "Asked for an auto quote",
     meta: ["98029", "2 cars"],
-    consent: { sms: true, email: true, basis: "Web form opt-in" },
+    consent: { sms: true, email: true, basis: "Quote form opt-in (calls and texts, incl. automated) \xB7 today" },
     lines: 1,
     proposed: 148,
     phone: "(555) 010-0151"
@@ -972,7 +990,7 @@ const XQ = [
     stage: "lead",
     reason: "Asked for renters + auto",
     meta: ["98075", "Moving in May"],
-    consent: { sms: true, email: true, basis: "Web form opt-in" },
+    consent: { sms: true, email: true, basis: "Quote form opt-in (calls and texts, incl. automated) \xB7 today" },
     lines: 2,
     proposed: 131,
     phone: "(555) 010-0152"
@@ -988,9 +1006,9 @@ const XQ = [
     seen: 32,
     scenario: "raw",
     stage: "lead",
-    reason: "Referred by James Roe \xB7 home inquiry",
+    reason: "Referred by James Roe \xB7 texted us about a home quote",
     meta: ["98075", "First-time buyer"],
-    consent: { sms: false, email: true, basis: "Referrer-shared, no SMS opt-in yet" },
+    consent: { sms: true, email: true, basis: "Texted the office first; replied YES to the consent text \xB7 Oct 21" },
     lines: 1,
     phone: "(555) 010-0153",
     say: ["Hi {first}, it's {rep} from your local office. James Roe asked me to reach out; he said you just bought your first home. Congratulations.", "I'll keep the home quote simple: what it covers, what it costs, and who you call when something happens. That's me.", "Do you have ten minutes now, or is later today better? You pick the time."],
@@ -1010,7 +1028,7 @@ const XQ = [
     stage: "proposed",
     reason: "Home renewal review",
     meta: ["Bring updated valuation"],
-    consent: { sms: true, email: true, basis: "Existing customer" },
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 2019" },
     lines: 1,
     proposed: 138,
     current: 153,
@@ -1030,7 +1048,7 @@ const XQ = [
     stage: "proposed",
     reason: "Callback \xB7 auto + life walkthrough",
     meta: ["Quoted $163/mo", "Pays $186/mo now"],
-    consent: { sms: true, email: true, basis: "Web form opt-in" },
+    consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Oct 20" },
     lines: 2,
     proposed: 163,
     current: 186,
@@ -1044,17 +1062,17 @@ const XQ = [
     source: "IL",
     day: 2,
     done: 4,
-    contacted: false,
+    contacted: true,
     at: "2:00 PM",
     scenario: "raw",
     stage: "lead",
-    reason: "Bundle discussion \xB7 auto + home",
-    meta: ["Bought lead \xB7 manual dial only"],
-    consent: { sms: false, email: false, basis: "Aggregator data \u2014 no express consent on file" },
+    reason: "Booked by text \xB7 auto + home bundle",
+    meta: ["Bought lead", "Auto + home"],
+    consent: { sms: true, email: true, basis: "E-signed text consent after the intro call \xB7 Oct 21" },
     lines: 2,
     proposed: 212,
     phone: "(555) 010-0156",
-    say: ["Hi {first}, it's {rep}. I have your auto and home numbers ready.", "Bundle total first, then what changes. Nothing for you to fill out.", "Want me to set it up? If yes, is it okay if I text you the next step?"]
+    say: ["Hi {first}, it's {rep}. I have your auto and home numbers ready.", "Bundle total first, then what changes. Nothing for you to fill out.", "Want me to set it up? I'll text you the next step."]
   },
   // Follow-ups due: today's step from each plan
   {
@@ -1069,7 +1087,7 @@ const XQ = [
     stage: "quoted",
     reason: "Quoted yesterday by email \xB7 no reply",
     meta: ["Auto", "Pays $171/mo"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "Quote form opt-in \xB7 Oct 22" },
     lines: 1,
     proposed: 142,
     current: 171,
@@ -1087,7 +1105,7 @@ const XQ = [
     stage: "bound",
     reason: "Customer \xB7 renewal going up $31/mo",
     meta: ["Home", "Renews in 15 days"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Mar 2023" },
     lines: 1,
     proposed: 96,
     current: 127,
@@ -1107,7 +1125,7 @@ const XQ = [
     stage: "quoted",
     reason: "Said \u201Clet me think\u201D on Monday",
     meta: ["Auto + home"],
-    consent: { sms: false, email: true },
+    consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Oct 19" },
     lines: 2,
     proposed: 238,
     phone: "(555) 010-0159"
@@ -1124,7 +1142,7 @@ const XQ = [
     stage: "quoted",
     reason: "Walked in two weeks ago \xB7 quiet since",
     meta: ["Auto", "Two teen drivers"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "Signed the consent form at the office \xB7 Oct 9" },
     lines: 1,
     proposed: 204,
     phone: "(555) 010-0160"
@@ -1141,7 +1159,7 @@ const XQ = [
     stage: "bound",
     reason: "Customer \xB7 home is elsewhere",
     meta: ["Auto with us", "Reviewed this morning"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Jun 2021" },
     lines: 1,
     proposed: 91,
     current: 118,
@@ -1159,7 +1177,7 @@ const XQ = [
     stage: "bound",
     reason: "Customer \xB7 home is elsewhere",
     meta: ["Auto with us", "Review day"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Jan 2024" },
     lines: 1,
     proposed: 87,
     phone: "(555) 010-0162"
@@ -1176,7 +1194,7 @@ const XQ = [
     stage: "lapsed",
     reason: "Left a year ago \xB7 price was the reason",
     meta: ["Auto", "Quote sent Tuesday"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "Former customer \xB7 written opt-in renewed by email \xB7 Oct 21" },
     lines: 1,
     proposed: 157,
     current: 181,
@@ -1194,7 +1212,7 @@ const XQ = [
     stage: "lapsed",
     reason: "Left exactly one year ago today",
     meta: ["3 cars", "Accident-free"],
-    consent: { sms: false, email: true },
+    consent: { sms: true, email: true, basis: "Former customer \xB7 written opt-in renewed by email \xB7 Oct 20" },
     lines: 1,
     proposed: 244,
     current: 276,
@@ -1212,7 +1230,7 @@ const XQ = [
     stage: "bound",
     reason: "Customer \xB7 new baby, told us Monday",
     meta: ["Auto with us", "Life review"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Nov 2022" },
     lines: 1,
     proposed: 112,
     phone: "(555) 010-0165",
@@ -1232,7 +1250,7 @@ const XQ = [
     stage: "quoted",
     reason: "Auto renews in 3 days",
     meta: ["Pays $186/mo", "Quoted $168/mo"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "Web form opt-in with her renewal date \xB7 Aug 3" },
     lines: 1,
     proposed: 168,
     current: 186,
@@ -1250,7 +1268,7 @@ const XQ = [
     stage: "quoted",
     reason: "Home renews in 6 days",
     meta: ["Quoted in the spring"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "Quote form opt-in \xB7 Apr 14" },
     lines: 2,
     proposed: 229,
     phone: "(555) 010-0167"
@@ -1267,7 +1285,7 @@ const XQ = [
     stage: "quoted",
     reason: "Auto renews in 14 days",
     meta: ["Pays $211/mo", "Quoted $192/mo"],
-    consent: { sms: false, email: true },
+    consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Sep 30" },
     lines: 1,
     proposed: 192,
     current: 211,
@@ -1285,7 +1303,7 @@ const XQ = [
     stage: "quoted",
     reason: "Auto renews in 5 days",
     meta: ["Pays $174/mo", "Quoted $168/mo"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Sep 12" },
     lines: 1,
     proposed: 168,
     current: 174,
@@ -1303,23 +1321,24 @@ const XQ = [
     stage: "quoted",
     reason: "Auto renews in 11 days",
     meta: ["Quoted in May"],
-    consent: { sms: true, email: true },
+    consent: { sms: true, email: true, basis: "Quote form opt-in \xB7 May 6" },
     lines: 1,
     proposed: 139,
     phone: "(555) 010-0170"
   }
 ];
 const XQ_GROUPS = [
-  { k: "now", title: "Right now", rule: "New leads: call inside a minute, five at most. Referrals: today, naming who sent them." },
-  { k: "booked", title: "Booked", rule: "They picked the time. Be early." },
-  { k: "due", title: "Follow-ups due", rule: "Today's step from each plan, at the hour that works for its channel." },
-  { k: "renew", title: "Renewal window", rule: "Counting back from the renewal: before the notice, then the 30 days after it." }
+  { k: "now", tag: "New lead", title: "Right now", rule: "New leads: call inside a minute, five at most. Referrals: today, naming who sent them." },
+  { k: "booked", tag: "Booked", title: "Booked", rule: "They picked the time. Be early." },
+  { k: "due", tag: "Follow-up", title: "Follow-ups due", rule: "Today's step from each plan, at the hour that works for its channel." },
+  { k: "renew", tag: "Renewal", title: "Renewal window", rule: "Counting back from the renewal: before the notice, then the 30 days after it." }
 ];
 const XCH = { call: "Call", text: "Text", email: "Email" };
-const XOUT = { talked: "Talked", sent: "Sent", voicemail: "Voicemail", noanswer: "No answer", quoted: "Quoted", signed: "Signed", notnow: "Not now" };
+const XOUT = { talked: "Talked", sent: "Sent", scheduled: "Scheduled", voicemail: "Voicemail", noanswer: "No answer", quoted: "Quoted", signed: "Signed", notnow: "Not now" };
+const XOUTBTN = { ...XOUT, sent: "Send now", scheduled: "Approve" };
 const XSTOP = /talked|quoted|signed|notnow/;
 function xOuts(ch, t) {
-  return ch === "call" ? ["talked", xVoicemail(t) ? "voicemail" : "noanswer", "quoted", "signed", "notnow"] : ["sent", "quoted", "signed", "notnow"];
+  return ch === "call" ? ["talked", xVoicemail(t) ? "voicemail" : "noanswer", "quoted", "signed", "notnow"] : [t && !t.tomorrow && t.slot > xClock() ? "scheduled" : "sent", "quoted", "signed", "notnow"];
 }
 function xGroupOf(lead) {
   if (lead.seen != null && lead.day === 0) return "now";
@@ -1384,6 +1403,8 @@ function xOutcomeText(v) {
   if (d.k === "quoted") return "Quoted \xB7 the quote follow-up plan starts tomorrow";
   if (d.k === "notnow") return "Not now \xB7 a reminder is set for their renewal date";
   if (d.k === "talked") return "Talked \xB7 " + nx;
+  if (d.k === "scheduled") return `Approved${d.by ? ` by ${d.by}` : ""} ${xFmt(d.when || d.t)} \xB7 sends ${xFmt(d.t)} \xB7 ${nx}`;
+  if (d.k === "sent") return `Sent${d.by ? ` by ${d.by}` : ""} ${xFmt(d.when || d.t)} \xB7 ${nx}`;
   return `${XOUT[d.k]} \xB7 ${nx}`;
 }
 function xStatusOf(t, now) {
@@ -1431,18 +1452,18 @@ function XDo({ v, persona, onAct, big }) {
   const copyText = msg ? ch === "email" ? `Subject: ${msg.subject}
 
 ${msg.body}` : msg.body : "";
-  return /* @__PURE__ */ I.createElement("div", { className: "x-do" + (big ? " x-do-big" : "") }, /* @__PURE__ */ I.createElement("div", { className: "x-why-now" }, /* @__PURE__ */ I.createElement("span", { className: "x-why-k" }, "Why this, why now"), xTouchWhy(t)), /* @__PURE__ */ I.createElement("div", { className: "x-do-bar" }, /* @__PURE__ */ I.createElement("div", { className: "x-seg x-chan", role: "group", "aria-label": "Channel" }, ["call", "text", "email"].map((c) => {
+  return /* @__PURE__ */ I.createElement("div", { className: "x-do" + (big ? " x-do-big" : "") }, XS.coach && /* @__PURE__ */ I.createElement("div", { className: "x-why-now" }, /* @__PURE__ */ I.createElement("span", { className: "x-why-k" }, "Why this, why now"), xTouchWhy(t)), /* @__PURE__ */ I.createElement("div", { className: "x-do-bar" }, /* @__PURE__ */ I.createElement("div", { className: "x-seg x-chan", role: "group", "aria-label": "Channel" }, ["call", "text", "email"].map((c) => {
     const dis = c === "text" && !okText || c === "email" && !okEmail;
     return /* @__PURE__ */ I.createElement("button", { key: c, className: ch === c ? "active" : "", "aria-pressed": ch === c, disabled: dis, title: dis ? `No ${c === "text" ? "text" : "email"} consent on file` : void 0, onClick: () => xSet((s) => ({ chan: { ...s.chan, [t.id]: c } })) }, XCH[c]);
-  })), /* @__PURE__ */ I.createElement(Rp, { consent: lead.consent })), ch === "call" ? /* @__PURE__ */ I.createElement(XCallPlan, { lead, persona, t }) : msg ? /* @__PURE__ */ I.createElement("div", { className: "x-msg" }, ch === "email" && /* @__PURE__ */ I.createElement("div", { className: "x-msg-subject" }, msg.subject), /* @__PURE__ */ I.createElement("div", { className: "x-msg-body" }, msg.body), /* @__PURE__ */ I.createElement("div", { className: "x-msg-foot" }, /* @__PURE__ */ I.createElement("span", { className: "x-msg-note" }, ch === "text" ? `${Zm(msg.body + cf).len} characters with the opt-out line` : "Signature and license line are added on send"), /* @__PURE__ */ I.createElement("button", { className: "btn", onClick: () => {
+  })), /* @__PURE__ */ I.createElement(Rp, { consent: lead.consent })), ch === "call" && /* @__PURE__ */ I.createElement(XAsks, { lead }), ch === "call" ? /* @__PURE__ */ I.createElement(XCallPlan, { lead, persona, t }) : msg ? /* @__PURE__ */ I.createElement("div", { className: "x-msg" }, ch === "email" && /* @__PURE__ */ I.createElement("div", { className: "x-msg-subject" }, msg.subject), /* @__PURE__ */ I.createElement("div", { className: "x-msg-body" }, msg.body), /* @__PURE__ */ I.createElement("div", { className: "x-msg-foot" }, /* @__PURE__ */ I.createElement("span", { className: "x-msg-note" }, ch === "text" ? `${Zm(msg.body + cf).len} characters with the opt-out line` : "Signature and license line are added on send"), /* @__PURE__ */ I.createElement("button", { className: "btn", onClick: () => {
     xCopy(copyText);
     setCopied(true);
     setTimeout(() => setCopied(false), 1597);
-  } }, copied ? "Copied" : "Copy"))) : null, blocked && /* @__PURE__ */ I.createElement("div", { className: "x-blocked" }, "No ", ch === "text" ? "text" : "email", " consent on file. Pick another channel above."), /* @__PURE__ */ I.createElement("div", { className: "x-outs" }, outs.map((k, i) => /* @__PURE__ */ I.createElement("button", { key: k, className: "btn" + (i === 0 ? " primary x-first" : ""), disabled: blocked && k !== "notnow", onClick: () => onAct(k) }, XOUT[k], big && i === 0 && /* @__PURE__ */ I.createElement("kbd", null, "Enter"))), /* @__PURE__ */ I.createElement("button", { className: "btn ghost x-skip", onClick: () => onAct("skip") }, "Skip", big && /* @__PURE__ */ I.createElement("kbd", null, "S"))));
+  } }, copied ? "Copied" : "Copy"))) : null, blocked && /* @__PURE__ */ I.createElement("div", { className: "x-blocked" }, "No ", ch === "text" ? "text" : "email", " consent on file. Pick another channel above."), /* @__PURE__ */ I.createElement("div", { className: "x-outs" }, outs.map((k, i) => /* @__PURE__ */ I.createElement("button", { key: k, className: "btn" + (i === 0 ? " primary x-first" : ""), disabled: blocked && k !== "notnow", onClick: () => onAct(k) }, k === "scheduled" ? `Approve \xB7 sends ${t.label}` : XOUTBTN[k], big && i === 0 && /* @__PURE__ */ I.createElement("kbd", null, "Enter"))), /* @__PURE__ */ I.createElement("button", { className: "btn ghost x-skip", onClick: () => onAct("skip") }, "Skip", big && /* @__PURE__ */ I.createElement("kbd", null, "S"))), /* @__PURE__ */ I.createElement(XHelp, { lead, persona }));
 }
 function XRow({ v, now, isOpen, persona, onToggle, onAct, onUndo }) {
   const lead = v.lead, st = rf[lead.style], t = v.current;
-  return /* @__PURE__ */ I.createElement("div", { className: `x-row x-st-${lead.style}${isOpen && t ? " is-open" : ""}${v.complete && v.doneTs.length ? " is-done" : ""}` }, /* @__PURE__ */ I.createElement("div", { className: "x-row-main", onClick: () => t && onToggle() }, /* @__PURE__ */ I.createElement("div", { className: "x-row-text" }, /* @__PURE__ */ I.createElement("div", { className: "x-row-line1" }, /* @__PURE__ */ I.createElement("span", { className: "x-name" }, lead.name), /* @__PURE__ */ I.createElement("span", { className: `style-pill ${lead.style}`, title: "Communication style" }, st ? st.label : lead.style), /* @__PURE__ */ I.createElement(Pp, { stage: lead.stage })), /* @__PURE__ */ I.createElement("div", { className: "x-row-line2" }, /* @__PURE__ */ I.createElement("span", null, lead.reason), lead.meta.map((m, i) => /* @__PURE__ */ I.createElement("span", { key: i, className: "dot" }, m))), /* @__PURE__ */ I.createElement("div", { className: "x-row-step" }, t ? /* @__PURE__ */ I.createElement(I.Fragment, null, t.booked ? `Booked call \xB7 ${lead.at}` : `Step ${t.step.n} of ${v.p.N} \xB7 ${xDayLabel(lead)} \xB7 ${t.step.what}`) : v.last ? /* @__PURE__ */ I.createElement(I.Fragment, null, /* @__PURE__ */ I.createElement("span", { className: "x-check" }, "\u2713"), " ", xOutcomeText(v)) : "Nothing due today"), v.ts.length > 0 && /* @__PURE__ */ I.createElement(XPath, { v, now })), /* @__PURE__ */ I.createElement("div", { className: "x-row-side" }, t && /* @__PURE__ */ I.createElement(XWhen, { t, now }), !t ? v.doneTs.length ? /* @__PURE__ */ I.createElement("button", { className: "x-undo", onClick: (e) => {
+  return /* @__PURE__ */ I.createElement("div", { className: `x-row x-st-${lead.style}${isOpen && t ? " is-open" : ""}${v.complete && v.doneTs.length ? " is-done" : ""}` }, /* @__PURE__ */ I.createElement("div", { className: "x-row-main", onClick: () => t && onToggle() }, /* @__PURE__ */ I.createElement("div", { className: "x-row-text" }, /* @__PURE__ */ I.createElement("div", { className: "x-row-line1" }, /* @__PURE__ */ I.createElement("span", { className: "x-name" }, lead.name), /* @__PURE__ */ I.createElement("span", { className: `style-pill ${lead.style}`, title: "Communication style" }, st ? st.label : lead.style), /* @__PURE__ */ I.createElement(Pp, { stage: lead.stage }), /* @__PURE__ */ I.createElement("span", { className: "x-tag" }, XQ_GROUPS.find((g) => g.k === v.group).tag, lead.at ? ` ${lead.at}` : "")), /* @__PURE__ */ I.createElement("div", { className: "x-row-line2" }, /* @__PURE__ */ I.createElement("span", null, lead.reason), lead.meta.map((m, i) => /* @__PURE__ */ I.createElement("span", { key: i, className: "dot" }, m))), /* @__PURE__ */ I.createElement("div", { className: "x-row-step" }, t ? /* @__PURE__ */ I.createElement(I.Fragment, null, t.booked ? `Booked call \xB7 ${lead.at}` : `Step ${t.step.n} of ${v.p.N} \xB7 ${xDayLabel(lead)} \xB7 ${t.step.what}`) : v.last ? /* @__PURE__ */ I.createElement(I.Fragment, null, /* @__PURE__ */ I.createElement("span", { className: "x-check" }, "\u2713"), " ", xOutcomeText(v)) : "Nothing due today"), v.ts.length > 0 && /* @__PURE__ */ I.createElement(XPath, { v, now })), /* @__PURE__ */ I.createElement("div", { className: "x-row-side" }, t && /* @__PURE__ */ I.createElement(XWhen, { t, now }), !t ? v.doneTs.length ? /* @__PURE__ */ I.createElement("button", { className: "x-undo", onClick: (e) => {
     e.stopPropagation();
     onUndo();
   } }, "Undo") : null : /* @__PURE__ */ I.createElement("button", { className: "btn x-act x-act-" + t.ch + (isOpen ? " primary" : ""), "aria-expanded": isOpen, onClick: (e) => {
@@ -1502,7 +1523,7 @@ function xAct(v, k, order) {
     return;
   }
   const before = xScore(XS.done);
-  const done = { ...XS.done, [v.current.id]: { k, ch: v.current.ch, at: Date.now(), t: xClock() } };
+  const done = { ...XS.done, [v.current.id]: { k, ch: v.current.ch, at: Date.now(), t: k === "scheduled" ? v.current.slot : xClock(), by: XS.persona || null, when: xClock() } };
   const b = xScore(done), bump = {};
   for (const key of ["touched", "quotes", "apps", "hh"]) if (b[key] > before[key]) bump[key] = Date.now();
   xSet({ done, bump });
@@ -1516,9 +1537,93 @@ function xUndo(v) {
   delete done[v.last.id];
   xSet({ done, open: v.lead.id });
 }
+function xAsks() {
+  let life = 0, ref = 0;
+  for (const k of Object.keys(XS.asks)) {
+    if (XS.asks[k].life) life++;
+    if (XS.asks[k].ref) ref++;
+  }
+  return { life, ref };
+}
+function XAsks({ lead }) {
+  const s = useXS();
+  const a = s.asks[lead.id] || {};
+  const flip = (k) => xSet((st) => ({ asks: { ...st.asks, [lead.id]: { ...st.asks[lead.id] || {}, [k]: !a[k] } } }));
+  return /* @__PURE__ */ I.createElement("div", { className: "x-asks", role: "group", "aria-label": "On this call" }, /* @__PURE__ */ I.createElement("span", { className: "x-asks-k" }, "On this call"), /* @__PURE__ */ I.createElement("button", { className: "x-ask" + (a.life ? " is-on" : ""), "aria-pressed": !!a.life, onClick: () => flip("life") }, a.life ? "\u2713 " : "", "Asked about life"), /* @__PURE__ */ I.createElement("button", { className: "x-ask" + (a.ref ? " is-on" : ""), "aria-pressed": !!a.ref, onClick: () => flip("ref") }, a.ref ? "\u2713 " : "", "Asked for a referral"));
+}
+function xWeek(score, F) {
+  const wd = (/* @__PURE__ */ new Date()).getDay(), idx = wd === 0 || wd === 6 ? 5 : wd, prior = idx - 1;
+  const apps = Math.round(prior * 3.25) + score.apps, hh = Math.round(prior * 1.5) + score.hh;
+  return { idx, prior, apps, hh, appsGoal: F.apps * 5, hhGoal: F.households * 5, appsTick: F.apps * prior, hhTick: F.households * prior };
+}
+function XStatusLine({ pr, next, now, onOpen }) {
+  const b = pr.behind;
+  const st = b === 0 ? ["ok", "\u2713", pr.doneNow ? "On track" : "Ready"] : b <= 3 ? ["warn", "\u25CF", `${b} running late`] : ["bad", "\u25B2", `${b} late`];
+  const open = Math.max(0, pr.dueNow - pr.doneNow);
+  return /* @__PURE__ */ I.createElement("div", { className: "x-status", role: "status" }, /* @__PURE__ */ I.createElement("span", { className: `x-andon is-${st[0]}` }, /* @__PURE__ */ I.createElement("span", { "aria-hidden": "true" }, st[1]), st[2]), Object.keys(XS.help).length > 0 && /* @__PURE__ */ I.createElement("span", { className: "x-andon is-help" }, /* @__PURE__ */ I.createElement("span", { "aria-hidden": "true" }, "\u25CF"), Object.keys(XS.help).length, " help asked"), /* @__PURE__ */ I.createElement("span", { className: "x-status-t", title: "Late = more than 30 minutes past its time" }, pr.doneNow, " done \xB7 ", open, " due now \xB7 ", Math.max(0, pr.plan.length - pr.dueNow), " later today", pr.firstsDone ? ` \xB7 first calls inside 5 min: ${pr.fast} of ${pr.firstsDone}` : ""));
+}
+function XScoreboard({ pr, score, F, bump, onStart, fresh }) {
+  const asks = xAsks(), wk = xWeek(score, F);
+  return /* @__PURE__ */ I.createElement("div", { className: "x-board" }, /* @__PURE__ */ I.createElement("div", { className: "x-board-group x-board-process" }, /* @__PURE__ */ I.createElement("div", { className: "x-board-k" }, "Process", /* @__PURE__ */ I.createElement("span", null, "what you control")), /* @__PURE__ */ I.createElement("div", { className: "x-board-row" }, /* @__PURE__ */ I.createElement(XMeter, { label: "Touches", v: pr.handled, of: pr.plan.length, tick: pr.dueNow, sub: `Plan by now: ${pr.dueNow}` }), /* @__PURE__ */ I.createElement(XMeter, { label: "Calls made", v: pr.callsDone, of: pr.calls }), /* @__PURE__ */ I.createElement(XMeter, { label: "Life talks", v: asks.life, of: 3 }), /* @__PURE__ */ I.createElement(XMeter, { label: "Referrals asked", v: asks.ref, of: 3 }))), /* @__PURE__ */ I.createElement("div", { className: "x-board-arrow", "aria-hidden": "true" }, "\u2192"), /* @__PURE__ */ I.createElement("div", { className: "x-board-group x-board-results" }, /* @__PURE__ */ I.createElement("div", { className: "x-board-k" }, "Results", /* @__PURE__ */ I.createElement("span", null, "they follow \xB7 apps and households week to date (demo history)")), /* @__PURE__ */ I.createElement("div", { className: "x-board-row" }, /* @__PURE__ */ I.createElement(XUnits, { label: "Quotes today", v: score.quotes, of: F.quoted, bump: bump.quotes }), /* @__PURE__ */ I.createElement(XMeter, { label: "Apps this week", v: wk.apps, of: wk.appsGoal, tick: wk.appsTick, sub: wk.prior ? `plan through yesterday: ${wk.appsTick}` : "week starts today" }), /* @__PURE__ */ I.createElement(XMeter, { label: "HH this week", v: wk.hh, of: wk.hhGoal, tick: wk.hhTick, sub: wk.prior ? `plan through yesterday: ${wk.hhTick}` : "week starts today" }))), /* @__PURE__ */ I.createElement("div", { className: "x-start" }, /* @__PURE__ */ I.createElement("button", { className: "x-start-btn" + (fresh ? " x-first" : ""), onClick: onStart }, fresh ? `Start my ${XQ.length}` : "Keep going", " ", /* @__PURE__ */ I.createElement("span", { "aria-hidden": "true" }, "\u2192")), /* @__PURE__ */ I.createElement("div", { className: "x-start-sub" }, "One at a time, in order; the next one opens by itself.")));
+}
+function xPeek(body, lead) {
+  const first = xFirst(lead.name);
+  const text = (body || "").replace(/\s+/g, " ").trim();
+  const short = text.length > 190 ? text.slice(0, 187).replace(/\s+\S*$/, "") + "\u2026" : text;
+  const parts = short.split(new RegExp(`(\\$\\d[\\d,]*(?:\\/mo\\.?)?|\\b${first}\\b|\\[[^\\]]+\\])`, "g"));
+  return parts.map((p, i) => i % 2 ? /* @__PURE__ */ I.createElement("mark", { key: i, className: /^\[/.test(p) ? "x-fill" : "" }, p) : p);
+}
+function XMsgRow({ v, now, isOpen, persona, onToggle, onAct, onUndo }) {
+  const lead = v.lead, t = v.current;
+  const msg = t ? xMessage(lead, t.ch, persona) : null;
+  const later = t && !t.tomorrow && t.slot > now;
+  return /* @__PURE__ */ I.createElement("div", { className: `x-row x-msgrow x-st-${lead.style}${isOpen && t ? " is-open" : ""}` }, /* @__PURE__ */ I.createElement("div", { className: "x-row-main", onClick: () => t && onToggle() }, /* @__PURE__ */ I.createElement("div", { className: "x-row-text" }, /* @__PURE__ */ I.createElement("div", { className: "x-row-line1" }, /* @__PURE__ */ I.createElement("span", { className: "x-name" }, lead.name), /* @__PURE__ */ I.createElement("span", { className: `style-pill ${lead.style}`, title: "Communication style" }, rf[lead.style].label), /* @__PURE__ */ I.createElement("span", { className: `x-chip x-chip-${t.ch}` }, XCH[t.ch]), /* @__PURE__ */ I.createElement("span", { className: "x-tag" }, XQ_GROUPS.find((g) => g.k === v.group).tag), !xBatchOk(v) && /* @__PURE__ */ I.createElement("span", { className: "x-alone", title: "Life-insurance messages are approved one at a time" }, "Check by itself")), /* @__PURE__ */ I.createElement("div", { className: "x-row-step" }, `Step ${t.step.n} of ${v.p.N} \xB7 ${xDayLabel(lead)} \xB7 ${t.step.what}`), msg && /* @__PURE__ */ I.createElement("div", { className: "x-msg-peek" }, t.ch === "email" && /* @__PURE__ */ I.createElement("b", null, /[.?!…]$/.test(msg.subject) ? msg.subject : msg.subject + ".", " "), xPeek(msg.body, lead)), /* @__PURE__ */ I.createElement("div", { className: "x-facts" }, "Check: ", xFacts(lead, t.ch))), /* @__PURE__ */ I.createElement("div", { className: "x-row-side" }, /* @__PURE__ */ I.createElement(XWhen, { t, now }), /* @__PURE__ */ I.createElement("button", { className: "btn primary x-approve", onClick: (e) => {
+    e.stopPropagation();
+    onAct(later ? "scheduled" : "sent");
+  } }, later ? "Approve" : "Send"))), isOpen && /* @__PURE__ */ I.createElement(XDo, { v, persona, onAct }));
+}
+function xFacts(lead, ch) {
+  const f = [`${xFirst(lead.name)}'s name`];
+  if (lead.proposed) f.push(`$${lead.proposed}/mo quote`);
+  if (lead.current) f.push(`$${lead.current}/mo today`);
+  f.push(ch === "text" ? "text consent on file" : "email consent on file");
+  return f.join(" \xB7 ");
+}
+function XHelp({ lead, persona }) {
+  const s = useXS();
+  const h = s.help[lead.id];
+  const who = persona === "Alex" ? "Maya" : "Alex";
+  if (h) return /* @__PURE__ */ I.createElement("div", { className: "x-help is-on" }, /* @__PURE__ */ I.createElement("span", { "aria-hidden": "true" }, "\u25CF"), " Help asked ", xFmt(h.at), " \xB7 ", h.to, " will see it here ", /* @__PURE__ */ I.createElement("button", { className: "x-undo", onClick: () => {
+    const n = { ...s.help };
+    delete n[lead.id];
+    xSet({ help: n });
+  } }, "Cancel"));
+  return /* @__PURE__ */ I.createElement("div", { className: "x-help" }, /* @__PURE__ */ I.createElement("button", { className: "x-help-btn", onClick: () => xSet((st) => ({ help: { ...st.help, [lead.id]: { at: xClock(), to: who, by: persona } } })) }, "Stuck? Ask ", who));
+}
+function xBatchOk(v) {
+  return !/\blife\b/i.test([v.lead.reason, ...v.lead.meta || []].join(" "));
+}
+function xApproveAll(rows) {
+  const now = xClock(), done = { ...XS.done };
+  for (const v of rows) {
+    const t = v.current;
+    if (!t || t.ch === "call" || t.blocked || !xBatchOk(v)) continue;
+    const later = !t.tomorrow && t.slot > now;
+    done[t.id] = { k: later ? "scheduled" : "sent", ch: t.ch, at: Date.now(), t: later ? t.slot : now, batch: true, by: XS.persona || null, when: now };
+  }
+  xSet({ done });
+}
+function xFold(list, now, row, open) {
+  const due = list.filter((v) => xIsDue(v.current, now) || v.lead.id === open);
+  const later = list.filter((v) => !due.includes(v));
+  const shown = later.slice(0, Math.max(0, 3 - Math.max(0, due.length - 4))), rest = later.slice(shown.length);
+  return /* @__PURE__ */ I.createElement(I.Fragment, null, due.map(row), shown.map(row), rest.length > 0 && /* @__PURE__ */ I.createElement("details", { className: "x-later" }, /* @__PURE__ */ I.createElement("summary", null, "Later today \xB7 ", rest.length, " more"), rest.map(row)));
+}
+function XLane({ title, n, rule, action, children, quiet }) {
+  return /* @__PURE__ */ I.createElement("div", { className: "x-lane" + (quiet ? " is-quiet" : "") }, /* @__PURE__ */ I.createElement("div", { className: "x-group-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-group-title" }, title), /* @__PURE__ */ I.createElement("span", { className: "x-group-n" }, n), rule && /* @__PURE__ */ I.createElement("span", { className: "x-group-rule" }, rule), action), children);
+}
 function XToday({ persona }) {
   const s = useXS();
-  const [filter, setFilter] = I.useState("all");
   const [, setTick] = I.useState(0);
   I.useEffect(() => {
     const t = setInterval(() => setTick((x) => x + 1), 1e3);
@@ -1526,74 +1631,236 @@ function XToday({ persona }) {
   }, []);
   if (s.view === "classic") return /* @__PURE__ */ I.createElement(I.Fragment, null, /* @__PURE__ */ I.createElement(XViewBar, { view: s.view }), /* @__PURE__ */ I.createElement(Uf, { persona }));
   if (s.view === "plan") return /* @__PURE__ */ I.createElement(I.Fragment, null, /* @__PURE__ */ I.createElement(XViewBar, { view: s.view }), /* @__PURE__ */ I.createElement(XDayPlan, { persona }));
+  XS.persona = persona;
   const now = xClock();
   const day = xBuildDay(XQ, now);
-  const views = xLeadViews(day);
+  const pr = xProgress(day, now);
+  const views = pr.views;
   const order = xWorkOrder(views, now);
   const F = Ef.funnel;
-  const inView = (v) => filter === "all" || v.current && v.current.ch === filter;
-  const list = views.filter(inView);
   const score = xScore(s.done);
-  const left = views.filter((v) => v.current);
-  const counts = { all: left.length };
-  for (const c of ["call", "text", "email"]) counts[c] = left.filter((v) => v.current.ch === c).length;
   const open = s.open != null ? s.open : order[0] ? order[0].lead.id : null;
   const openV = views.find((v) => v.lead.id === open) || null;
   const sideV = (openV && openV.current ? openV : null) || order[0] || views[0];
-  const tiles = [
-    { k: "touched", label: "Prospects touched", v: score.touched, goal: F.leads },
-    { k: "quotes", label: "Quotes", v: score.quotes, goal: F.quoted },
-    { k: "apps", label: "Apps", v: score.apps, goal: F.apps },
-    { k: "hh", label: "HH protected", v: score.hh, goal: F.households, hero: true }
-  ];
+  const next = order.find((v) => xIsDue(v.current, now)) || order[0] || null;
   const booked = views.filter((v) => v.lead.at).sort((a, b) => xParseAt(a.lead.at) - xParseAt(b.lead.at));
-  const rank = {};
-  order.forEach((v, i) => {
-    rank[v.lead.id] = i;
-  });
-  const sortRows = (rows) => rows.slice().sort((a, b) => (rank[a.lead.id] ?? 999) - (rank[b.lead.id] ?? 999));
+  const blocked = order.filter((v) => v.current.blocked);
+  const calls = order.filter((v) => v.current.ch === "call" && !v.current.blocked);
+  const msgs = order.filter((v) => v.current.ch !== "call" && !v.current.blocked);
+  const msgsDue = msgs.filter((v) => xIsDue(v.current, now));
+  const batch = msgs.filter(xBatchOk);
+  const handled = views.filter((v) => !v.current && v.doneTs.length);
+  const sched = day.touches.filter((t) => XS.done[t.id] && XS.done[t.id].k === "scheduled" && XS.done[t.id].t > now).sort((a, b) => a.slot - b.slot);
   const start = () => {
-    if (!openV || !openV.current) xSet({ open: order[0] ? order[0].lead.id : null });
+    if (!openV || !openV.current) xSet({ open: next ? next.lead.id : null });
     xSet({ focus: true });
   };
   const fresh = !Object.keys(s.done).length;
-  const touchesToday = day.touches.length;
-  const mix = { call: day.touches.filter((t) => t.ch === "call").length, text: day.touches.filter((t) => t.ch === "text").length, email: day.touches.filter((t) => t.ch === "email").length };
-  return /* @__PURE__ */ I.createElement("section", { className: "view active x-today" }, /* @__PURE__ */ I.createElement(XViewBar, { view: s.view }), /* @__PURE__ */ I.createElement("div", { className: "page-head" }, /* @__PURE__ */ I.createElement("div", null, /* @__PURE__ */ I.createElement("h1", null, Gm(Math.floor(now / 60)), ", ", /* @__PURE__ */ I.createElement("span", null, persona), "."), /* @__PURE__ */ I.createElement("div", { className: "greeting" }, `${F.leads} prospects \xB7 ${F.quoted} quotes \xB7 ${F.apps} apps / ${F.households} HH protected`)), /* @__PURE__ */ I.createElement("div", { className: "stamp" }, s.clock != null ? `Demo clock ${xFmt(now)} \xB7 ` : "", touchesToday, " touches planned: ", mix.call, " calls \xB7 ", mix.text, " texts \xB7 ", mix.email, " emails")), /* @__PURE__ */ I.createElement("div", { className: "x-score" }, tiles.map((t) => /* @__PURE__ */ I.createElement("div", { key: t.k, className: "x-tile" + (t.hero ? " x-tile-hero" : "") }, /* @__PURE__ */ I.createElement("div", { className: "x-tile-label" }, t.label), /* @__PURE__ */ I.createElement("div", { className: "x-tile-num" }, /* @__PURE__ */ I.createElement("span", { key: s.bump[t.k] || 0, className: s.bump[t.k] ? "x-pop" : "" }, t.v), /* @__PURE__ */ I.createElement("small", null, " / ", t.goal)), /* @__PURE__ */ I.createElement("div", { className: "x-tile-bar" }, /* @__PURE__ */ I.createElement("i", { style: { width: Math.min(100, t.v / t.goal * 100) + "%" } })))), /* @__PURE__ */ I.createElement("div", { className: "x-start" }, /* @__PURE__ */ I.createElement("button", { className: "x-start-btn" + (fresh ? " x-first" : ""), onClick: start }, score.touched ? "Keep going" : `Start my ${XQ.length}`, " ", /* @__PURE__ */ I.createElement("span", { "aria-hidden": "true" }, "\u2192")), /* @__PURE__ */ I.createElement("div", { className: "x-start-sub" }, "One lead at a time, in the right order; the next one opens by itself."))), /* @__PURE__ */ I.createElement("div", { className: "x-grid" }, /* @__PURE__ */ I.createElement("div", { className: "card x-queue" }, /* @__PURE__ */ I.createElement("div", { className: "card-head x-queue-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Today's ", XQ.length), /* @__PURE__ */ I.createElement("div", { className: "x-seg x-filters", role: "group", "aria-label": "Filter by channel" }, [["all", "All"], ["call", "Calls"], ["text", "Texts"], ["email", "Emails"]].map(([k, l]) => /* @__PURE__ */ I.createElement("button", { key: k, className: filter === k ? "active" : "", "aria-pressed": filter === k, onClick: () => {
-    setFilter(k);
-    const f = order.find((v) => k === "all" || v.current.ch === k);
-    xSet({ open: f ? f.lead.id : null });
-  } }, l, /* @__PURE__ */ I.createElement("b", null, counts[k])))), /* @__PURE__ */ I.createElement("span", { className: "count" }, score.touched, " done \xB7 ", XQ.length - score.touched, " to go")), XQ_GROUPS.map((g) => {
-    const rows = sortRows(list.filter((v) => v.group === g.k));
-    if (!rows.length) return null;
-    return /* @__PURE__ */ I.createElement("div", { key: g.k, className: "x-group" }, /* @__PURE__ */ I.createElement("div", { className: "x-group-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-group-title" }, g.title), /* @__PURE__ */ I.createElement("span", { className: "x-group-n" }, rows.filter((v) => v.current).length), /* @__PURE__ */ I.createElement("span", { className: "x-group-rule" }, g.rule)), rows.map((v) => /* @__PURE__ */ I.createElement(
-      XRow,
-      {
-        key: v.lead.id,
-        v,
-        now,
-        isOpen: open === v.lead.id,
-        persona,
-        onToggle: (force) => xSet({ open: force === true ? v.lead.id : open === v.lead.id ? "" : v.lead.id }),
-        onAct: (k) => xAct(v, k, order),
-        onUndo: () => xUndo(v)
-      }
-    )));
-  }), !list.length && /* @__PURE__ */ I.createElement("div", { className: "x-empty" }, "Nothing in this view."), /* @__PURE__ */ I.createElement("div", { className: "x-queue-foot" }, /* @__PURE__ */ I.createElement("span", null, "Every lead comes preset with its step, its channel, its hour and its message. Nothing to set up."), /* @__PURE__ */ I.createElement("button", { className: "btn ghost", onClick: () => xSet({ done: {}, chan: {}, open: null, bump: {} }) }, "Reset the day"))), /* @__PURE__ */ I.createElement("div", { className: "x-side" }, sideV && /* @__PURE__ */ I.createElement(XHowTo, { lead: sideV.lead, ch: sideV.current ? sideV.current.ch : "call" }), /* @__PURE__ */ I.createElement("div", { className: "card x-agenda" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Booked today"), /* @__PURE__ */ I.createElement("span", { className: "count" }, String(booked.length).padStart(2, "0"))), booked.map((v) => /* @__PURE__ */ I.createElement("button", { key: v.lead.id, className: "x-agenda-row" + (v.current ? "" : " is-done"), onClick: () => {
-    setFilter("all");
-    xSet({ open: v.lead.id });
-  } }, /* @__PURE__ */ I.createElement("span", { className: "mono x-agenda-time" }, v.lead.at), /* @__PURE__ */ I.createElement("span", { className: "x-agenda-name" }, v.lead.name), /* @__PURE__ */ I.createElement("span", { className: "x-agenda-what" }, v.lead.reason)))))), s.focus && /* @__PURE__ */ I.createElement(
+  const mix = { call: 0, text: 0, email: 0 };
+  for (const t of pr.plan) mix[t.ch]++;
+  const auto = mix.text + mix.email;
+  const openLead = (id) => xSet({ open: id });
+  const row = (v) => v.current.ch === "call" ? /* @__PURE__ */ I.createElement(XRow, { key: v.lead.id, v, now, isOpen: open === v.lead.id, persona, onToggle: (force) => xSet({ open: force === true ? v.lead.id : open === v.lead.id ? "" : v.lead.id }), onAct: (k) => xAct(v, k, order), onUndo: () => xUndo(v) }) : /* @__PURE__ */ I.createElement(XMsgRow, { key: v.lead.id, v, now, isOpen: open === v.lead.id, persona, onToggle: () => xSet({ open: open === v.lead.id ? "" : v.lead.id }), onAct: (k) => xAct(v, k, order), onUndo: () => xUndo(v) });
+  return /* @__PURE__ */ I.createElement("section", { className: "view active x-today" }, /* @__PURE__ */ I.createElement(XViewBar, { view: s.view }), /* @__PURE__ */ I.createElement("div", { className: "page-head x-head" }, /* @__PURE__ */ I.createElement("div", null, /* @__PURE__ */ I.createElement("h1", null, Gm(Math.floor(now / 60)), ", ", /* @__PURE__ */ I.createElement("span", null, persona), "."), /* @__PURE__ */ I.createElement("div", { className: "greeting" }, `${F.leads} prospects \xB7 ${F.quoted} quotes \xB7 ${F.apps} apps / ${F.households} HH protected`)), /* @__PURE__ */ I.createElement("div", { className: "x-head-side" }, /* @__PURE__ */ I.createElement(XCompliance, { day }), /* @__PURE__ */ I.createElement("div", { className: "stamp" }, s.clock != null ? `Demo clock ${xFmt(now)} \xB7 ` : "", pr.plan.length, " touches planned: ", mix.call, " calls, ", auto, " messages drafted for you"))), /* @__PURE__ */ I.createElement(XStatusLine, { pr, next, now, onOpen: openLead }), /* @__PURE__ */ I.createElement(XScoreboard, { pr, score, F, bump: s.bump, onStart: start, fresh }), /* @__PURE__ */ I.createElement("div", { className: "x-grid" }, /* @__PURE__ */ I.createElement("div", { className: "card x-queue" }, /* @__PURE__ */ I.createElement("div", { className: "card-head x-queue-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Today's ", XQ.length), /* @__PURE__ */ I.createElement("div", { className: "x-seg x-coach", role: "group", "aria-label": "Coaching" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Coaching"), [[true, "On"], [false, "Off"]].map(([v, l]) => /* @__PURE__ */ I.createElement("button", { key: l, className: s.coach === v ? "active" : "", "aria-pressed": s.coach === v, onClick: () => xSetCoach(v), title: v ? "Tips and the why on every touch: best for newer team members" : "Just the work: for experienced team members" }, l))), /* @__PURE__ */ I.createElement("span", { className: "count" }, handled.length, " handled \xB7 ", XQ.length - handled.length, " to go")), blocked.length > 0 && /* @__PURE__ */ I.createElement(XLane, { title: "Needs a decision", n: blocked.length, rule: "The system stopped these; each says why." }, blocked.map(row)), /* @__PURE__ */ I.createElement(XLane, { title: "Your calls", n: calls.length, rule: s.coach ? "Due now first, then by time. Your words are on each call." : null }, xFold(calls, now, row, open), !calls.length && /* @__PURE__ */ I.createElement("div", { className: "x-empty" }, "No calls left today.")), /* @__PURE__ */ I.createElement(
+    XLane,
+    {
+      title: "Messages to check and send",
+      n: msgs.length,
+      rule: s.coach ? "Written from your templates and timed for their hour. Check the marked parts, then approve the routine ones in one batch at a pause point; each send records that you approved it." : null,
+      action: batch.length > 1 ? /* @__PURE__ */ I.createElement("button", { className: "btn x-approve-all", onClick: () => xApproveAll(msgs), title: batch.length < msgs.length ? `${msgs.length - batch.length} marked \u201CCheck by itself\u201D stay for you to approve one at a time` : void 0 }, "Approve ", batch.length === msgs.length ? `all ${batch.length}` : `${batch.length} routine`) : null
+    },
+    xFold(msgs, now, row, open),
+    !msgs.length && /* @__PURE__ */ I.createElement("div", { className: "x-empty" }, "Every message is checked. They send at their hours.")
+  ), (sched.length > 0 || handled.length > 0) && /* @__PURE__ */ I.createElement("details", { className: "x-lane x-lane-done" }, /* @__PURE__ */ I.createElement("summary", { className: "x-group-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-group-title" }, "Handled today"), /* @__PURE__ */ I.createElement("span", { className: "x-group-n" }, handled.length), /* @__PURE__ */ I.createElement("span", { className: "x-group-rule" }, sched.length ? `${sched.length} approved message${sched.length === 1 ? "" : "s"} will send on time` : "Tap to see them")), sched.map((t) => /* @__PURE__ */ I.createElement("div", { key: t.id, className: "x-done-row" }, /* @__PURE__ */ I.createElement("span", { className: "mono" }, xFmt(t.slot)), /* @__PURE__ */ I.createElement("span", { className: `x-chip x-chip-${t.ch}` }, XCH[t.ch]), /* @__PURE__ */ I.createElement("span", null, t.lead.name), /* @__PURE__ */ I.createElement("span", { className: "x-done-what" }, t.step.what, " \xB7 approved, sends on time"))), handled.map((v) => /* @__PURE__ */ I.createElement("div", { key: v.lead.id, className: "x-done-row" }, /* @__PURE__ */ I.createElement("span", { className: "x-check" }, "\u2713"), /* @__PURE__ */ I.createElement("span", null, v.lead.name), /* @__PURE__ */ I.createElement("span", { className: "x-done-what" }, xOutcomeText(v)), /* @__PURE__ */ I.createElement("button", { className: "x-undo", onClick: () => xUndo(v) }, "Undo")))), /* @__PURE__ */ I.createElement("div", { className: "x-queue-foot" }, /* @__PURE__ */ I.createElement("span", null, "Every lead comes preset with its step, its channel, its hour and its words. Nothing to set up."), /* @__PURE__ */ I.createElement("button", { className: "btn ghost", onClick: () => xSet({ done: {}, chan: {}, asks: {}, open: null, bump: {} }) }, "Reset the day"))), /* @__PURE__ */ I.createElement("div", { className: "x-side" }, /* @__PURE__ */ I.createElement("div", { className: "card x-wins" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Small wins today"), /* @__PURE__ */ I.createElement("span", { className: "count" }, handled.length, " of ", XQ.length)), /* @__PURE__ */ I.createElement("div", { className: "x-wins-body" }, /* @__PURE__ */ I.createElement(XTiles, { pr, onOpen: openLead }), /* @__PURE__ */ I.createElement("div", { className: "x-wins-line" }, handled.length ? `${handled.length} handled${score.quotes ? ` \xB7 ${score.quotes} quote${score.quotes === 1 ? "" : "s"}` : ""}${score.hh ? ` \xB7 ${score.hh} household${score.hh === 1 ? "" : "s"} protected` : ""}.` : "Each square is one person on today's list. It fills when their touch for today is done."))), s.coach && sideV && /* @__PURE__ */ I.createElement(XHowTo, { lead: sideV.lead, ch: sideV.current ? sideV.current.ch : "call" }), /* @__PURE__ */ I.createElement("div", { className: "card x-agenda" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Booked today"), /* @__PURE__ */ I.createElement("span", { className: "count" }, String(booked.length).padStart(2, "0"))), booked.map((v) => /* @__PURE__ */ I.createElement("button", { key: v.lead.id, className: "x-agenda-row" + (v.current ? "" : " is-done"), onClick: () => xSet({ open: v.lead.id }) }, /* @__PURE__ */ I.createElement("span", { className: "mono x-agenda-time" }, v.lead.at), /* @__PURE__ */ I.createElement("span", { className: "x-agenda-name" }, v.lead.name), /* @__PURE__ */ I.createElement("span", { className: "x-agenda-what" }, v.lead.reason)))))), s.focus && /* @__PURE__ */ I.createElement(
     XFocus,
     {
-      v: openV && openV.current ? openV : order[0] || null,
+      v: openV && openV.current ? openV : next,
       now,
       persona,
       score,
       total: XQ.length,
-      onAct: (k) => xAct(openV && openV.current ? openV : order[0], k, order),
+      onAct: (k) => xAct(openV && openV.current ? openV : next, k, order),
       onClose: () => xSet({ focus: false })
     }
   ));
+}
+const XCOMP_SCRUB = 7 * 60 + 55;
+function xCompliance(day) {
+  const n = XQ.length;
+  const consented = XQ.filter((l) => l.consent && l.consent.sms && l.consent.email).length;
+  const msgs = day.touches.filter((t) => t.ch !== "call");
+  const msgOk = msgs.every((t) => xAllowed(t.ch, t.lead));
+  const live = day.touches.filter((t) => t.ch !== "email" && !t.tomorrow && !XS.done[t.id]);
+  const hoursOk = live.every((t) => t.slot >= XLEGAL[t.ch][0] && t.slot < XLEGAL[t.ch][1]);
+  const dnc = XQ.filter((l) => l.dnc).length;
+  const recs = Object.values(XS.done);
+  const sends = recs.filter((d) => d.k === "sent" || d.k === "scheduled");
+  const signed = sends.filter((d) => d.by).length;
+  return [
+    { k: "Consent on file", ok: consented === n && msgOk, how: "System", t: `${consented} of ${n} people, written or e-signed, for text and email, each with its source and date`, ref: "T7" },
+    { k: "Calling hours", ok: hoursOk, how: "System", t: "Calls and texts only 8 am\u20138 pm their time; after 8 pm they wait for the morning", ref: "T7" },
+    { k: "Do Not Call", ok: dnc === 0, how: `System \xB7 ${xFmt(XCOMP_SCRUB)}`, t: `National and agency lists checked: ${dnc === 0 ? "no matches" : `${dnc} match${dnc === 1 ? "" : "es"}, held back`}`, ref: "T7" },
+    { k: "Opt-out and disclosures", ok: true, how: "System", t: "Opt-out line on every text, and STOP takes effect at once (the federal limit is 10 business days); license line, postal address and unsubscribe on every email", ref: "T37" },
+    { k: "Approvals on record", ok: signed === sends.length, how: "Each send", t: sends.length ? `${signed} of ${sends.length} sends today show who approved them and when` : "Every send will show who approved it and when; opening a message is not approving it", ref: "T37" }
+  ];
+}
+function XCompliance({ day }) {
+  useXS();
+  const checks = xCompliance(day);
+  const pass = checks.filter((c) => c.ok).length, all = checks.length, ok = pass === all;
+  return /* @__PURE__ */ I.createElement("details", { className: "x-comp" + (ok ? " is-ok" : " is-warn") }, /* @__PURE__ */ I.createElement("summary", { "aria-label": `Compliance check: ${pass} of ${all} passed. Show the checks.` }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-icon", "aria-hidden": "true" }, ok ? "\u2713" : "!"), /* @__PURE__ */ I.createElement("span", { className: "x-comp-text" }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-k" }, "Compliance check"), /* @__PURE__ */ I.createElement("span", { className: "x-comp-n" }, ok ? "All clear" : `${all - pass} to fix`, " \xB7 ", pass, " of ", all, " passed"))), /* @__PURE__ */ I.createElement("div", { className: "x-comp-body" }, /* @__PURE__ */ I.createElement("div", { className: "x-comp-head" }, "Checked by the system before every touch, not ticked by hand \xB7 last run ", xFmt(xClock())), /* @__PURE__ */ I.createElement("ul", null, checks.map((c) => /* @__PURE__ */ I.createElement("li", { key: c.k, className: c.ok ? "ok" : "warn" }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-mark", "aria-hidden": "true" }, c.ok ? "\u2713" : "!"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("b", null, c.k, "."), " ", c.t, ". ", /* @__PURE__ */ I.createElement("span", { className: "x-comp-how" }, c.how), " ", c.ref && /* @__PURE__ */ I.createElement(XRefs, { ids: [c.ref] }))))), /* @__PURE__ */ I.createElement("details", { className: "x-comp-recs" }, /* @__PURE__ */ I.createElement("summary", null, "See the ", XQ.length, " consent records"), /* @__PURE__ */ I.createElement("ul", null, XQ.map((l) => /* @__PURE__ */ I.createElement("li", { key: l.id }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-rec-name" }, l.name), /* @__PURE__ */ I.createElement("span", { className: "x-comp-rec-ch" }, l.consent.sms ? "\u2713 Text" : "\u2715 Text", " \xB7 ", l.consent.email ? "\u2713 Email" : "\u2715 Email"), /* @__PURE__ */ I.createElement("span", { className: "x-comp-rec-src" }, l.consent.basis))))), /* @__PURE__ */ I.createElement("div", { className: "x-comp-foot" }, "In the live version these come from the phone, email and consent records. Demo people only.")));
+}
+const XCOL = { call: "#2a78d6", email: "#c8790f", text: "#1baf7a", plan: "#C9D3E3", done: "#1F3864", grid: "#ECE8DE", axis: "#C3C2B7", now: "#8C2F39" };
+function xProgress(day, now) {
+  const views = xLeadViews(day);
+  const stopped = {};
+  for (const v of views) stopped[v.lead.id] = !v.current && v.doneTs.some((t) => XSTOP.test(XS.done[t.id].k));
+  const plan = day.touches.filter((t) => !t.tomorrow && (XS.done[t.id] || !stopped[t.lead.id]));
+  const done = plan.filter((t) => XS.done[t.id]);
+  const at = (t) => XS.done[t.id] && XS.done[t.id].t != null ? XS.done[t.id].t : t.slot;
+  const dueNow = plan.filter((t) => t.slot <= now).length;
+  const doneNow = done.filter((t) => at(t) <= now + 0.01).length;
+  const hours = [];
+  for (let h = 8; h <= 19; h++) {
+    const inH = (m) => m >= h * 60 && m < (h + 1) * 60;
+    hours.push({ h, plan: plan.filter((t) => inH(t.slot)).length, done: done.filter((t) => inH(at(t))).length });
+  }
+  const calls = plan.filter((t) => t.ch === "call"), callsDone = calls.filter((t) => XS.done[t.id]);
+  const firsts = day.touches.filter((t) => t.wk === "now" && t.lead.seen != null);
+  const fast = firsts.filter((t) => XS.done[t.id] && XS.done[t.id].t != null && XS.done[t.id].t - xLanded(t.lead) <= 5).length;
+  const behind = plan.filter((t) => !XS.done[t.id] && t.slot < now - 30).length;
+  const firstsDone = firsts.filter((t) => XS.done[t.id]).length;
+  return { views, plan, done, handled: done.length, at, dueNow, doneNow, behind, hours, calls: calls.length, callsDone: callsDone.length, firsts: firsts.length, firstsDone, fast, stopped };
+}
+function XMeter({ label, v, of, tick, unit, sub }) {
+  const pct = of ? Math.min(1, v / of) : 0, tp = of && tick != null ? Math.min(1, tick / of) : null;
+  return /* @__PURE__ */ I.createElement("div", { className: "x-meter", role: "group", "aria-label": `${label}: ${v} of ${of}${tick != null ? `, plan by now ${tick}` : ""}` }, /* @__PURE__ */ I.createElement("div", { className: "x-meter-top" }, /* @__PURE__ */ I.createElement("span", { className: "x-meter-k" }, label), /* @__PURE__ */ I.createElement("span", { className: "x-meter-v" }, v, /* @__PURE__ */ I.createElement("small", null, " / ", of, unit ? ` ${unit}` : ""))), /* @__PURE__ */ I.createElement("div", { className: "x-meter-track" }, /* @__PURE__ */ I.createElement("i", { style: { width: pct * 100 + "%" } }), tp != null && /* @__PURE__ */ I.createElement("b", { className: "x-meter-tick", style: { left: tp * 100 + "%" }, title: `Plan by now: ${tick}` })), /* @__PURE__ */ I.createElement("div", { className: "x-meter-sub" }, of ? pct < 0.5 ? `${v} done` : v >= of ? "Done" : `${of - v} to go` : "", sub ? ` \xB7 ${sub}` : ""));
+}
+function XUnits({ label, v, of, bump }) {
+  return /* @__PURE__ */ I.createElement("div", { className: "x-meter x-units", role: "group", "aria-label": `${label}: ${v} of ${of}` }, /* @__PURE__ */ I.createElement("div", { className: "x-meter-top" }, /* @__PURE__ */ I.createElement("span", { className: "x-meter-k" }, label), /* @__PURE__ */ I.createElement("span", { className: "x-meter-v" }, /* @__PURE__ */ I.createElement("span", { key: bump || 0, className: bump ? "x-pop" : "" }, v), /* @__PURE__ */ I.createElement("small", null, " / ", of))), /* @__PURE__ */ I.createElement("div", { className: "x-units-row", "aria-hidden": "true" }, Array.from({ length: of }, (_, i) => /* @__PURE__ */ I.createElement("i", { key: i, className: i < v ? "is-on" : "" }))), /* @__PURE__ */ I.createElement("div", { className: "x-meter-sub" }, v >= of ? "Goal met" : v / of < 0.5 ? `${v} so far` : `${of - v} to go`));
+}
+function useBoxWidth(def) {
+  const ref = I.useRef(null);
+  const [w, setW] = I.useState(def);
+  I.useEffect(() => {
+    if (!ref.current || typeof ResizeObserver === "undefined") return void 0;
+    const ro = new ResizeObserver((es) => {
+      const cw = Math.round(es[0].contentRect.width);
+      if (cw > 0) setW(cw);
+    });
+    ro.observe(ref.current);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, w];
+}
+function XBurnUp({ pr, now, height }) {
+  const [hov, setHov] = I.useState(null);
+  const [box, W] = useBoxWidth(610);
+  const H = height || 165, L = 34, R = 76, T = 13, B = 26;
+  const x0 = 8 * 60, x1 = 20 * 60, total = Math.max(1, pr.plan.length);
+  const sx = (m) => L + (Math.max(x0, Math.min(x1, m)) - x0) / (x1 - x0) * (W - L - R);
+  const sy = (n) => T + (1 - n / total) * (H - T - B);
+  const steps = (times) => {
+    const s = times.slice().sort((a, b) => a - b);
+    const pts = [[x0, 0]];
+    s.forEach((m, i) => {
+      pts.push([Math.max(x0, m), i]);
+      pts.push([Math.max(x0, m), i + 1]);
+    });
+    return pts;
+  };
+  const planPts = steps(pr.plan.map((t) => t.slot));
+  planPts.push([x1, pr.plan.length]);
+  const donePts = steps(pr.done.map((t) => pr.at(t)).filter((m) => m <= now + 0.01));
+  donePts.push([Math.min(Math.max(now, x0), x1), pr.doneNow]);
+  const path = (pts) => pts.map(([m, n], i) => `${i ? "L" : "M"}${sx(m).toFixed(1)},${sy(n).toFixed(1)}`).join("");
+  const ticks = [8, 10, 12, 14, 16, 18, 20];
+  const yt = [0, Math.round(total / 2), total];
+  const cum = (m) => ({ plan: pr.plan.filter((t) => t.slot <= m).length, done: pr.done.filter((t) => pr.at(t) <= Math.min(m, now)).length });
+  const move = (e) => {
+    const r = e.currentTarget.getBoundingClientRect(), px = (e.clientX - r.left) / r.width * W;
+    const m = Math.round((x0 + (px - L) / (W - L - R) * (x1 - x0)) / 30) * 30;
+    if (m < x0 || m > x1) {
+      setHov(null);
+      return;
+    }
+    setHov({ m, ...cum(m) });
+  };
+  const nowIn = now >= x0 && now <= x1;
+  return /* @__PURE__ */ I.createElement("figure", { className: "x-chart x-burn", ref: box }, /* @__PURE__ */ I.createElement("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Touches planned vs done by time of day: ${pr.doneNow} done, ${pr.dueNow} planned by now, ${pr.plan.length} today`, onPointerMove: move, onPointerLeave: () => setHov(null) }, yt.map((n) => /* @__PURE__ */ I.createElement("g", { key: n }, /* @__PURE__ */ I.createElement("line", { x1: L, x2: W - R, y1: sy(n), y2: sy(n), stroke: XCOL.grid }), /* @__PURE__ */ I.createElement("text", { x: L - 5, y: sy(n) + 3, textAnchor: "end", className: "x-ax" }, n))), ticks.map((h) => /* @__PURE__ */ I.createElement("text", { key: h, x: sx(h * 60), y: H - 8, textAnchor: "middle", className: "x-ax" }, h === 12 ? "12 PM" : h > 12 ? `${h - 12} PM` : `${h} AM`)), /* @__PURE__ */ I.createElement("path", { d: path(planPts), fill: "none", stroke: XCOL.plan, strokeWidth: "2", strokeLinejoin: "round" }), /* @__PURE__ */ I.createElement("path", { d: path(donePts), fill: "none", stroke: XCOL.done, strokeWidth: "2", strokeLinejoin: "round" }), nowIn && /* @__PURE__ */ I.createElement("g", null, /* @__PURE__ */ I.createElement("line", { x1: sx(now), x2: sx(now), y1: T, y2: H - B, stroke: XCOL.now }), /* @__PURE__ */ I.createElement("text", { x: sx(now) + 4, y: T + 8, className: "x-ax x-ax-now" }, "now")), /* @__PURE__ */ I.createElement("circle", { cx: sx(Math.min(Math.max(now, x0), x1)), cy: sy(pr.doneNow), r: "4.5", fill: XCOL.done, stroke: "#fff", strokeWidth: "2" }), /* @__PURE__ */ I.createElement("text", { x: W - R + 5, y: sy(pr.plan.length) + 4, className: "x-lab" }, pr.plan.length, " planned"), /* @__PURE__ */ I.createElement("text", { x: Math.min(sx(now), W - R) + 8, y: sy(pr.doneNow) + 4, className: "x-lab x-lab-strong" }, pr.doneNow, " done"), hov && /* @__PURE__ */ I.createElement("g", null, /* @__PURE__ */ I.createElement("line", { x1: sx(hov.m), x2: sx(hov.m), y1: T, y2: H - B, stroke: XCOL.axis }))), hov && /* @__PURE__ */ I.createElement("div", { className: "x-tip", style: { left: `${sx(hov.m) / W * 100}%` } }, /* @__PURE__ */ I.createElement("b", null, hov.done), " done \xB7 ", /* @__PURE__ */ I.createElement("b", null, hov.plan), " planned", /* @__PURE__ */ I.createElement("span", null, xFmt(hov.m))), /* @__PURE__ */ I.createElement("figcaption", { className: "x-legend" }, /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "x-key-line", style: { background: XCOL.done } }), "Done"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "x-key-line", style: { background: XCOL.plan } }), "Planned"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "x-key-line", style: { background: XCOL.now } }), "Now")), /* @__PURE__ */ I.createElement(XTable, { caption: "Touches by the hour", cols: ["Hour", "Planned", "Done"], rows: pr.hours.map((r) => [xFmt(r.h * 60), r.plan, r.done]) }));
+}
+function XHourBars({ pr, now }) {
+  const [hov, setHov] = I.useState(null);
+  const [box, W] = useBoxWidth(610);
+  const H = 110, L = 8, R = 8, T = 16, B = 22;
+  const max = Math.max(1, ...pr.hours.map((r) => r.plan), ...pr.hours.map((r) => r.done));
+  const n = pr.hours.length, band = (W - L - R) / n, bw = Math.min(21, band * 0.55);
+  const sy = (v) => T + (1 - v / max) * (H - T - B);
+  const nowH = Math.floor(now / 60);
+  return /* @__PURE__ */ I.createElement("figure", { className: "x-chart x-hours", ref: box }, /* @__PURE__ */ I.createElement("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Touches planned and done in each hour", onPointerLeave: () => setHov(null) }, /* @__PURE__ */ I.createElement("line", { x1: L, x2: W - R, y1: sy(0), y2: sy(0), stroke: XCOL.axis }), pr.hours.map((r, i) => {
+    const cx = L + band * i + band / 2;
+    const bar = (v, w, fill) => v > 0 ? /* @__PURE__ */ I.createElement("path", { d: `M${cx - w / 2},${sy(0)}V${sy(v) + 3}q0,-3 3,-3h${w - 6}q3,0 3,3V${sy(0)}Z`, fill }) : null;
+    return /* @__PURE__ */ I.createElement("g", { key: r.h, onPointerEnter: () => setHov(i), tabIndex: "0", onFocus: () => setHov(i), onBlur: () => setHov(null) }, /* @__PURE__ */ I.createElement("rect", { x: cx - band / 2, y: T, width: band, height: H - T - B, fill: "transparent" }), bar(r.plan, bw, XCOL.plan), bar(Math.min(r.done, max), Math.max(5, bw - 8), XCOL.done), /* @__PURE__ */ I.createElement("text", { x: cx, y: H - 8, textAnchor: "middle", className: "x-ax" + (r.h === nowH ? " x-ax-now" : "") }, r.h > 12 ? r.h - 12 : r.h), r.plan > 0 && /* @__PURE__ */ I.createElement("text", { x: cx, y: sy(r.plan) - 4, textAnchor: "middle", className: "x-lab-sm" }, r.done ? `${r.done}/${r.plan}` : r.plan));
+  })), hov != null && /* @__PURE__ */ I.createElement("div", { className: "x-tip", style: { left: `${(L + (W - L - R) / n * hov + (W - L - R) / n / 2) / W * 100}%` } }, /* @__PURE__ */ I.createElement("b", null, pr.hours[hov].done), " done of ", /* @__PURE__ */ I.createElement("b", null, pr.hours[hov].plan), /* @__PURE__ */ I.createElement("span", null, xFmt(pr.hours[hov].h * 60), " hour")), /* @__PURE__ */ I.createElement("figcaption", { className: "x-legend" }, /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "x-key-box", style: { background: XCOL.done } }), "Done"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "x-key-box", style: { background: XCOL.plan } }), "Planned")));
+}
+function XTiles({ pr, onOpen }) {
+  const order = pr.views.slice().sort((a, b) => (b.doneTs.length > 0) - (a.doneTs.length > 0));
+  const state = (v) => {
+    const k = v.doneTs.map((t) => XS.done[t.id].k);
+    if (k.includes("signed")) return ["won", "Signed"];
+    if (k.includes("quoted")) return ["won", "Quoted"];
+    if (!v.current && v.doneTs.length) return ["done", "Done for today"];
+    if (v.doneTs.length) return ["part", "Started"];
+    return ["todo", "To do"];
+  };
+  const handled = pr.views.filter((v) => !v.current && v.doneTs.length).length;
+  return /* @__PURE__ */ I.createElement("div", { className: "x-tiles-wrap" }, /* @__PURE__ */ I.createElement("div", { className: "x-tiles", role: "list", "aria-label": `${handled} of ${pr.views.length} people handled today` }, order.map((v) => {
+    const [s, label] = state(v);
+    return /* @__PURE__ */ I.createElement("button", { key: v.lead.id, role: "listitem", className: `x-tile-p is-${s}`, title: `${v.lead.name} \xB7 ${label}`, "aria-label": `${v.lead.name}: ${label}`, onClick: () => onOpen && onOpen(v.lead.id) }, /* @__PURE__ */ I.createElement("span", { "aria-hidden": "true" }, s === "won" ? "\u2605" : s === "done" ? "\u2713" : s === "part" ? "\u2022" : ""));
+  })), /* @__PURE__ */ I.createElement("div", { className: "x-tiles-key" }, /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "is-won" }), "Quoted or signed"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "is-done" }), "Done for today"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "is-part" }), "Started"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "is-todo" }), "To do")));
+}
+const XSTRAT_FWD = ["IL", "RF", "PI", "QN", "CC", "LE"], XSTRAT_BACK = ["XD", "RI", "WB"];
+function XCadence({ keys, lo, hi, title, sub, zoom, ticks }) {
+  const [hov, setHov] = I.useState(null);
+  const [box, W] = useBoxWidth(470);
+  const narrow = W < 430, rowH = 34, L = narrow ? 92 : 128, R = 44, T = 8, B = 26, H = T + B + rowH * keys.length;
+  const Z = zoom ? narrow ? 55 : 89 : 0, a0 = L + (zoom ? Z + 13 : 0), lo2 = zoom ? 1 : lo;
+  const sx = (d) => a0 + (d - lo2) / (hi - lo2) * (W - R - a0);
+  const tk = ticks || [lo, hi];
+  const chOf = (st) => st.ch.length > 1 && st.ch[0] === "text" ? "text" : st.ch[0];
+  const mark = (ch, x, y) => {
+    const c = XCOL[ch] || XCOL.call;
+    if (ch === "email") return /* @__PURE__ */ I.createElement("rect", { x: x - 4.5, y: y - 4.5, width: "9", height: "9", rx: "1.5", fill: c, stroke: "#fff", strokeWidth: "2" });
+    if (ch === "text") return /* @__PURE__ */ I.createElement("path", { d: `M${x},${y - 6}L${x + 6},${y + 4.5}L${x - 6},${y + 4.5}Z`, fill: c, stroke: "#fff", strokeWidth: "1.5", strokeLinejoin: "round" });
+    return /* @__PURE__ */ I.createElement("circle", { cx: x, cy: y, r: "5", fill: c, stroke: "#fff", strokeWidth: "2" });
+  };
+  const when = (k, st) => {
+    if (st.day > 0) return `day ${st.day}`;
+    if (st.day < 0) return `${-st.day} days before`;
+    const w = XWIN[st.win];
+    return lo < 0 ? "on the date" : w && w.rel ? `day 0, ${w.label}` : st.win === "now" ? "day 0, right away" : st.win === "soon" ? "day 0, first open slot" : `day 0, ${w ? w.label : ""}`;
+  };
+  return /* @__PURE__ */ I.createElement("figure", { className: "x-chart x-cadence" }, title && /* @__PURE__ */ I.createElement("div", { className: "x-chart-title" }, title, sub && /* @__PURE__ */ I.createElement("span", null, sub)), /* @__PURE__ */ I.createElement("div", { className: "x-chart-box", ref: box }, /* @__PURE__ */ I.createElement("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${title}: each lead type's steps by day`, onPointerLeave: () => setHov(null) }, zoom && /* @__PURE__ */ I.createElement("g", null, /* @__PURE__ */ I.createElement("rect", { x: L, y: T, width: Z, height: H - T - B, rx: "3", fill: "#F5F2EB" }), /* @__PURE__ */ I.createElement("text", { x: L + Z / 2, y: H - 9, textAnchor: "middle", className: "x-ax" }, "day 0")), tk.map((d) => /* @__PURE__ */ I.createElement("g", { key: d }, /* @__PURE__ */ I.createElement("line", { x1: sx(d), x2: sx(d), y1: T, y2: H - B, stroke: d === 0 && lo < 0 ? XCOL.axis : XCOL.grid }), /* @__PURE__ */ I.createElement("text", { x: sx(d), y: H - 9, textAnchor: "middle", className: "x-ax" }, d === 0 && lo < 0 ? "date" : d))), keys.map((k, i) => {
+    const y = T + rowH * i + rowH / 2, all = XSRC[k].steps;
+    const inRange = all.filter((st) => st.day >= lo && st.day <= hi), later = all.filter((st) => st.day > hi);
+    const d0 = zoom ? inRange.filter((st) => st.day === 0) : [];
+    const byDay = {};
+    return /* @__PURE__ */ I.createElement("g", { key: k }, /* @__PURE__ */ I.createElement("text", { x: L - 8, y: y + 4, textAnchor: "end", className: "x-lab" }, XSRC[k].label), /* @__PURE__ */ I.createElement("line", { x1: zoom ? a0 : sx(lo), x2: sx(hi), y1: y, y2: y, stroke: XCOL.grid }), inRange.map((st) => {
+      let x;
+      if (zoom && st.day === 0) {
+        const j = d0.indexOf(st);
+        x = L + 11 + (d0.length > 1 ? j / (d0.length - 1) * (Z - 22) : (Z - 22) / 2);
+      } else {
+        const j = (byDay[st.day] = (byDay[st.day] || 0) + 1) - 1;
+        x = sx(st.day) + j * 10;
+      }
+      const ch = chOf(st), h = { k, st, x, y, ch };
+      return /* @__PURE__ */ I.createElement("g", { key: st.n, onPointerEnter: () => setHov(h), onFocus: () => setHov(h), onBlur: () => setHov(null), tabIndex: "0", "aria-label": `${XSRC[k].label}, step ${st.n}: ${XCH[ch]}, ${st.what}, ${when(k, st)}` }, /* @__PURE__ */ I.createElement("circle", { cx: x, cy: y, r: "12", fill: "transparent" }), mark(ch, x, y));
+    }), later.length > 0 && /* @__PURE__ */ I.createElement("text", { x: W - R + 6, y: y + 4, className: "x-lab-sm" }, "+", later.length, " later"));
+  })), hov && /* @__PURE__ */ I.createElement("div", { className: "x-tip", style: { left: `${hov.x / W * 100}%`, top: `${hov.y / H * 100}%` } }, /* @__PURE__ */ I.createElement("b", null, XCH[hov.ch]), " ", hov.st.what, /* @__PURE__ */ I.createElement("span", null, XSRC[hov.k].label, " \xB7 ", when(hov.k, hov.st), hov.st.vm ? ` \xB7 voicemail ${hov.st.vm} sec` : ""))), /* @__PURE__ */ I.createElement("figcaption", { className: "x-legend" }, /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "x-key-dot", style: { background: XCOL.call } }), "Call"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "x-key-sq", style: { background: XCOL.email } }), "Email"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("i", { className: "x-key-tri", style: { borderBottomColor: XCOL.text } }), "Text, once they've talked to you")), /* @__PURE__ */ I.createElement(XTable, { caption: title, cols: ["Lead type", "Steps"], rows: keys.map((k) => [XSRC[k].label, XSRC[k].steps.map((st) => `${XCH[chOf(st)]} ${st.day < 0 ? "\u2212" + -st.day : st.day}`).join(" \xB7 ")]) }));
+}
+function XTable({ caption, cols, rows }) {
+  return /* @__PURE__ */ I.createElement("details", { className: "x-table" }, /* @__PURE__ */ I.createElement("summary", null, "Show as a table"), /* @__PURE__ */ I.createElement("table", null, /* @__PURE__ */ I.createElement("caption", null, caption), /* @__PURE__ */ I.createElement("thead", null, /* @__PURE__ */ I.createElement("tr", null, cols.map((c) => /* @__PURE__ */ I.createElement("th", { key: c, scope: "col" }, c)))), /* @__PURE__ */ I.createElement("tbody", null, rows.map((r, i) => /* @__PURE__ */ I.createElement("tr", { key: i }, r.map((c, j) => j ? /* @__PURE__ */ I.createElement("td", { key: j }, c) : /* @__PURE__ */ I.createElement("th", { key: j, scope: "row" }, c)))))));
 }
 const XTAGLINE = "An agent's experience and judgment, at every team member's fingertips.";
 const XRULES = [];
@@ -1608,12 +1875,12 @@ function XRefs({ ids }) {
 }
 function XClockBar() {
   const s = useXS();
-  return /* @__PURE__ */ I.createElement("div", { className: "x-clockbar" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Clock"), /* @__PURE__ */ I.createElement("div", { className: "x-seg", role: "group", "aria-label": "Demo clock" }, XCLOCKS.map(([l, v]) => /* @__PURE__ */ I.createElement("button", { key: l, className: s.clock === v ? "active" : "", "aria-pressed": s.clock === v, onClick: () => xSet({ clock: v }) }, l))));
+  return /* @__PURE__ */ I.createElement("div", { className: "x-clockbar" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Clock"), /* @__PURE__ */ I.createElement("div", { className: "x-seg", role: "group", "aria-label": "Demo clock" }, XCLOCKS.map(([l, v]) => /* @__PURE__ */ I.createElement("button", { key: l, className: s.clock === v ? "active" : "", "aria-pressed": s.clock === v, onClick: () => xSet({ clock: v, clockAt: Date.now() }) }, l))));
 }
 function XPlanRow({ t, now }) {
   const lead = t.lead, d = XS.done[t.id];
   const v = { cls: d ? "is-done" : !t.tomorrow && t.slot <= now ? "is-due" : "" };
-  return /* @__PURE__ */ I.createElement("div", { className: `x-plan-row x-st-${lead.style} ${v.cls}` }, /* @__PURE__ */ I.createElement("div", { className: "x-plan-time mono" }, t.tomorrow ? "8:00 AM" : t.doneAt != null ? xFmt(t.slot) : t.wk === "now" ? t.slot <= now ? "Now" : xFmt(t.slot) : t.label), /* @__PURE__ */ I.createElement("div", { className: "x-plan-main" }, /* @__PURE__ */ I.createElement("div", { className: "x-row-line1" }, /* @__PURE__ */ I.createElement("span", { className: `x-chip x-chip-${t.ch}` }, XCH[t.ch]), /* @__PURE__ */ I.createElement("span", { className: "x-name" }, lead.name), /* @__PURE__ */ I.createElement("span", { className: `style-pill ${lead.style}` }, rf[lead.style].label), /* @__PURE__ */ I.createElement("span", { className: "x-plan-src" }, XSRC[lead.source].label), d && /* @__PURE__ */ I.createElement("span", { className: "x-check" }, "\u2713 ", XOUT[d.k]), XS.chan[t.id] && /* @__PURE__ */ I.createElement("span", { className: "x-override", title: "A team member changed the channel; the plan keeps the hour that fits it" }, "changed by you")), /* @__PURE__ */ I.createElement("div", { className: "x-plan-step mono" }, t.booked ? `Booked call \xB7 ${lead.at}` : `Step ${t.step.n} of ${t.p.N} \xB7 ${xDayLabel(lead)} \xB7 ${t.step.what}`), /* @__PURE__ */ I.createElement("div", { className: "x-plan-why" }, xTouchWhy(t), " ", /* @__PURE__ */ I.createElement(XRefs, { ids: [t.step.ref, t.chReason && /style rule/.test(t.chReason) ? t.p.style.ref : null, t.chReason === XSTYLE.noTextFirst ? "T10" : null, t.wk && XWIN[t.wk] && XWIN[t.wk].ref] }))));
+  return /* @__PURE__ */ I.createElement("div", { className: `x-plan-row x-st-${lead.style} ${v.cls}` }, /* @__PURE__ */ I.createElement("div", { className: "x-plan-time mono" }, t.tomorrow ? "8:00 AM" : t.doneAt != null ? xFmt(t.slot) : t.wk === "now" ? t.slot <= now ? "Now" : xFmt(t.slot) : t.label), /* @__PURE__ */ I.createElement("div", { className: "x-plan-main" }, /* @__PURE__ */ I.createElement("div", { className: "x-row-line1" }, /* @__PURE__ */ I.createElement("span", { className: `x-chip x-chip-${t.ch}` }, XCH[t.ch]), /* @__PURE__ */ I.createElement("span", { className: "x-name" }, lead.name), /* @__PURE__ */ I.createElement("span", { className: `style-pill ${lead.style}` }, rf[lead.style].label), /* @__PURE__ */ I.createElement("span", { className: "x-plan-src" }, XSRC[lead.source].label), d && /* @__PURE__ */ I.createElement("span", { className: "x-check" }, "\u2713 ", XOUT[d.k]), XS.chan[t.id] && /* @__PURE__ */ I.createElement("span", { className: "x-override", title: "A team member changed the channel; the plan keeps the hour that fits it" }, "changed by you")), /* @__PURE__ */ I.createElement("div", { className: "x-plan-step mono" }, t.booked ? `Booked call \xB7 ${lead.at}` : `Step ${t.step.n} of ${t.p.N} \xB7 ${xDayLabel(lead)} \xB7 ${t.step.what}`), !d && !t.tomorrow && t.slot < now - 30 && /* @__PURE__ */ I.createElement("label", { className: "x-miss" }, "Late \xB7 why?", /* @__PURE__ */ I.createElement("select", { value: XS.miss[t.id] || "", onChange: (e) => xSet((st) => ({ miss: { ...st.miss, [t.id]: e.target.value } })) }, ["", "On another call", "Waiting on them", "Walk-in or service", "Moved it on purpose", "Other"].map((o) => /* @__PURE__ */ I.createElement("option", { key: o, value: o }, o || "Pick one")))), /* @__PURE__ */ I.createElement("div", { className: "x-plan-why" }, xTouchWhy(t), " ", /* @__PURE__ */ I.createElement(XRefs, { ids: [t.step.ref, t.chReason && /style rule/.test(t.chReason) ? t.p.style.ref : null, t.chReason === XSTYLE.noTextFirst ? "T10" : null, t.wk && XWIN[t.wk] && XWIN[t.wk].ref] }))));
 }
 function XRhythm({ day, now }) {
   const done = (t) => !!XS.done[t.id];
@@ -1624,11 +1891,28 @@ function XRhythm({ day, now }) {
   const left = day.touches.filter((t) => !done(t) && !t.tomorrow && t.slot >= now).length;
   const first = day.touches.filter((t) => !t.tomorrow).sort((a, b) => a.slot - b.slot)[0];
   const pts = [
-    { at: 8 * 60, k: "Start", t: `${day.touches.length} touches planned; the first at ${first ? first.label === "Now" ? xFmt(Math.max(now, 8 * 60)) : first.label : "8:00 AM"}. Nothing to sort or set up.` },
-    { at: 12 * 60, k: "Midday check", t: overdue ? `${overdue} lead${overdue === 1 ? "" : "s"} past due by more than 30 minutes. They are at the top of the queue.` : "Nothing past due. The afternoon calls start at 4." },
-    { at: 17 * 60, k: "Wrap-up", t: `${touched} of ${XQ.length} touched${left ? `, ${left} touch${left === 1 ? "" : "es"} still ahead today` : ""}. Every lead already has its next step set.` }
+    { at: 8 * 60, k: "Start \xB7 huddle", t: `${day.touches.length} touches planned, the first at ${first ? first.label === "Now" ? xFmt(Math.max(now, 8 * 60)) : first.label : "8:00 AM"}; ${XQ.filter((l) => l.seen != null && l.day === 0).length} new leads, ${XQ.filter((l) => l.at).length} booked calls${Object.keys(XS.help).length ? `, ${Object.keys(XS.help).length} help asked` : ""}. Read your two commitments. Nothing to sort or set up.`, ref: ["T26", "T35"] },
+    { at: 12 * 60, k: "Midday check", t: overdue ? `${overdue} lead${overdue === 1 ? "" : "s"} with a touch past due by more than 30 minutes. They are at the top of the queue.` : "Nothing past due. The afternoon calls start at 4.", ref: ["T18"] },
+    { at: 17 * 60, k: "Wrap-up", t: `${touched} of ${XQ.length} touched${left ? `, ${left} touch${left === 1 ? "" : "es"} still ahead today` : ""}. Every lead already has its next step set.`, ref: ["T34"] }
   ];
-  return /* @__PURE__ */ I.createElement("div", { className: "card x-rhythm" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The day's three pause points"), /* @__PURE__ */ I.createElement("span", { className: "count" }, xFmt(now))), /* @__PURE__ */ I.createElement("ol", { className: "x-rhythm-list" }, pts.map((p) => /* @__PURE__ */ I.createElement("li", { key: p.k, className: now >= p.at && (p.at === 17 * 60 || now < p.at + 4 * 60) ? "is-now" : now > p.at ? "is-past" : "" }, /* @__PURE__ */ I.createElement("span", { className: "x-rhythm-at mono" }, xFmt(p.at)), /* @__PURE__ */ I.createElement("span", { className: "x-rhythm-k" }, p.k), /* @__PURE__ */ I.createElement("span", { className: "x-rhythm-t" }, p.t)))));
+  return /* @__PURE__ */ I.createElement("div", { className: "card x-rhythm" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The day's three pause points"), /* @__PURE__ */ I.createElement("span", { className: "count" }, xFmt(now))), /* @__PURE__ */ I.createElement("ol", { className: "x-rhythm-list" }, pts.map((p) => /* @__PURE__ */ I.createElement("li", { key: p.k, className: now >= p.at && (p.at === 17 * 60 || now < p.at + 4 * 60) ? "is-now" : now > p.at ? "is-past" : "" }, /* @__PURE__ */ I.createElement("span", { className: "x-rhythm-at mono" }, xFmt(p.at)), /* @__PURE__ */ I.createElement("span", { className: "x-rhythm-k" }, p.k), /* @__PURE__ */ I.createElement("span", { className: "x-rhythm-t" }, p.t, " ", /* @__PURE__ */ I.createElement(XRefs, { ids: p.ref })), p.at === 17 * 60 && /* @__PURE__ */ I.createElement(XReflect, null)))));
+}
+function XReflect() {
+  const key = "acc.reflect." + (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+  const [v, setV] = I.useState(() => {
+    try {
+      return window.localStorage.getItem(key) || "";
+    } catch (e) {
+      return "";
+    }
+  });
+  return /* @__PURE__ */ I.createElement("label", { className: "x-reflect" }, "One thing that worked today", /* @__PURE__ */ I.createElement("input", { value: v, maxLength: 140, placeholder: "e.g. calling the new leads before the emails", onChange: (e) => {
+    setV(e.target.value);
+    try {
+      window.localStorage.setItem(key, e.target.value);
+    } catch (x) {
+    }
+  } }));
 }
 function XTestCalc() {
   const [base, setBase] = I.useState(10), [target, setTarget] = I.useState(15), [perDay, setPerDay] = I.useState(20), [agencies, setAgencies] = I.useState(1), [power, setPower] = I.useState(0.8);
@@ -1662,12 +1946,15 @@ function XDayPlan({ persona }) {
   const nowH = Math.floor(now / 60);
   const cmp = I.useMemo(() => xCompare(XQ, seed), [seed]);
   const people = new Set(day.touches.map((t) => t.lead.id)).size;
-  return /* @__PURE__ */ I.createElement("section", { className: "view active x-plan" }, /* @__PURE__ */ I.createElement("div", { className: "page-head" }, /* @__PURE__ */ I.createElement("div", null, /* @__PURE__ */ I.createElement("h1", null, "The whole day, planned."), /* @__PURE__ */ I.createElement("div", { className: "greeting" }, day.touches.length, " touches for ", people, " people \xB7 ", mix.call, " calls \xB7 ", mix.text, " texts \xB7 ", mix.email, " emails. Different people get different channels, at different hours, in a different order.")), /* @__PURE__ */ I.createElement(XClockBar, null)), /* @__PURE__ */ I.createElement("div", { className: "x-plan-grid" }, /* @__PURE__ */ I.createElement("div", { className: "card x-timeline" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Today, hour by hour"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "now ", xFmt(now))), rightNow.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "x-hour is-now x-hour-right-now" }, /* @__PURE__ */ I.createElement("div", { className: "x-hour-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-hour-time mono" }, "Now"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-label" }, "New leads: the first call, inside a minute"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-why" }, XWIN.now.why, ". ", /* @__PURE__ */ I.createElement(XRefs, { ids: [XWIN.now.ref] }))), rightNow.slice().sort((a, b) => xFreshKey(a.lead, now) - xFreshKey(b.lead, now)).map((t) => /* @__PURE__ */ I.createElement(XPlanRow, { key: t.id, t, now }))), hours.map((hr) => {
+  const pr = xProgress(day, now);
+  const order = xWorkOrder(pr.views, now);
+  const next = order.find((v) => xIsDue(v.current, now)) || order[0] || null;
+  return /* @__PURE__ */ I.createElement("section", { className: "view active x-plan" }, /* @__PURE__ */ I.createElement("div", { className: "page-head" }, /* @__PURE__ */ I.createElement("div", null, /* @__PURE__ */ I.createElement("h1", null, "The whole day, planned."), /* @__PURE__ */ I.createElement("div", { className: "greeting" }, day.touches.length, " touches for ", people, " people \xB7 ", mix.call, " calls \xB7 ", mix.text, " texts \xB7 ", mix.email, " emails. Different people get different channels, at different hours, in a different order.")), /* @__PURE__ */ I.createElement("div", { className: "x-head-side" }, /* @__PURE__ */ I.createElement(XClockBar, null), /* @__PURE__ */ I.createElement(XCompliance, { day }))), /* @__PURE__ */ I.createElement("div", { className: "x-plan-grid" }, /* @__PURE__ */ I.createElement("div", { className: "x-plan-main-col" }, /* @__PURE__ */ I.createElement("div", { className: "card x-progress" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Plan vs done"), /* @__PURE__ */ I.createElement("span", { className: "count" }, pr.doneNow, " done \xB7 ", pr.dueNow, " planned by now \xB7 ", pr.plan.length, " today")), /* @__PURE__ */ I.createElement("div", { className: "x-progress-body" }, /* @__PURE__ */ I.createElement(XStatusLine, { pr, next, now, onOpen: (id) => xSet({ view: "queue", open: id }) }), /* @__PURE__ */ I.createElement("div", { className: "x-chart-title" }, "Through the day", /* @__PURE__ */ I.createElement("span", null, "touches done against the plan; the gap is how far behind or ahead ", /* @__PURE__ */ I.createElement(XRefs, { ids: ["T33", "T28"] }))), /* @__PURE__ */ I.createElement(XBurnUp, { pr, now }), /* @__PURE__ */ I.createElement("div", { className: "x-chart-title" }, "Hour by hour", /* @__PURE__ */ I.createElement("span", null, "planned and done in each hour, like a lean production board ", /* @__PURE__ */ I.createElement(XRefs, { ids: ["T22", "T32"] }))), /* @__PURE__ */ I.createElement(XHourBars, { pr, now }))), /* @__PURE__ */ I.createElement("div", { className: "card x-timeline" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Today, hour by hour"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "now ", xFmt(now))), rightNow.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "x-hour is-now x-hour-right-now" }, /* @__PURE__ */ I.createElement("div", { className: "x-hour-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-hour-time mono" }, "Now"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-label" }, "New leads: the first call, inside a minute"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-why" }, XWIN.now.why, ". ", /* @__PURE__ */ I.createElement(XRefs, { ids: [XWIN.now.ref] }))), rightNow.slice().sort((a, b) => xFreshKey(a.lead, now) - xFreshKey(b.lead, now)).map((t) => /* @__PURE__ */ I.createElement(XPlanRow, { key: t.id, t, now }))), hours.map((hr) => {
     const rows = (byHour[hr.h] || []).slice().sort((a, b) => a.slot - b.slot);
     const isNow = nowH === hr.h;
     if (hr.h >= 20 && !rows.length) return null;
     return /* @__PURE__ */ I.createElement("div", { key: hr.h, className: "x-hour" + (rows.length ? "" : " is-empty") + (isNow ? " is-now" : "") }, /* @__PURE__ */ I.createElement("div", { className: "x-hour-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-hour-time mono" }, xFmt(hr.h * 60)), /* @__PURE__ */ I.createElement("span", { className: "x-hour-label" }, hr.label, isNow && /* @__PURE__ */ I.createElement("span", { className: "x-now-tag" }, "now")), /* @__PURE__ */ I.createElement("span", { className: "x-hour-why" }, hr.why, " ", hr.ref && /* @__PURE__ */ I.createElement(XRefs, { ids: [].concat(hr.ref) }))), rows.map((t) => /* @__PURE__ */ I.createElement(XPlanRow, { key: t.id, t, now })));
-  }), tomorrow.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "x-hour is-now" }, /* @__PURE__ */ I.createElement("div", { className: "x-hour-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-hour-time mono" }, "8:00 AM"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-label" }, "Tomorrow, first thing"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-why" }, "After 8 pm, calls and texts wait for the morning; email can still go out. ", /* @__PURE__ */ I.createElement(XRefs, { ids: ["T7"] }))), tomorrow.map((t) => /* @__PURE__ */ I.createElement(XPlanRow, { key: t.id, t, now }))), /* @__PURE__ */ I.createElement("div", { className: "x-queue-foot" }, /* @__PURE__ */ I.createElement("span", null, "This is the same plan the Action queue runs. Change the clock, a lead's style or its consent, and the step, channel and hour move with it."))), /* @__PURE__ */ I.createElement("div", { className: "x-side x-plan-side" }, /* @__PURE__ */ I.createElement(XRhythm, { day, now }), /* @__PURE__ */ I.createElement("div", { className: "card" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The formula"), /* @__PURE__ */ I.createElement("span", { className: "count" }, XRULES.length, " rules")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules" }, XRULES.map((r, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-k" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, r.t, " ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))))), /* @__PURE__ */ I.createElement("div", { className: "card x-vs" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The plan vs. the usual day"), /* @__PURE__ */ I.createElement("button", { className: "btn ghost x-vs-shuffle", onClick: () => setSeed((x) => x + 1) }, "Run another usual day")), /* @__PURE__ */ I.createElement("div", { className: "x-vs-body" }, /* @__PURE__ */ I.createElement("div", { className: "x-vs-head" }, /* @__PURE__ */ I.createElement("span", null), /* @__PURE__ */ I.createElement("span", null, "Usual day"), /* @__PURE__ */ I.createElement("span", null, "Hakobian plan")), cmp.map((r, i) => /* @__PURE__ */ I.createElement("div", { key: i, className: "x-vs-row" }, /* @__PURE__ */ I.createElement("div", { className: "x-vs-lever" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-vs-guess" }, r.usual), /* @__PURE__ */ I.createElement("div", { className: "x-vs-hak" }, r.plan), /* @__PURE__ */ I.createElement("div", { className: "x-vs-ev" }, r.why, ". ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))), /* @__PURE__ */ I.createElement("div", { className: "x-vs-note" }, "Same 20 people, same day. The usual day is a model of a team member without a plan: starts at 9:15, works the list in whatever order it sits, checks the lead inbox every two hours, picks a channel out of habit (6 calls, 2\u20133 emails, 1\u20132 texts in 10), sends one template, stops after about two tries. These are process numbers, not results, and this usual day is generous: a secret shop of 25 insurers found 1.45 call attempts per lead and 2.3 days to a first call. Whether the plan closes more households is what the test below measures."))), /* @__PURE__ */ I.createElement("div", { className: "card x-test" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "How to prove it"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "the test")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules x-test-steps" }, XTEST.map((t, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, t)))), /* @__PURE__ */ I.createElement(XTestCalc, null)), XDESIGN.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "card x-design" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Built to need no training"), /* @__PURE__ */ I.createElement("span", { className: "count" }, XDESIGN.length, " rules")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules x-design-rules" }, XDESIGN.map((r, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-k" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, r.t, " ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))))), /* @__PURE__ */ I.createElement("div", { className: "card x-sources" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "What the tags mean"), /* @__PURE__ */ I.createElement("span", { className: "count" }, Object.keys(XREF).length, " sources")), /* @__PURE__ */ I.createElement("ul", { className: "x-source-list" }, Object.values(XREF).map((r) => /* @__PURE__ */ I.createElement("li", { key: r.k }, /* @__PURE__ */ I.createElement("span", { className: "x-ref" }, r.k), /* @__PURE__ */ I.createElement("span", null, r.s))))))));
+  }), tomorrow.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "x-hour is-now" }, /* @__PURE__ */ I.createElement("div", { className: "x-hour-head" }, /* @__PURE__ */ I.createElement("span", { className: "x-hour-time mono" }, "8:00 AM"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-label" }, "Tomorrow, first thing"), /* @__PURE__ */ I.createElement("span", { className: "x-hour-why" }, "After 8 pm, calls and texts wait for the morning; email can still go out. ", /* @__PURE__ */ I.createElement(XRefs, { ids: ["T7"] }))), tomorrow.map((t) => /* @__PURE__ */ I.createElement(XPlanRow, { key: t.id, t, now }))), /* @__PURE__ */ I.createElement("div", { className: "x-queue-foot" }, /* @__PURE__ */ I.createElement("span", null, "This is the same plan the Action queue runs. Change the clock, a lead's style or its consent, and the step, channel and hour move with it.")))), /* @__PURE__ */ I.createElement("div", { className: "x-side x-plan-side" }, /* @__PURE__ */ I.createElement(XRhythm, { day, now }), /* @__PURE__ */ I.createElement("div", { className: "card x-commit" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "This week's two commitments"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "if-then")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules" }, /* @__PURE__ */ I.createElement("li", null, /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, "If a new lead lands while I'm on a call, then I call it within five minutes of hanging up.")), /* @__PURE__ */ I.createElement("li", null, /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, "If a quoted lead hasn't answered by day 3, then I call at 4 pm with their style's question."))), /* @__PURE__ */ I.createElement("div", { className: "x-commit-foot" }, `Set in the weekly WIG session, written as "if X, then I'll do Y at a time." Demo examples. `, /* @__PURE__ */ I.createElement(XRefs, { ids: ["T35"] }))), /* @__PURE__ */ I.createElement("div", { className: "card x-strategy" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The strategy"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "every lead type")), /* @__PURE__ */ I.createElement("div", { className: "x-strategy-body" }, /* @__PURE__ */ I.createElement(XCadence, { keys: XSTRAT_FWD, lo: 0, hi: 22, zoom: true, ticks: [1, 5, 10, 15, 22], title: "From the first touch", sub: "Day 0 opens up to show the minutes: call now, email at 20, call at 30\u201360 and 1\u20132 hours" }), /* @__PURE__ */ I.createElement(XCadence, { keys: XSTRAT_BACK, lo: -60, hi: 10, ticks: [-60, -45, -30, -21, -14, -7, 0, 10], title: "Around their date", sub: "Days before and after the renewal date or the anniversary" }), /* @__PURE__ */ I.createElement("div", { className: "x-strategy-note" }, "Same pace for every communication style; the style changes the words. Texts only once they've talked to you."))), /* @__PURE__ */ I.createElement("div", { className: "card" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The formula"), /* @__PURE__ */ I.createElement("span", { className: "count" }, XRULES.length, " rules")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules" }, XRULES.map((r, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-k" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, r.t, " ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))))), /* @__PURE__ */ I.createElement("div", { className: "card x-vs" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "The plan vs. the usual day"), /* @__PURE__ */ I.createElement("button", { className: "btn ghost x-vs-shuffle", onClick: () => setSeed((x) => x + 1) }, "Run another usual day")), /* @__PURE__ */ I.createElement("div", { className: "x-vs-body" }, /* @__PURE__ */ I.createElement("div", { className: "x-vs-head" }, /* @__PURE__ */ I.createElement("span", null), /* @__PURE__ */ I.createElement("span", null, "Usual day"), /* @__PURE__ */ I.createElement("span", null, "Hakobian plan")), cmp.map((r, i) => /* @__PURE__ */ I.createElement("div", { key: i, className: "x-vs-row" }, /* @__PURE__ */ I.createElement("div", { className: "x-vs-lever" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-vs-guess" }, r.usual), /* @__PURE__ */ I.createElement("div", { className: "x-vs-hak" }, r.plan), /* @__PURE__ */ I.createElement("div", { className: "x-vs-ev" }, r.why, ". ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))), /* @__PURE__ */ I.createElement("div", { className: "x-vs-note" }, "Same 20 people, same day. The usual day is a model of a team member without a plan: starts at 9:15, works the list in whatever order it sits, checks the lead inbox every two hours, picks a channel out of habit (6 calls, 2\u20133 emails, 1\u20132 texts in 10), sends one template, stops after about two tries. These are process numbers, not results, and this usual day is generous: a secret shop of 25 insurers found 1.45 call attempts per lead and 2.3 days to a first call. Whether the plan closes more households is what the test below measures."))), /* @__PURE__ */ I.createElement("div", { className: "card x-test" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "How to prove it"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "the test")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules x-test-steps" }, XTEST.map((t, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, t)))), /* @__PURE__ */ I.createElement(XTestCalc, null)), XDESIGN.length > 0 && /* @__PURE__ */ I.createElement("div", { className: "card x-design" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Built to need no training"), /* @__PURE__ */ I.createElement("span", { className: "count" }, XDESIGN.length, " rules")), /* @__PURE__ */ I.createElement("ol", { className: "x-rules x-design-rules" }, XDESIGN.map((r, i) => /* @__PURE__ */ I.createElement("li", { key: i }, /* @__PURE__ */ I.createElement("div", { className: "x-rule-k" }, r.k), /* @__PURE__ */ I.createElement("div", { className: "x-rule-t" }, r.t, " ", /* @__PURE__ */ I.createElement(XRefs, { ids: r.ref })))))), /* @__PURE__ */ I.createElement("div", { className: "card x-sources" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "What the tags mean"), /* @__PURE__ */ I.createElement("span", { className: "count" }, Object.keys(XREF).length, " sources")), /* @__PURE__ */ I.createElement("ul", { className: "x-source-list" }, Object.values(XREF).map((r) => /* @__PURE__ */ I.createElement("li", { key: r.k }, /* @__PURE__ */ I.createElement("span", { className: "x-ref" }, r.k), /* @__PURE__ */ I.createElement("span", null, r.s))))))));
 }
 function XNowBar() {
   useXS();
@@ -1716,7 +2003,23 @@ Object.assign(XREF, {
   T18: { k: "T18", s: "Pause points: the WHO 19-item checklist, read at three pauses that already existed, was followed by deaths falling from 1.5% to 0.8% in eight hospitals (Haynes et al., 2009). Mandated across 101 Ontario hospitals with self-reported ticks, it changed nothing: count actions, not ticks. \xB7 Peer-reviewed" },
   T19: { k: "T19", s: "Guidance inside the work: suggested replies raised support agents' resolutions per hour 14%, and 34% for novices (5,179 agents; Brynjolfsson, Li & Raymond). Voice-directed picking cut errors 61%. UPS took its routing software to about 55,000 drivers by letting it set the next stop, moving to a new center only after two weeks of better results. \xB7 Peer-reviewed" },
   T20: { k: "T20", s: "Block the error: an interface that blocked error states (the IBM 'training wheels' study) sped learning; the control group spent almost a quarter of its time recovering from errors. \xB7 Peer-reviewed" },
-  T21: { k: "T21", s: "Touch and reading: targets at least 44 \xD7 44 px and never under 24; contrast at least 4.5:1; status never shown by color alone; reading lines around 55\u201370 characters (WCAG 2.2; Apple guidelines; Dyson, 2004). \xB7 Standards" }
+  T21: { k: "T21", s: "Touch and reading: targets at least 44 \xD7 44 px and never under 24; contrast at least 4.5:1; status never shown by color alone; reading lines around 55\u201370 characters (WCAG 2.2; Apple guidelines; Dyson, 2004). \xB7 Standards" },
+  T22: { k: "T22", s: "Standard work: every task specified by content, sequence, timing and outcome, with a built-in test, so a step done late or out of order is 'immediately apparent' (Spear & Bowen, 'Decoding the DNA of the Toyota Production System,' HBR 1999). No study measures a 5- or 10-second rule; treat it as an acceptance test for the screen. \xB7 Practitioner" },
+  T23: { k: "T23", s: "Jidoka and the andon cord: the machine stops itself when something is abnormal and a person is called to that one spot; normal work flows without attention (Toyota Production System). People under-report problems, so the system flags them from its own events (Tucker & Spear, 2006). \xB7 Company and peer-reviewed" },
+  T24: { k: "T24", s: "Automation bias: a review of 74 studies found reviewers over-trust good automation more under workload and time pressure; showing the facts behind a suggestion and making the reviewer accountable reduced it (Goddard, Roudsari & Wyatt, JAMIA 2012). In a field experiment with 181 recruiters, better AI drew less effort and lower accuracy, mostly from the experienced ones (Dell'Acqua). \xB7 Peer-reviewed and working paper" },
+  T25: { k: "T25", s: "Batch like work, in the order the system sets: grouping similar tasks raised productivity in a bank's loan processing (Staats & Gino, Management Science 2012); in 2.4M radiology reads, choosing your own order (easy first) lowered productivity (Ibanez et al., Management Science 2018). \xB7 Peer-reviewed" },
+  T26: { k: "T26", s: "Short daily huddles: a review of 24 studies found unit-level huddles positive, though most were uncontrolled before-and-after studies (Franklin et al., BMJ Quality & Safety 2020). Daily review of the numbers was part of the management bundle that raised output in a randomized trial in Indian textile plants (Bloom et al.). \xB7 Peer-reviewed" },
+  T27: { k: "T27", s: "Done early, left late: people try harder when they look at whichever is smaller, what's done or what's left. Early in the day show what's done; past halfway, show what's left (Koo & Fishbach, Journal of Consumer Research 2012). \xB7 Peer-reviewed" },
+  T28: { k: "T28", s: "Watching progress works: across 138 randomized studies (19,951 people), prompting people to track progress raised goal attainment, d = 0.40, and more when progress was physically recorded or shared (Harkin et al., Psychological Bulletin 2016). So a person's tap counts the touch, not the send. \xB7 Peer-reviewed" },
+  T29: { k: "T29", s: "Feedback can backfire: across 607 effects, feedback helped on average (d = .41) but more than a third of interventions lowered performance, mostly when it pointed at the person instead of the task (Kluger & DeNisi, Psychological Bulletin 1996). So every number here points at the next task. \xB7 Peer-reviewed" },
+  T30: { k: "T30", s: "No rankings: in a three-year randomized trial with commissioned salespeople, removing a private sales ranking raised sales; the drop came from people who learned they were behind and eased off (Barankay). Team totals and each person against their own plan instead. \xB7 Field experiment" },
+  T31: { k: "T31", s: "Help for newer people, less for experienced ones: across 60 studies, novices learned more with more guidance (d = 0.51) and experienced people learned more with less (d = \u22120.43) (expertise-reversal meta-analysis, 2025). Hence the Coaching switch. AI suggestions lifted novice support agents 34%, experienced ones barely (Brynjolfsson, Li & Raymond). \xB7 Peer-reviewed" },
+  T32: { k: "T32", s: "Charts read at a glance: simple bars were read correctly in about a quarter of a second; ring-style radial charts took about 1.5 seconds (Blascheck et al., IEEE 2019). Up to about four items are counted at a glance, so small counts show as squares. \xB7 Peer-reviewed" },
+  T33: { k: "T33", s: "Burn-up, not burn-down: when the plan grows or shrinks during the day, a burn-up shows it; a burn-down hides it and can make someone look behind only because the list grew. The plan line follows the hour-by-hour plan, not a straight line (agile and lean practice; Few's bullet graph). \xB7 Practitioner" },
+  T34: { k: "T34", s: "One line of reflection: across 10 studies (4,340 people), a few minutes of reflecting on what worked improved later performance, most of all early in the learning curve (Di Stefano, Gino, Pisano & Staats, Harvard Business School). \xB7 Working paper" },
+  T36: { k: "T36", s: "Reviewing good automation: people with a reliable aid caught 65% of the problems it missed, against 97% without it; a 'please verify' prompt and a second reviewer didn't help (Skitka et al., NASA studies). Being accountable for the approval did (Mosier et al., 1996). Approve all is for routine template messages; anything about life insurance is checked one at a time. \xB7 Peer-reviewed" },
+  T37: { k: "T37", s: "Evidence, not a badge: regulated review records name the reviewer, the item, the date and the action, and 'merely opening a communication is not sufficient review' (FINRA Rule 3110). Sites with a trust seal were more than twice as likely to be untrustworthy (Edelman, 2009), so the check opens to its records. Opt-outs must be honored within 10 business days, with at most one confirmation text (47 CFR 64.1200). \xB7 Rules and peer-reviewed" },
+  T35: { k: "T35", s: "If-then plans: across 94 tests, plans written as 'if X happens, then I'll do Y' raised goal attainment with d = .65 (Gollwitzer & Sheeran, Advances in Experimental Social Psychology 2006). \xB7 Peer-reviewed" }
 });
 Object.assign(XWIN, {
   now: { label: "Right now", why: "The first call inside a minute, five at most: speed is the strongest lever in the lead-response data", ref: "T1" },
@@ -1799,14 +2102,21 @@ XTEST.push(...[
   "The plan is written down before the first coin flip; the result is read once, at the end, with its 95% interval. Customer data stays in the agency's and carrier's own systems, under lead IDs."
 ]);
 XDESIGN.push(...[
-  { k: "It decides the next step", t: "One lead at a time: who, why now, which channel, and the words, already filled in. The Now bar on every screen is the next touch; tap it and it opens.", ref: ["T19"] },
-  { k: "No tour, no manual", t: "The guidance is in the work: a one-line why on every touch, the three moves on every call. Tutorials don't raise task success, and they make tasks feel harder.", ref: ["T17"] },
-  { k: "Wrong moves are locked, with the reason", t: "Text stays locked until consent is on file; after 8 pm calls and texts wait for the morning; a locked button says why.", ref: ["T20", "T7"] },
-  { k: "It starts set up", t: "The plan, the hours and the words are preset. One tap accepts; a change is kept and marked \u201Cchanged by you.\u201D In a tool like this, the defaults are the training.", ref: ["T16"] },
-  { k: "Three pause points", t: "Start, midday, wrap-up: each under 90 seconds, nine items or fewer.", ref: ["T18"] },
-  { k: "Undo, not \u201CAre you sure?\u201D", t: "Anything reversible happens at once, with Undo. Reset the day puts everything back.", ref: [] },
-  { k: "Counted when it happens", t: "In the live version, touches are read from the phone, email and text logs, not ticked by hand. Ticked boxes are not the behavior.", ref: ["T18"] },
-  { k: "Big targets, readable words", t: "Buttons at least 44 px on touch screens; Focus mode sets the words at 16.5 px; status shows in words as well as color.", ref: ["T21"] },
+  { k: "One line says what needs you", t: "The top line of Today is the whole status: done, planned by now, and the next touch with its button. Read it in a glance and act; the 10-second goal is an acceptance test, not a proven threshold.", ref: ["T22", "T19"] },
+  { k: "Normal is quiet; exceptions get their own lane", t: "Lanes in a fixed order: Needs a decision, Your calls, Messages to check. A lead the system stopped sits at the top with the reason in plain words; everything on plan looks calm.", ref: ["T22", "T23"] },
+  { k: "It stops itself and says why", t: "No text without consent on file, no call or text after 8 pm, nothing to a Do Not Call number. A locked button says why; the compliance check at the top shows what was checked, how and when, and opens to the 20 consent records.", ref: ["T23", "T20", "T7", "T37"] },
+  { k: "Check the facts, then approve", t: "Each drafted message shows the facts it was built from (name, quote, consent) with those parts marked. Approve sends it at its hour; at a pause point, one button approves the routine ones, and life-insurance messages are checked one at a time. Every send records who approved it and when.", ref: ["T24", "T36"] },
+  { k: "Like work together, in the system's order", t: "Calls in one lane, messages in another, both in the order the plan sets. Choosing easy-first lowers output in large field data.", ref: ["T25"] },
+  { k: "Few things open at once", t: "Each lane shows what's due and the next three; the rest of the day folds away until it's due.", ref: ["T25", "T32"] },
+  { k: "Stuck? One tap", t: "The help button names the person it goes to and marks the card until they answer, like pulling the andon cord.", ref: ["T23"] },
+  { k: "Process first, results after", t: "The scoreboard puts the work you control (touches, calls, life talks, referrals asked) ahead of the results (quotes, apps, households). Apps and households show week to date, because a day's count is too small to read.", ref: ["T28", "T29"] },
+  { k: "Done early, left late", t: "Under halfway, each meter shows what's done; past halfway, what's left. Each person on the list is one square that fills when their touch is done.", ref: ["T27", "T32"] },
+  { k: "Your plan, not a ranking", t: "Everyone sees team totals and their own plan. No leaderboard; a private ranking cut sales in a randomized trial.", ref: ["T30"] },
+  { k: "Coaching on or off", t: "Newer team members see the tips and the why on every touch; experienced ones switch them off and keep the same layout and buttons.", ref: ["T31"] },
+  { k: "It starts set up, with no tour", t: "The plan, the hours and the words are preset; a change is kept and marked \u201Cchanged by you.\u201D The guidance is in the work, not in a tutorial.", ref: ["T16", "T17"] },
+  { k: "Three pause points", t: "Start (the huddle), midday, wrap-up: each under 90 seconds. Two if-then commitments for the week; one line on what worked at the end of the day.", ref: ["T18", "T26", "T35", "T34"] },
+  { k: "Counted by a tap, not ticked", t: "A touch counts when a person sends, approves or logs it. In the live version the call, text and email logs confirm it.", ref: ["T28", "T18"] },
+  { k: "Undo, big targets, words with color", t: "Anything reversible happens at once, with Undo. Buttons at least 44 px on touch screens; status always in words as well as color.", ref: ["T21"] },
   { k: "One person at a time", t: "Roll out to one team member, and move to the next after two weeks of better numbers, with a local champion to ask.", ref: ["T19"] },
   { k: "Craft", t: "Type and spacing step by the golden ratio (1.618), motion runs on Fibonacci timings, and the lettering is kerned with true ligatures. A finish choice, not a usability claim.", ref: [] }
 ]);
