@@ -192,3 +192,158 @@
 .x-outs kbd,.x-focus-top kbd,.x-focus-keys{display:none}
 .x-skip{margin-left:0}
 }
+
+/* ---------- v8: sequencing engine, Day plan, Now bar, best-now corner, brand line ---------- */
+/* the calligraphy lesson, applied as typographic craft: kerning and ligatures on, balanced
+   headings, no orphans in prose, tabular figures wherever numbers line up or tick */
+body{font-kerning:normal;font-feature-settings:"kern","liga";text-rendering:optimizeLegibility}
+h1,h2,.x-focus-name,.x-howto-essence,.card-head .title,.panel-head .title,.x-rule-k{text-wrap:balance}
+.why,.x-say-t,.x-msg-body,.x-rule-t,.x-vs-ev,.x-plan-why,.x-why-now,.x-best-why,.greeting{text-wrap:pretty}
+.mono,.x-when,.x-tile-num,.x-plan-time,.x-hour-time,.x-nowbar-t,.x-best-clock,.x-calc-big,.x-path-t{font-variant-numeric:tabular-nums}
+.val,.x-howto-label{hanging-punctuation:first}
+
+/* brand: descriptor and tagline beside the name */
+.brand-tagline{font-family:Fraunces,serif;font-weight:400;font-size:13px;line-height:1.382;color:var(--ink-2);max-width:377px;padding-left:21px;border-left:1px solid var(--line)}
+.brand-tagline .amp{font-size:16.5px;color:var(--signal);font-weight:300;margin:0 1px;line-height:1}
+@media (max-width: 1280px){.brand-tagline{display:none}}
+
+/* tab bar + Now bar */
+.tabs-wrap{display:flex;align-items:center;gap:13px;background:var(--surface);border-bottom:1px solid var(--line);padding-right:34px}
+.tabs-wrap .tabs{flex:1;min-width:0;border-bottom:none}
+.x-nowbar{display:inline-flex;align-items:center;gap:8px;flex:none;max-width:420px;padding:5px 8px 5px 13px;border:1px solid var(--line);border-radius:21px;background:var(--paper);font-family:inherit;font-size:11px;color:var(--ink-2);cursor:pointer;transition:background .15s,border-color .15s}
+.x-nowbar:hover{background:var(--paper-warm);border-color:var(--ink-4)}
+.x-nowbar-dot{width:8px;height:8px;border-radius:50%;background:var(--ink-4);flex:none}
+.x-nowbar.is-due .x-nowbar-dot{background:var(--green);box-shadow:0 0 0 0 #2d6e4766;animation:xPulse 1.597s ease-out infinite}
+.x-nowbar-call.is-due .x-nowbar-dot{background:var(--accent);box-shadow:0 0 0 0 #1f386466}
+.x-nowbar-k{text-transform:uppercase;letter-spacing:.1em;font-weight:600;color:var(--ink)}
+.x-nowbar-ch{padding:1px 8px;border-radius:8px;background:var(--accent-tint);color:var(--accent);text-transform:uppercase;letter-spacing:.06em;font-size:10px}
+.x-nowbar-text .x-nowbar-ch{background:var(--green-tint);color:#2d5c3f}
+.x-nowbar-email .x-nowbar-ch{background:#f4ece2;color:#6b4513}
+.x-nowbar-name{font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.x-nowbar-t{color:var(--ink-3);white-space:nowrap}
+.x-nowbar-go{font-size:16.5px;line-height:1;color:var(--ink-3);padding:0 3px}
+.x-nowbar.is-clear .x-nowbar-k{color:var(--green)}
+@keyframes xPulse{0%{box-shadow:0 0 0 0 #2d6e4766}70%{box-shadow:0 0 0 8px #2d6e4700}to{box-shadow:0 0 0 0 #2d6e4700}}
+
+/* first-run signifier: the one button to press pulses until the first outcome is logged */
+.x-first{position:relative}
+.x-start-btn.x-first{animation:xBreath 2.584s ease-in-out infinite}
+@keyframes xBreath{0%,to{box-shadow:0 0 0 0 #ffffff00}50%{box-shadow:0 0 0 5px #ffffff40}}
+
+/* today's sequence per person */
+.x-path{display:flex;flex-wrap:wrap;align-items:center;gap:3px 5px;margin-top:8px}
+.x-path-step{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--ink-3)}
+.x-path-arrow{color:var(--ink-4);margin-right:2px}
+.x-path-ch{padding:0 5px;border-radius:3px;border:1px solid var(--line);text-transform:uppercase;letter-spacing:.06em;line-height:16px}
+.x-path-call .x-path-ch{background:var(--accent-tint);color:var(--accent);border-color:#c9d3e3}
+.x-path-text .x-path-ch{background:var(--green-tint);color:#2d5c3f;border-color:#c5dcc9}
+.x-path-email .x-path-ch{background:#f4ece2;color:#6b4513;border-color:#e8dab8}
+.x-path-t{font-family:IBM Plex Mono,monospace}
+.x-path-step.is-cur .x-path-ch{box-shadow:0 0 0 2px var(--surface),0 0 0 3px currentColor}
+.x-path-step.is-done{opacity:.55}
+.x-path-step.is-off{opacity:.35;text-decoration:line-through}
+.x-when-due{background:var(--accent-tint);color:var(--accent);border-color:#c9d3e3}
+.x-why-now{margin:0 0 13px;padding:8px 13px;border-left:3px solid var(--accent);background:var(--accent-tint);font-size:11px;line-height:1.618;color:var(--ink-2)}
+.x-why-k{display:block;margin-bottom:2px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--accent)}
+
+/* Compose corner: the best channel for this hour */
+.x-draft-head{display:flex;justify-content:space-between;align-items:flex-start;gap:13px;flex-wrap:wrap}
+.x-best{flex:0 1 288px;min-width:0;padding:8px 13px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:5px;background:var(--surface)}
+.x-best-text{border-left-color:var(--green)}.x-best-email{border-left-color:#c99a6b}
+.x-best-top{display:flex;align-items:center;gap:8px}
+.x-best-k{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:600;color:var(--ink)}
+.x-best-clock{margin-left:auto;font-size:11px;color:var(--ink-3)}
+.x-best-why{margin-top:5px;font-size:11px;line-height:1.5;color:var(--ink-2)}
+.x-best-then{margin-top:3px;font-size:11px;color:var(--ink-3)}
+.x-best-switch{margin-top:5px;padding:0;border:none;background:none;font-family:inherit;font-size:11px;color:var(--accent);text-decoration:underline;cursor:pointer}
+
+/* Day plan */
+.x-clockbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.x-now-tag{margin-left:8px;padding:0 5px;border-radius:3px;background:var(--accent);color:#fff;font-size:9px;letter-spacing:.1em;vertical-align:1px}
+.x-hour.is-now .x-hour-head{background:var(--accent-tint)}
+.x-plan-row.is-due{background:#fffdf8}
+.x-plan-row.is-done{opacity:.55}
+.x-plan-row .x-row-line1 .x-chip{flex:none}
+.x-test .x-test-steps li:before{background:var(--green)}
+.x-calc{padding:0 21px 21px}
+.x-calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 13px}
+.x-calc-grid label{display:grid;gap:3px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:500}
+.x-num{width:100%;padding:5px 8px;border:1px solid var(--line);border-radius:3px;background:var(--surface);font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--ink)}
+.x-calc-power{margin-top:13px}
+.x-calc-out{margin-top:13px;padding:13px;border-radius:5px;background:var(--paper);border:1px solid var(--line-soft);display:grid;gap:5px;font-size:13px;line-height:1.5;color:var(--ink-2)}
+.x-calc-big{font-family:Fraunces,serif;font-size:21px;font-weight:500;color:var(--ink)}
+.x-calc-rel{font-size:11px;color:var(--ink-3)}
+.x-vs-shuffle{padding:3px 8px;font-size:11px}
+@media (pointer: coarse){.x-outs .btn,.x-act,.x-seg button,.x-nowbar{min-height:44px}.x-seg button{padding-top:8px;padding-bottom:8px}}
+@media (max-width: 820px){
+.tabs-wrap{position:sticky;top:0;z-index:20;padding-right:0;box-shadow:0 1px 0 var(--line)}
+.tabs-wrap .tabs{position:static;box-shadow:none}
+.x-nowbar{position:fixed;left:13px;right:13px;bottom:13px;z-index:60;max-width:none;justify-content:flex-start;padding:8px 13px;border-color:var(--ink-4);box-shadow:0 5px 21px #1a1a1a2e;background:var(--surface);font-size:13px}
+.x-nowbar-go{margin-left:auto}
+main{padding-bottom:89px}
+.x-draft-head .x-best{flex:1 1 100%}
+.x-clockbar{justify-content:flex-start}
+.x-clockbar .x-seg{flex-wrap:wrap}
+.x-calc-grid{grid-template-columns:1fr}
+}
+/* v8: engine "why now" line, Day plan */
+.x-refs{display:inline-flex;gap:3px;vertical-align:baseline}
+.x-ref{display:inline-block;padding:0 4px;border:1px solid var(--line);border-radius:3px;background:var(--surface);font-family:IBM Plex Mono,monospace;font-size:9px;line-height:14px;color:var(--ink-3);cursor:help}
+.x-chip{display:inline-block;padding:1px 8px;border-radius:8px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;border:1px solid var(--line);background:var(--surface);color:var(--ink-2)}
+.x-chip-call{background:var(--accent-tint);color:var(--accent);border-color:#c9d3e3}
+.x-chip-text{background:var(--green-tint);color:#2d5c3f;border-color:#c5dcc9}
+.x-chip-email{background:#f4ece2;color:#6b4513;border-color:#e8dab8}
+.x-plan .page-head .stamp{max-width:377px;text-align:right;text-transform:none;letter-spacing:.02em;font-family:Fraunces,serif;font-size:13px;color:var(--ink-2)}
+.x-plan-grid{display:grid;grid-template-columns:minmax(0,1.618fr) minmax(0,1fr);gap:21px;align-items:start}
+.x-plan-side{position:static}
+.x-hour{border-bottom:1px solid var(--line-soft)}
+.x-hour.is-empty .x-hour-head{opacity:.55}
+.x-hour-head{display:grid;grid-template-columns:89px minmax(0,1fr);gap:0 13px;padding:8px 21px;background:var(--paper)}
+.x-hour-time{grid-row:span 2;font-size:13px;color:var(--ink);font-weight:500;padding-top:1px}
+.x-hour-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:600;color:var(--ink-2)}
+.x-hour-why{font-size:11px;color:var(--ink-3)}
+.x-hour-now .x-hour-head{background:var(--green-tint)}
+.x-plan-row{display:grid;grid-template-columns:89px minmax(0,1fr);gap:0 13px;padding:13px 21px 13px 18px;border-top:1px solid var(--line-soft);border-left:3px solid transparent}
+.x-plan-time{font-size:13px;color:var(--ink-2);padding-top:2px}
+.x-plan-src{font-size:11px;color:var(--ink-3)}
+.x-plan-step{margin-top:3px;font-size:11px;color:var(--ink-2)}
+.x-plan-why{margin-top:3px;font-size:11px;line-height:1.618;color:var(--ink-3)}
+.x-rules{list-style:none;padding:13px 21px 21px;display:grid;gap:13px}
+.x-rules li{display:grid;gap:3px;padding-left:21px;position:relative;counter-increment:xr}
+.x-rules{counter-reset:xr}
+.x-rules li:before{content:counter(xr);position:absolute;left:0;top:2px;width:16px;height:16px;border-radius:50%;background:var(--accent);color:#fff;font-family:IBM Plex Mono,monospace;font-size:10px;line-height:16px;text-align:center}
+.x-test li:before{background:var(--green)}
+.x-rule-k{font-size:13px;font-weight:500;color:var(--ink)}
+.x-rule-t{font-size:13px;line-height:1.618;color:var(--ink-2)}
+.x-vs-body{padding:13px 21px 21px}
+.x-vs-head{display:grid;grid-template-columns:89px 1fr 1fr;gap:8px;padding-bottom:5px;border-bottom:1px solid var(--line-soft);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);font-weight:500}
+.x-vs-row{display:grid;grid-template-columns:89px 1fr 1fr;gap:3px 8px;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:13px}
+.x-vs-lever{font-weight:500;color:var(--ink);font-size:11px;line-height:1.5}
+.x-vs-guess{color:var(--ink-3)}
+.x-vs-hak{color:var(--ink);font-weight:500}
+.x-vs-ev{grid-column:1/-1;font-size:11px;line-height:1.618;color:var(--ink-3)}
+.x-vs-note{margin-top:13px;padding:8px 13px;border-left:3px solid var(--amber);background:var(--amber-tint);font-size:11px;line-height:1.618;color:var(--ink-2)}
+.x-source-list{list-style:none;padding:13px 21px 21px;display:grid;gap:8px}
+.x-source-list li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px;font-size:11px;line-height:1.618;color:var(--ink-2)}
+@media (max-width: 820px){
+.x-plan .page-head .stamp{max-width:none;text-align:left}
+.x-plan-grid{grid-template-columns:1fr}
+.x-hour-head,.x-plan-row{grid-template-columns:55px minmax(0,1fr);padding-left:13px;padding-right:13px}
+.x-vs-head,.x-vs-row{grid-template-columns:1fr 1fr}
+.x-vs-head span:first-child{display:none}
+.x-vs-lever{grid-column:1/-1}
+}
+
+.x-override{font-size:10px;color:var(--amber);border:1px dashed #e8c886;border-radius:3px;padding:0 5px}
+.x-rhythm-list{list-style:none;padding:8px 21px 13px;display:grid;gap:0}
+.x-rhythm-list li{display:grid;grid-template-columns:70px 1fr;gap:2px 8px;padding:8px 0;border-bottom:1px solid var(--line-soft)}
+.x-rhythm-list li:last-child{border-bottom:none}
+.x-rhythm-at{grid-row:span 2;font-size:11px;color:var(--ink-3);padding-top:2px}
+.x-rhythm-k{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:600;color:var(--ink-2)}
+.x-rhythm-t{font-size:13px;line-height:1.5;color:var(--ink-2);text-wrap:pretty}
+.x-rhythm-list li.is-now .x-rhythm-k{color:var(--accent)}
+.x-rhythm-list li.is-now .x-rhythm-at{color:var(--accent);font-weight:600}
+.x-rhythm-list li.is-past{opacity:.6}
+/* the words you say are the one thing read under pressure: bigger and a readable measure in focus mode */
+.x-do-big .x-say-t,.x-do-big .x-msg-body{font-size:16.5px;line-height:1.618;max-width:62ch}
+.x-do-big .x-msg-subject{font-size:16.5px}
