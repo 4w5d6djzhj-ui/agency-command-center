@@ -525,3 +525,75 @@ details.x-later[open]>summary::before{content:"▾ "}
 .x-comp-rec-ch{color:var(--green);font-size:11px;white-space:nowrap}
 .x-comp-rec-src{grid-column:1/-1;color:var(--ink-3);font-size:11px}
 .x-alone{display:inline-block;padding:1px 6px;border:1px dashed var(--amber);border-radius:3px;font-size:10px;color:#6b4513;white-space:nowrap}
+/* v10: a lean top. Fewer bands before the work; the day as a picture; the board as one slim row. */
+.topbar{padding:8px 34px}
+.brand-logo{height:28px}
+.brand-divider{height:28px}
+.brand-text .name{font-size:16px;line-height:12px}
+.brand-text .sub{font-size:10.5px}
+.brand-tagline{font-size:12.5px;max-width:340px}
+.notice-band{line-height:18px;font-size:9.5px}
+.x-top{display:flex;justify-content:space-between;align-items:flex-start;gap:21px;margin:0 0 13px}
+.x-top h1{font-family:Fraunces,serif;font-weight:500;font-size:24px;letter-spacing:-.015em;color:var(--ink);line-height:1.2;margin:0 0 8px}
+.x-top h1 span{color:var(--accent)}
+.x-top .x-status{margin:0}
+.x-top-right{display:flex;align-items:center;gap:13px;flex-wrap:wrap;justify-content:flex-end}
+.x-top .x-viewbar{margin:0}
+.x-strip{margin:0 0 13px;background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:5px 8px 0}
+.x-strip-cap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:3px 13px;font-size:11px;color:var(--ink-3);padding:3px 8px 8px}
+.x-strip-cap b{color:var(--ink);font-weight:600}
+.x-strip-key i{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px 0 10px;vertical-align:middle}
+.x-strip-key em{font-style:normal;color:var(--ink-4);margin-left:10px}
+.x-strip-dot{transition:fill .382s ease}
+.x-lean .x-board{margin-bottom:13px;grid-template-columns:minmax(0,1.618fr) auto minmax(0,1.236fr) auto}
+.x-lean .x-board-group{padding:5px 13px 8px}
+.x-lean .x-board-k{margin-bottom:3px}
+.x-lean .x-meter-v{font-size:16.5px}
+.x-lean .x-meter-track{height:5px;margin-top:3px}
+.x-lean .x-meter-sub{margin-top:3px}
+.x-lean .x-units-row{height:10px}
+.x-lean .x-units-row i{flex-basis:10px;height:10px}
+.x-lean .x-start{flex-direction:row;align-items:center;padding:8px 13px}
+.x-lean .x-start-btn{font-size:14px;padding:8px 16px;white-space:nowrap}
+.x-lean .x-start-sub{display:none}
+.x-lean .x-row:not(.is-open) .x-row-line2{display:none}
+.x-lean .x-row-main{padding:10px 21px 10px 18px}
+.x-lean .x-row-step{margin-top:1px}
+/* Compose: the pickers on one row above the draft, the draft wide, the why beside it */
+.x-compose-head{margin-bottom:13px}
+.x-compose-head h1{font-size:24px}
+.compose-layout>.panel:first-child .panel-head{display:none}
+.compose-layout>.panel:first-child .panel-body{display:flex;flex-wrap:wrap;gap:8px 21px;align-items:flex-start;padding:13px 21px}
+.compose-layout>.panel:first-child .control-group{margin:0}
+.compose-layout>.panel:first-child .control-group:first-child{flex:0 1 400px}
+.compose-layout .lead-select{width:100%;min-width:220px;font-size:13px!important;padding:6px 10px}
+.compose-layout .lead-summary{margin-top:5px}
+.compose-layout .segment{flex-direction:row;flex-wrap:wrap;gap:5px}
+.compose-layout .segment button{padding:5px 11px;border-radius:21px;font-size:12.5px;text-align:center}
+.compose-layout .segment button.active{box-shadow:none;background:var(--accent-tint);border-color:var(--accent)}
+.compose-layout .channel-toggle button{padding:5px 13px}
+.compose-layout .control-label{margin-bottom:5px}
+@media (min-width:821px){
+  .compose-layout{grid-template-columns:minmax(0,1.618fr) minmax(0,1fr);grid-template-areas:"build build" "draft why"}
+  .compose-layout>.panel:nth-child(1){grid-area:build}
+  .compose-layout>.panel:nth-child(2){grid-area:draft}
+  .compose-layout>.panel:nth-child(3){grid-area:why}
+}
+@media (max-width:820px){
+  .x-top{flex-direction:column;gap:8px}
+  .x-top-right{justify-content:flex-start}
+  .x-strip-cap{font-size:10.5px}
+  .x-lean .x-board{grid-template-columns:1fr}
+}
+
+.x-lean .x-meter-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:820px){
+  .topbar{padding:8px 13px;gap:5px}
+  .brand-text .sub{font-size:10px}
+  .office-chip{font-size:12px;padding:5px 8px}
+  .persona-switch{font-size:12px}
+  .persona-pill button{padding:3px 10px;font-size:12px}
+  .x-strip{padding:3px 3px 0}
+  .x-lean .x-board-group{padding:5px 10px 8px}
+}
+.x-strip-model{display:inline;margin:0;font-size:11px;color:var(--ink-3)}
