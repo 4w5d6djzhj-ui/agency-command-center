@@ -474,11 +474,11 @@ const XFRESH = (() => {
     return false;
   }
 })();
-const XS = { done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved(), seeded: false };
+const XS = { done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved(), seeded: false };
 const XSEED_CALLS = ["quoted", "talked", "noanswer", "talked", "quoted", "noanswer", "talked", "noanswer"];
 function xSeedUpTo(minutes, silent) {
   const apply = silent ? (patch) => Object.assign(XS, patch) : xSet;
-  const base = { chan: {}, asks: {}, help: {}, miss: {}, pro: {}, open: null, bump: {} };
+  const base = { chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, bump: {} };
   if (minutes == null) {
     apply({ ...base, done: {} });
     return;
@@ -503,7 +503,15 @@ function xSeedUpTo(minutes, silent) {
   }
   if (talkedLeads[0]) asks[talkedLeads[0]] = { life: true };
   if (talkedLeads[1]) asks[talkedLeads[1]] = { ref: true };
-  apply({ ...base, done, asks });
+  const cool = {};
+  if (typeof xOpenBlocks === "function" && typeof XCOOL !== "undefined") {
+    XS.done = done;
+    const blocks = xOpenBlocks(xBuildDay(XQ, minutes)).filter((g) => g[1] <= cutoff);
+    blocks.forEach((g, bi) => XCOOL.slice(bi * 2, bi * 2 + 2).forEach((l) => {
+      cool[l.id] = g[1] - 5;
+    }));
+  }
+  apply({ ...base, done, asks, cool });
 }
 function xStartOver() {
   xSet({ clock: 9 * 60, clockAt: Date.now() });
@@ -1381,6 +1389,119 @@ const XQ = [
     phone: "(555) 010-0170"
   }
 ];
+const XCOOL = [
+  {
+    id: "K01",
+    name: "Nina Lorem",
+    style: "asker",
+    source: "IL",
+    stage: "lead",
+    contacted: false,
+    phone: "(555) 010-0171",
+    consent: { sms: false, email: true, basis: "Quote form opt-in (email) \xB7 Sep 22" },
+    why: "Internet lead, day 31: six calls and five emails done, no answer. The 45-day burst is two weeks out.",
+    ch: "email",
+    say: "Nina, one line: the quote I sent still holds through next month. If the timing's wrong, reply 'later' and I'll check back in the spring."
+  },
+  {
+    id: "K02",
+    name: "Felix Ipsum",
+    style: "doer",
+    source: "QN",
+    stage: "proposed",
+    contacted: true,
+    phone: "(555) 010-0172",
+    consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Sep 12" },
+    proposed: 142,
+    why: "Quoted $142/mo in September; said 'after the move.' Forty days on, no decision.",
+    ch: "text",
+    say: "Hi Felix, it's {rep}. Did the move go through? Your auto quote is still {proposed}; two minutes to switch it on."
+  },
+  {
+    id: "K03",
+    name: "Ravi Blank",
+    style: "thinker",
+    source: "XD",
+    stage: "lead",
+    contacted: true,
+    phone: "(555) 010-0173",
+    consent: { sms: true, email: true, basis: "Written opt-in at the first call \xB7 Aug 30" },
+    why: "X-date December 20, 58 days out. The proposal goes at 45 days; a call now is early, but cheap.",
+    ch: "call",
+    say: "Ravi, it's {rep}. Quick one: your renewal is December 20. Want me to run the numbers early, so you have them before the notice lands?"
+  },
+  {
+    id: "K04",
+    name: "Clara Stencil",
+    style: "story",
+    source: "WB",
+    stage: "lapsed",
+    contacted: true,
+    phone: "(555) 010-0174",
+    consent: { sms: false, email: true, basis: "Former customer \xB7 email opt-in on file \xB7 Nov 2025" },
+    why: "Left eleven months ago over price. The anniversary is six weeks out; the win-back plan starts at three.",
+    ch: "email",
+    say: "Clara, no pitch: a year on, the discount you had is back on the table. One line back and I'll send the numbers."
+  },
+  {
+    id: "K05",
+    name: "Jonah Filler",
+    style: "doer",
+    source: "PI",
+    stage: "proposed",
+    contacted: true,
+    phone: "(555) 010-0175",
+    consent: { sms: false, email: true, basis: "Walk-in \xB7 email opt-in on the quote form \xB7 Sep 8" },
+    why: "Walked in for a quote in September; two emails since, no reply. Day 45.",
+    ch: "call",
+    say: "Jonah, it's {rep} from the office you stopped by. Still worth the switch? If not, say so and I'll close the file."
+  },
+  {
+    id: "K06",
+    name: "Aisha Scaffold",
+    style: "asker",
+    source: "RF",
+    stage: "lead",
+    contacted: false,
+    phone: "(555) 010-0176",
+    consent: { sms: false, email: true, basis: "Referral \xB7 email opt-in by reply \xB7 Oct 1" },
+    why: "Referred by Rosa Mockup; six calls, never reached. Day 23: the plan's last email went out yesterday.",
+    ch: "email",
+    say: "Aisha, Rosa Mockup asked me to look after you. I'll stop calling; here's the number in writing, and it holds."
+  },
+  {
+    id: "K07",
+    name: "Marco Proxy",
+    style: "story",
+    source: "RI",
+    stage: "bound",
+    contacted: true,
+    phone: "(555) 010-0177",
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Mar 2023" },
+    proposed: 131,
+    current: 155,
+    why: "Customer: the renewal goes up in 40 days and the notice lands next week. The plan's first call is at 35 days.",
+    ch: "call",
+    say: "Marco, heads up before the letter: your renewal goes up about $24. I've re-run it: same coverage, {proposed}. Ten minutes this week?"
+  },
+  {
+    id: "K08",
+    name: "Ivy Standin",
+    style: "thinker",
+    source: "CC",
+    stage: "bound",
+    contacted: true,
+    phone: "(555) 010-0178",
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Jul 2022" },
+    why: "Customer, auto only; no review in two years and the home is elsewhere.",
+    ch: "text",
+    say: "Hi Ivy, it's {rep}. Two years since we looked at your coverage together. Want a ten-minute review before the holidays? AM or PM?"
+  }
+];
+function xCoolChannel(l) {
+  const order = [l.ch, "call", "email", "text"];
+  return order.find((c) => xAllowed(c, l) && (c !== "text" || l.contacted)) || "email";
+}
 const XQ_GROUPS = [
   { k: "now", tag: "New lead", title: "Right now", rule: "New leads: call inside a minute, five at most. Referrals: today, naming who sent them." },
   { k: "booked", tag: "Booked", title: "Booked", rule: "They picked the time. Be early." },
@@ -1627,9 +1748,9 @@ function XStatusLine({ pr, next, now, onOpen }) {
   const open = Math.max(0, pr.dueNow - pr.doneNow);
   return /* @__PURE__ */ I.createElement("div", { className: "x-status", role: "status" }, /* @__PURE__ */ I.createElement("span", { className: `x-andon is-${st[0]}` }, /* @__PURE__ */ I.createElement("span", { "aria-hidden": "true" }, st[1]), st[2]), Object.keys(XS.help).length > 0 && /* @__PURE__ */ I.createElement("span", { className: "x-andon is-help" }, /* @__PURE__ */ I.createElement("span", { "aria-hidden": "true" }, "\u25CF"), Object.keys(XS.help).length, " help asked"), /* @__PURE__ */ I.createElement("span", { className: "x-status-t", title: "Late = more than 30 minutes past its time" }, pr.doneNow, " done \xB7 ", open, " due now \xB7 ", Math.max(0, pr.plan.length - pr.dueNow), " later today", pr.firstsDone ? ` \xB7 first calls inside 5 min: ${pr.fast} of ${pr.firstsDone}` : ""));
 }
-function XScoreboard({ pr, score, F, bump, onStart, fresh, pro }) {
+function XScoreboard({ pr, score, F, bump, onStart, fresh, pro, cool }) {
   const asks = xAsks(), wk = xWeek(score, F);
-  return /* @__PURE__ */ I.createElement("div", { className: "x-board" }, /* @__PURE__ */ I.createElement("div", { className: "x-board-group x-board-process" }, /* @__PURE__ */ I.createElement("div", { className: "x-board-k" }, "Process", /* @__PURE__ */ I.createElement("span", null, "what you control")), /* @__PURE__ */ I.createElement("div", { className: "x-board-row" }, /* @__PURE__ */ I.createElement(XMeter, { label: "Touches", v: pr.handled, of: pr.plan.length, tick: pr.dueNow, sub: `by now ${pr.dueNow}` }), /* @__PURE__ */ I.createElement(XMeter, { label: "Calls made", v: pr.callsDone, of: pr.calls }), /* @__PURE__ */ I.createElement(XMeter, { label: "Life talks", v: asks.life, of: 3 }), /* @__PURE__ */ I.createElement(XMeter, { label: "Referrals asked", v: asks.ref, of: 3 }), /* @__PURE__ */ I.createElement(XMeter, { label: "Proactive", v: pro.done, of: pro.total }))), /* @__PURE__ */ I.createElement("div", { className: "x-board-arrow", "aria-hidden": "true" }, "\u2192"), /* @__PURE__ */ I.createElement("div", { className: "x-board-group x-board-results" }, /* @__PURE__ */ I.createElement("div", { className: "x-board-k" }, "Results", /* @__PURE__ */ I.createElement("span", null, "they follow \xB7 apps and households week to date (demo history)")), /* @__PURE__ */ I.createElement("div", { className: "x-board-row" }, /* @__PURE__ */ I.createElement(XUnits, { label: "Quotes today", v: score.quotes, of: F.quoted, bump: bump.quotes }), /* @__PURE__ */ I.createElement(XMeter, { label: "Apps this week", v: wk.apps, of: wk.appsGoal, tick: wk.appsTick, sub: wk.prior ? `plan so far ${wk.appsTick}` : "week starts today" }), /* @__PURE__ */ I.createElement(XMeter, { label: "HH this week", v: wk.hh, of: wk.hhGoal, tick: wk.hhTick, sub: wk.prior ? `plan so far ${wk.hhTick}` : "week starts today" }))), /* @__PURE__ */ I.createElement("div", { className: "x-start" }, /* @__PURE__ */ I.createElement("button", { className: "x-start-btn" + (fresh ? " x-first" : ""), onClick: onStart }, fresh ? "Start the next 5 minutes" : "Next 5 minutes", " ", /* @__PURE__ */ I.createElement("span", { "aria-hidden": "true" }, "\u2192")), /* @__PURE__ */ I.createElement("div", { className: "x-start-sub" }, "One at a time, five minutes each; the next one opens by itself.")));
+  return /* @__PURE__ */ I.createElement("div", { className: "x-board" }, /* @__PURE__ */ I.createElement("div", { className: "x-board-group x-board-process" }, /* @__PURE__ */ I.createElement("div", { className: "x-board-k" }, "Process", /* @__PURE__ */ I.createElement("span", null, "what you control")), /* @__PURE__ */ I.createElement("div", { className: "x-board-row" }, /* @__PURE__ */ I.createElement(XMeter, { label: "Touches", v: pr.handled, of: pr.plan.length, tick: pr.dueNow, sub: `by now ${pr.dueNow}` }), /* @__PURE__ */ I.createElement(XMeter, { label: "Calls made", v: pr.callsDone, of: pr.calls }), /* @__PURE__ */ I.createElement(XMeter, { label: "Life talks", v: asks.life, of: 3 }), /* @__PURE__ */ I.createElement(XMeter, { label: "Referrals asked", v: asks.ref, of: 3 }), /* @__PURE__ */ I.createElement(XMeter, { label: "Proactive", v: pro.done, of: pro.total }), /* @__PURE__ */ I.createElement(XMeter, { label: "Cooler leads", v: cool.done, of: cool.total }))), /* @__PURE__ */ I.createElement("div", { className: "x-board-arrow", "aria-hidden": "true" }, "\u2192"), /* @__PURE__ */ I.createElement("div", { className: "x-board-group x-board-results" }, /* @__PURE__ */ I.createElement("div", { className: "x-board-k" }, "Results", /* @__PURE__ */ I.createElement("span", null, "they follow \xB7 apps and households week to date (demo history)")), /* @__PURE__ */ I.createElement("div", { className: "x-board-row" }, /* @__PURE__ */ I.createElement(XUnits, { label: "Quotes today", v: score.quotes, of: F.quoted, bump: bump.quotes }), /* @__PURE__ */ I.createElement(XMeter, { label: "Apps this week", v: wk.apps, of: wk.appsGoal, tick: wk.appsTick, sub: wk.prior ? `plan so far ${wk.appsTick}` : "week starts today" }), /* @__PURE__ */ I.createElement(XMeter, { label: "HH this week", v: wk.hh, of: wk.hhGoal, tick: wk.hhTick, sub: wk.prior ? `plan so far ${wk.hhTick}` : "week starts today" }))), /* @__PURE__ */ I.createElement("div", { className: "x-start" }, /* @__PURE__ */ I.createElement("button", { className: "x-start-btn" + (fresh ? " x-first" : ""), onClick: onStart }, fresh ? "Start the next 5 minutes" : "Next 5 minutes", " ", /* @__PURE__ */ I.createElement("span", { "aria-hidden": "true" }, "\u2192")), /* @__PURE__ */ I.createElement("div", { className: "x-start-sub" }, "One at a time, five minutes each; the next one opens by itself.")));
 }
 function xPeek(body, lead) {
   const first = xFirst(lead.name);
@@ -1730,7 +1851,7 @@ function XToday({ persona }) {
   const auto = mix.text + mix.email;
   const openLead = (id) => xSet({ open: id });
   const row = (v) => v.current.ch === "call" ? /* @__PURE__ */ I.createElement(XRow, { key: v.lead.id, v, now, isOpen: open === v.lead.id, persona, onToggle: (force) => xSet({ open: force === true ? v.lead.id : open === v.lead.id ? "" : v.lead.id }), onAct: (k) => xAct(v, k, order), onUndo: () => xUndo(v) }) : /* @__PURE__ */ I.createElement(XMsgRow, { key: v.lead.id, v, now, isOpen: open === v.lead.id, persona, onToggle: () => xSet({ open: open === v.lead.id ? "" : v.lead.id }), onAct: (k) => xAct(v, k, order), onUndo: () => xUndo(v) });
-  return /* @__PURE__ */ I.createElement("section", { className: "view active x-today x-lean" }, /* @__PURE__ */ I.createElement("div", { className: "x-top" }, /* @__PURE__ */ I.createElement("div", { className: "x-top-left" }, /* @__PURE__ */ I.createElement("h1", null, Gm(Math.floor(now / 60)), ", ", /* @__PURE__ */ I.createElement("span", null, persona), "."), /* @__PURE__ */ I.createElement(XStatusLine, { pr, next, now, onOpen: openLead })), /* @__PURE__ */ I.createElement("div", { className: "x-top-right" }, /* @__PURE__ */ I.createElement(XCompliance, { day }), /* @__PURE__ */ I.createElement(XViewBar, { view: s.view }))), /* @__PURE__ */ I.createElement(XDayStrip, { pr, now, mix, clock: s.clock }), /* @__PURE__ */ I.createElement(XScoreboard, { pr, score, F, bump: s.bump, onStart: start, fresh, pro: xProCount(day) }), /* @__PURE__ */ I.createElement("div", { className: "x-grid" }, /* @__PURE__ */ I.createElement("div", { className: "card x-queue" }, /* @__PURE__ */ I.createElement("div", { className: "card-head x-queue-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Today's ", XQ.length), /* @__PURE__ */ I.createElement("div", { className: "x-seg x-coach", role: "group", "aria-label": "Coaching" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Coaching"), [[true, "On"], [false, "Off"]].map(([v, l]) => /* @__PURE__ */ I.createElement("button", { key: l, className: s.coach === v ? "active" : "", "aria-pressed": s.coach === v, onClick: () => xSetCoach(v), title: v ? "Tips and the why on every touch: best for newer team members" : "Just the work: for experienced team members" }, l))), /* @__PURE__ */ I.createElement("span", { className: "count" }, handled.length, " handled \xB7 ", XQ.length - handled.length, " to go")), blocked.length > 0 && /* @__PURE__ */ I.createElement(XLane, { title: "Needs a decision", n: blocked.length, rule: "The system stopped these; each says why." }, blocked.map(row)), /* @__PURE__ */ I.createElement(XLane, { title: "Your calls", n: calls.length, rule: s.coach ? "Due now first, then by time. Your words are on each call." : null }, xFold(calls, now, row, open), !calls.length && /* @__PURE__ */ I.createElement("div", { className: "x-empty" }, "No calls left today.")), /* @__PURE__ */ I.createElement(
+  return /* @__PURE__ */ I.createElement("section", { className: "view active x-today x-lean" }, /* @__PURE__ */ I.createElement("div", { className: "x-top" }, /* @__PURE__ */ I.createElement("div", { className: "x-top-left" }, /* @__PURE__ */ I.createElement("h1", null, Gm(Math.floor(now / 60)), ", ", /* @__PURE__ */ I.createElement("span", null, persona), "."), /* @__PURE__ */ I.createElement(XStatusLine, { pr, next, now, onOpen: openLead })), /* @__PURE__ */ I.createElement("div", { className: "x-top-right" }, /* @__PURE__ */ I.createElement(XCompliance, { day }), /* @__PURE__ */ I.createElement(XViewBar, { view: s.view }))), /* @__PURE__ */ I.createElement(XDayStrip, { pr, now, mix, clock: s.clock }), /* @__PURE__ */ I.createElement(XScoreboard, { pr, score, F, bump: s.bump, onStart: start, fresh, pro: xProCount(day), cool: xCoolCount() }), /* @__PURE__ */ I.createElement("div", { className: "x-grid" }, /* @__PURE__ */ I.createElement("div", { className: "card x-queue" }, /* @__PURE__ */ I.createElement("div", { className: "card-head x-queue-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Today's ", XQ.length), /* @__PURE__ */ I.createElement("div", { className: "x-seg x-coach", role: "group", "aria-label": "Coaching" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Coaching"), [[true, "On"], [false, "Off"]].map(([v, l]) => /* @__PURE__ */ I.createElement("button", { key: l, className: s.coach === v ? "active" : "", "aria-pressed": s.coach === v, onClick: () => xSetCoach(v), title: v ? "Tips and the why on every touch: best for newer team members" : "Just the work: for experienced team members" }, l))), /* @__PURE__ */ I.createElement("span", { className: "count" }, handled.length, " handled \xB7 ", XQ.length - handled.length, " to go")), blocked.length > 0 && /* @__PURE__ */ I.createElement(XLane, { title: "Needs a decision", n: blocked.length, rule: "The system stopped these; each says why." }, blocked.map(row)), /* @__PURE__ */ I.createElement(XLane, { title: "Your calls", n: calls.length, rule: s.coach ? "Due now first, then by time. Your words are on each call." : null }, xFold(calls, now, row, open), !calls.length && /* @__PURE__ */ I.createElement("div", { className: "x-empty" }, "No calls left today.")), /* @__PURE__ */ I.createElement(
     XLane,
     {
       title: "Messages to check and send",
@@ -1982,6 +2103,9 @@ function xProCount(day) {
   const tasks = xProTasks(day);
   return { done: tasks.filter((t) => XS.pro[t.id]).length, total: tasks.length };
 }
+function xCoolCount() {
+  return { done: XCOOL.filter((l) => XS.cool[l.id]).length, total: XCOOL.length };
+}
 function XOpenTime({ day, now, coach }) {
   const s = useXS();
   const gaps = xOpenBlocks(day);
@@ -1998,7 +2122,17 @@ function XOpenTime({ day, now, coach }) {
     else pro[id] = xClock();
     return { pro };
   });
-  return /* @__PURE__ */ I.createElement("div", { className: "card x-open" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Open time \xB7 proactive"), /* @__PURE__ */ I.createElement("span", { className: "count" }, done, " of ", tasks.length)), /* @__PURE__ */ I.createElement("div", { className: "x-open-body" }, coach && /* @__PURE__ */ I.createElement("div", { className: "x-open-rule" }, "The hours with no call, text or email planned. Five minutes each, for tomorrow and the week; one tap when it's done."), byGap.map(({ g, tasks: ts }, i) => /* @__PURE__ */ I.createElement("div", { key: i, className: "x-open-block" + (now >= g[0] && now < g[1] ? " is-now" : now >= g[1] ? " is-past" : "") }, /* @__PURE__ */ I.createElement("div", { className: "x-open-when" }, /* @__PURE__ */ I.createElement("span", { className: "mono" }, xFmt(g[0]), "\u2013", xFmt(g[1])), /* @__PURE__ */ I.createElement("span", { className: "x-open-len" }, Math.round((g[1] - g[0]) / 5) * 5, " min open", now >= g[0] && now < g[1] ? " \xB7 now" : "")), /* @__PURE__ */ I.createElement("ul", { className: "x-open-list" }, ts.map((t) => /* @__PURE__ */ I.createElement("li", { key: t.id, className: s.pro[t.id] ? "is-done" : "" }, /* @__PURE__ */ I.createElement("button", { className: "x-open-check", "aria-pressed": !!s.pro[t.id], onClick: () => toggle(t.id), "aria-label": s.pro[t.id] ? `Done: ${t.k}` : `Mark done: ${t.k}` }, s.pro[t.id] ? "\u2713" : ""), /* @__PURE__ */ I.createElement("div", { className: "x-open-text" }, /* @__PURE__ */ I.createElement("div", { className: "x-open-k" }, t.k, " ", /* @__PURE__ */ I.createElement("span", { className: "x-mins" }, t.min, " min")), coach && !s.pro[t.id] && /* @__PURE__ */ I.createElement("div", { className: "x-open-t" }, t.t), s.pro[t.id] && /* @__PURE__ */ I.createElement("div", { className: "x-open-t" }, "Done ", xFmt(s.pro[t.id])))))))), !byGap.length && /* @__PURE__ */ I.createElement("div", { className: "x-empty" }, "No open time today: the plan fills the day.")));
+  const toggleCool = (id) => xSet((st) => {
+    const cool = { ...st.cool };
+    if (cool[id]) delete cool[id];
+    else cool[id] = xClock();
+    return { cool };
+  });
+  const coolDone = XCOOL.filter((l) => s.cool[l.id]).length;
+  return /* @__PURE__ */ I.createElement("div", { className: "card x-open" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Open time \xB7 proactive"), /* @__PURE__ */ I.createElement("span", { className: "count" }, done, " of ", tasks.length, " \xB7 ", coolDone, " of ", XCOOL.length, " leads")), /* @__PURE__ */ I.createElement("div", { className: "x-open-body" }, coach && /* @__PURE__ */ I.createElement("div", { className: "x-open-rule" }, "The hours with no call, text or email planned. Five minutes each, for tomorrow and the week; one tap when it's done."), byGap.map(({ g, tasks: ts }, i) => /* @__PURE__ */ I.createElement("div", { key: i, className: "x-open-block" + (now >= g[0] && now < g[1] ? " is-now" : now >= g[1] ? " is-past" : "") }, /* @__PURE__ */ I.createElement("div", { className: "x-open-when" }, /* @__PURE__ */ I.createElement("span", { className: "mono" }, xFmt(g[0]), "\u2013", xFmt(g[1])), /* @__PURE__ */ I.createElement("span", { className: "x-open-len" }, Math.round((g[1] - g[0]) / 5) * 5, " min open", now >= g[0] && now < g[1] ? " \xB7 now" : "")), /* @__PURE__ */ I.createElement("ul", { className: "x-open-list" }, ts.map((t) => /* @__PURE__ */ I.createElement("li", { key: t.id, className: s.pro[t.id] ? "is-done" : "" }, /* @__PURE__ */ I.createElement("button", { className: "x-open-check", "aria-pressed": !!s.pro[t.id], onClick: () => toggle(t.id), "aria-label": s.pro[t.id] ? `Done: ${t.k}` : `Mark done: ${t.k}` }, s.pro[t.id] ? "\u2713" : ""), /* @__PURE__ */ I.createElement("div", { className: "x-open-text" }, /* @__PURE__ */ I.createElement("div", { className: "x-open-k" }, t.k, " ", /* @__PURE__ */ I.createElement("span", { className: "x-mins" }, t.min, " min")), coach && !s.pro[t.id] && /* @__PURE__ */ I.createElement("div", { className: "x-open-t" }, t.t), s.pro[t.id] && /* @__PURE__ */ I.createElement("div", { className: "x-open-t" }, "Done ", xFmt(s.pro[t.id])))))))), !byGap.length && /* @__PURE__ */ I.createElement("div", { className: "x-empty" }, "No open time today: the plan fills the day."), /* @__PURE__ */ I.createElement("div", { className: "x-open-block x-cool" }, /* @__PURE__ */ I.createElement("div", { className: "x-open-when" }, /* @__PURE__ */ I.createElement("span", { className: "mono" }, "Any open minute"), /* @__PURE__ */ I.createElement("span", { className: "x-open-len" }, XCOOL.length, " cooler leads \xB7 not due today, still worth five minutes \xB7 ", coolDone, " done")), coach && /* @__PURE__ */ I.createElement("div", { className: "x-open-rule" }, "Not hot and not due by their plan: older internet leads, quotes with no decision, renewals weeks out. One suggested channel inside their consent, one opener, one tap when it's done. In any order."), /* @__PURE__ */ I.createElement("ul", { className: "x-open-list" }, XCOOL.map((l) => {
+    const ch = xCoolChannel(l), d = s.cool[l.id];
+    return /* @__PURE__ */ I.createElement("li", { key: l.id, className: d ? "is-done" : "" }, /* @__PURE__ */ I.createElement("button", { className: "x-open-check", "aria-pressed": !!d, onClick: () => toggleCool(l.id), "aria-label": d ? `Done: ${l.name}` : `Mark done: ${l.name}` }, d ? "\u2713" : ""), /* @__PURE__ */ I.createElement("div", { className: "x-open-text" }, /* @__PURE__ */ I.createElement("div", { className: "x-open-k" }, /* @__PURE__ */ I.createElement("span", { className: "x-cool-name" }, l.name), /* @__PURE__ */ I.createElement("span", { className: `style-pill ${l.style}` }, rf[l.style] ? rf[l.style].label : l.style), /* @__PURE__ */ I.createElement("span", { className: "x-tag" }, XSRC[l.source].label), /* @__PURE__ */ I.createElement("span", { className: `x-chip x-chip-${ch}` }, XCH[ch]), /* @__PURE__ */ I.createElement("span", { className: "x-mins" }, "5 min")), !d && /* @__PURE__ */ I.createElement("div", { className: "x-open-t" }, l.why, coach ? ` Say: "${xFillSay(l.say, l, XS.persona || "Alex")}"` : "", ch === "call" ? ` \xB7 ${l.phone}` : ""), d && /* @__PURE__ */ I.createElement("div", { className: "x-open-t" }, "Done ", xFmt(d))));
+  })))));
 }
 function XDayStrip({ pr, now, mix, clock }) {
   const [ref, W] = useBoxWidth(960);
@@ -2018,7 +2152,7 @@ function XDayStrip({ pr, now, mix, clock }) {
   return /* @__PURE__ */ I.createElement("div", { className: "x-strip", ref }, /* @__PURE__ */ I.createElement("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", height: H, role: "img", "aria-label": `${touches.length} touches planned today, ${pr.doneNow} done, ${pr.behind} late`, style: { display: "block" } }, /* @__PURE__ */ I.createElement("defs", null, /* @__PURE__ */ I.createElement("pattern", { id: "x-lunch-hatch", width: "6", height: "6", patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, /* @__PURE__ */ I.createElement("line", { x1: "0", y1: "0", x2: "0", y2: "6", stroke: "var(--line)", strokeWidth: "1.5" }))), /* @__PURE__ */ I.createElement("g", { className: "x-strip-lunch" }, /* @__PURE__ */ I.createElement("rect", { x: sx(XDAY.lunch[0]), y: top - 2, width: Math.max(0, sx(XDAY.lunch[1]) - sx(XDAY.lunch[0])), height: H - bottom - top + 2, fill: "url(#x-lunch-hatch)", rx: "3" }), sx(XDAY.lunch[1]) - sx(XDAY.lunch[0]) > 44 && /* @__PURE__ */ I.createElement("text", { x: (sx(XDAY.lunch[0]) + sx(XDAY.lunch[1])) / 2, y: top + 9, textAnchor: "middle", fontSize: "9.5", fill: "var(--ink-3)", fontFamily: "IBM Plex Mono, monospace", letterSpacing: ".06em" }, "LUNCH")), xOpenBlocks(pr.day || { touches: pr.plan }).map((g, i) => /* @__PURE__ */ I.createElement("g", { key: i, className: "x-strip-open" }, /* @__PURE__ */ I.createElement("rect", { x: sx(g[0]), y: top - 2, width: Math.max(0, sx(g[1]) - sx(g[0])), height: H - bottom - top + 2, fill: "var(--paper-warm)", rx: "3" }), sx(g[1]) - sx(g[0]) > 110 ? /* @__PURE__ */ I.createElement("text", { x: (sx(g[0]) + sx(g[1])) / 2, y: top + 9, textAnchor: "middle", fontSize: "9.5", fill: "var(--ink-3)", fontFamily: "IBM Plex Mono, monospace", letterSpacing: ".06em" }, "OPEN \xB7 5-MIN WORK") : sx(g[1]) - sx(g[0]) > 36 ? /* @__PURE__ */ I.createElement("text", { x: (sx(g[0]) + sx(g[1])) / 2, y: top + 9, textAnchor: "middle", fontSize: "9.5", fill: "var(--ink-3)", fontFamily: "IBM Plex Mono, monospace", letterSpacing: ".06em" }, "OPEN") : null)), /* @__PURE__ */ I.createElement("line", { x1: L, x2: W - R, y1: H - bottom, y2: H - bottom, stroke: "var(--line)" }), hours.map((h) => /* @__PURE__ */ I.createElement("g", { key: h }, /* @__PURE__ */ I.createElement("line", { x1: sx(h * 60), x2: sx(h * 60), y1: H - bottom - 3, y2: H - bottom + 3, stroke: "var(--ink-4)" }), /* @__PURE__ */ I.createElement("text", { x: sx(h * 60), y: H - 5, textAnchor: h === hours[0] ? "start" : h === hours[hours.length - 1] ? "end" : "middle", fontSize: "10", fill: "var(--ink-3)", fontFamily: "IBM Plex Mono, monospace" }, (h > 12 ? h - 12 : h) + (h >= 12 ? " PM" : " AM")))), dots.map(({ t, i }) => {
     const d = XS.done[t.id], late = !d && t.slot <= now - 30, c = XCOL[t.ch];
     return /* @__PURE__ */ I.createElement("circle", { key: t.id, cx: sx(t.slot), cy: y(i), r: 5, fill: d ? c : "var(--surface)", stroke: late ? "var(--signal)" : c, strokeWidth: late ? 2 : 1.5, className: "x-strip-dot" + (d ? " is-done" : late ? " is-late" : "") }, /* @__PURE__ */ I.createElement("title", null, `${xFmt(t.slot)} \xB7 ${XCH[t.ch]} \xB7 ${t.lead.name}${d ? " \xB7 done" : late ? " \xB7 late" : ""}`));
-  }), inDay && /* @__PURE__ */ I.createElement("g", { className: "x-strip-now" }, /* @__PURE__ */ I.createElement("line", { x1: sx(now), x2: sx(now), y1: top - 6, y2: H - bottom, stroke: "var(--signal)", strokeWidth: "1.5" }), /* @__PURE__ */ I.createElement("text", { x: sx(now), y: top - 8 + 4, textAnchor: "middle", fontSize: "9.5", fontWeight: "600", fill: "var(--signal)", fontFamily: "IBM Plex Mono, monospace", letterSpacing: ".08em" }, "NOW"))), /* @__PURE__ */ I.createElement("div", { className: "x-strip-cap" }, /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("b", null, touches.length), " touches today \xB7 ", mix.call, " calls \xB7 ", mix.text + mix.email, " messages drafted for you", clock != null ? ` \xB7 demo clock ${xFmt(now)}` : "", " \xB7 ", /* @__PURE__ */ I.createElement("span", { className: "greeting x-strip-model", title: "The day's model: 20 prospects, 7 quotes, 4 applications, 2 households protected" }, `${Ef.funnel.leads} prospects \xB7 ${Ef.funnel.quoted} quotes \xB7 ${Ef.funnel.apps} apps / ${Ef.funnel.households} HH protected`)), /* @__PURE__ */ I.createElement("span", { className: "x-strip-key" }, /* @__PURE__ */ I.createElement("i", { style: { background: XCOL.call } }), "call ", /* @__PURE__ */ I.createElement("i", { style: { background: XCOL.email } }), "email ", /* @__PURE__ */ I.createElement("i", { style: { background: XCOL.text } }), "text ", /* @__PURE__ */ I.createElement("em", null, "filled = done \xB7 red ring = late"))));
+  }), inDay && /* @__PURE__ */ I.createElement("g", { className: "x-strip-now" }, /* @__PURE__ */ I.createElement("line", { x1: sx(now), x2: sx(now), y1: top - 6, y2: H - bottom, stroke: "var(--signal)", strokeWidth: "1.5" }), /* @__PURE__ */ I.createElement("text", { x: sx(now), y: top - 8 + 4, textAnchor: "middle", fontSize: "9.5", fontWeight: "600", fill: "var(--signal)", fontFamily: "IBM Plex Mono, monospace", letterSpacing: ".08em" }, "NOW"))), /* @__PURE__ */ I.createElement("div", { className: "x-strip-cap" }, /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("b", null, touches.length), " touches today \xB7 ", mix.call, " calls \xB7 ", mix.text + mix.email, " messages drafted for you \xB7 ", XCOOL.length, " cooler leads for open time", clock != null ? ` \xB7 demo clock ${xFmt(now)}` : "", " \xB7 ", /* @__PURE__ */ I.createElement("span", { className: "greeting x-strip-model", title: "The day's model: 20 prospects, 7 quotes, 4 applications, 2 households protected" }, `${Ef.funnel.leads} prospects \xB7 ${Ef.funnel.quoted} quotes \xB7 ${Ef.funnel.apps} apps / ${Ef.funnel.households} HH protected`)), /* @__PURE__ */ I.createElement("span", { className: "x-strip-key" }, /* @__PURE__ */ I.createElement("i", { style: { background: XCOL.call } }), "call ", /* @__PURE__ */ I.createElement("i", { style: { background: XCOL.email } }), "email ", /* @__PURE__ */ I.createElement("i", { style: { background: XCOL.text } }), "text ", /* @__PURE__ */ I.createElement("em", null, "filled = done \xB7 red ring = late"))));
 }
 const XTAGLINE = "An agent's experience and judgment, at every team member's fingertips.";
 const XRULES = [];

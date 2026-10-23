@@ -624,3 +624,10 @@ details.x-later[open]>summary::before{content:"▾ "}
 .x-open-list li.is-done .x-open-k{color:var(--ink-3);text-decoration:line-through}
 .x-open-t{font-size:11.5px;color:var(--ink-3);line-height:1.45;margin-top:1px}
 @media (pointer:coarse){.x-open-check{width:28px;height:28px}}
+
+/* v12: cooler leads in the open-time card */
+.x-open-block.x-cool{margin-top:5px;border-top:1px solid var(--line)}
+.x-open-block.x-cool .x-open-when{flex-wrap:wrap}
+.x-cool-name{font-weight:500}
+.x-open-k .style-pill{font-size:10px;padding:0 6px;line-height:16px}
+.x-open-k .x-chip{padding:0 6px;line-height:16px}
