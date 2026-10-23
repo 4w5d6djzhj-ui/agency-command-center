@@ -598,3 +598,29 @@ details.x-later[open]>summary::before{content:"▾ "}
 }
 .x-strip-model{display:inline;margin:0;font-size:11px;color:var(--ink-3)}
 .x-comp-rec-ch.is-stop{color:var(--signal)}
+/* v11: the five-minute day, open time, the seeded morning */
+.x-mins{display:inline-block;padding:1px 6px;border-radius:21px;background:var(--accent-tint);color:var(--accent);font-size:10px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.x-timer{margin-left:auto;display:inline-flex;align-items:baseline;gap:3px;font-size:13px;color:var(--ink-2)}
+.x-timer .mono{font-size:14px;font-weight:600;color:var(--accent)}
+.x-timer small{font-size:10px;color:var(--ink-3)}
+.x-timer.is-over .mono{color:var(--amber)}
+.x-do-bar{align-items:center}
+.x-open .card-head .count{font-family:IBM Plex Mono,monospace}
+.x-open-body{padding:8px 21px 13px}
+.x-open-rule{font-size:12px;color:var(--ink-3);margin:5px 0 8px;line-height:1.5}
+.x-open-block{padding:8px 0;border-top:1px solid var(--line-soft)}
+.x-open-block:first-of-type{border-top:none}
+.x-open-block.is-now .x-open-when{color:var(--signal)}
+.x-open-block.is-past{opacity:.72}
+.x-open-when{display:flex;align-items:baseline;gap:8px;font-size:11px;color:var(--ink-2);margin-bottom:5px}
+.x-open-when .mono{font-weight:600}
+.x-open-len{color:var(--ink-3)}
+.x-open-list{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.x-open-list li{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start}
+.x-open-check{width:24px;height:24px;border-radius:5px;border:1.5px solid var(--ink-4);background:var(--surface);cursor:pointer;font-size:13px;color:#fff;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .233s}
+.x-open-check:hover{border-color:var(--accent)}
+.x-open-list li.is-done .x-open-check{background:var(--green);border-color:var(--green)}
+.x-open-k{font-size:13px;color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.x-open-list li.is-done .x-open-k{color:var(--ink-3);text-decoration:line-through}
+.x-open-t{font-size:11.5px;color:var(--ink-3);line-height:1.45;margin-top:1px}
+@media (pointer:coarse){.x-open-check{width:28px;height:28px}}
