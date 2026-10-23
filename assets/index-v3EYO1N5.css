@@ -631,3 +631,15 @@ details.x-later[open]>summary::before{content:"▾ "}
 .x-cool-name{font-weight:500}
 .x-open-k .style-pill{font-size:10px;padding:0 6px;line-height:16px}
 .x-open-k .x-chip{padding:0 6px;line-height:16px}
+
+/* v12.2: lanes by channel, cooler leads folded into each */
+.x-lane-group{border-top:1px solid var(--line)}
+.x-lane-group > .x-group-head-msgs{padding:10px 21px 4px}
+.x-lane.is-sub{border-top:1px dashed var(--line-soft)}
+.x-lane.is-sub .x-group-head{padding-top:6px;padding-bottom:2px}
+.x-lane.is-sub .x-group-title{font-size:11px;letter-spacing:.1em;color:var(--ink-2)}
+.x-later.x-cool{margin-top:4px}
+.x-later.x-cool > summary{color:var(--ink-3)}
+.x-later.x-cool .x-open-list{padding:4px 21px 8px}
+.x-later.x-cool .x-open-rule{padding:0 21px}
+.x-lane-group > .x-group-head-msgs .x-group-title{white-space:nowrap}
