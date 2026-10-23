@@ -637,6 +637,10 @@ function xPickChannel(step, lead, contactedSoFar) {
     allowed = allowed.filter((c) => c !== "text");
     return { ch: st.pref.find((c) => allowed.includes(c)) || allowed[0], blocked: false, reason: XSTYLE.noTextFirst };
   }
+  if (lead.consent && lead.consent.stop && step.ch.includes("text") && !allowed.includes("text")) {
+    const pick2 = st.pref.find((c) => allowed.includes(c)) || allowed[0];
+    return { ch: pick2, blocked: false, reason: `They texted STOP at ${lead.consent.stop}; texts are off, so this goes by ${pick2}` };
+  }
   if (allowed.length === 1) return { ch: allowed[0], blocked: false, reason: step.ch.length > 1 ? "The one channel this step allows that they have okayed" : null };
   const pick = st.pref.find((c) => allowed.includes(c)) || allowed[0];
   return { ch: pick, blocked: false, reason: st.why ? st.why[pick] : null };
@@ -1320,8 +1324,8 @@ const XQ = [
     scenario: "xdate",
     stage: "quoted",
     reason: "Auto renews in 11 days",
-    meta: ["Quoted in May"],
-    consent: { sms: true, email: true, basis: "Quote form opt-in \xB7 May 6" },
+    meta: ["Quoted in May", "Texted STOP 7:42 AM"],
+    consent: { sms: false, email: true, stop: "7:42 AM", basis: "Replied STOP at 7:42 AM today: texts suppressed in 4 seconds \xB7 email opt-in on file (quote form, May 6)" },
     lines: 1,
     proposed: 139,
     phone: "(555) 010-0170"
@@ -1687,7 +1691,8 @@ function XToday({ persona }) {
 const XCOMP_SCRUB = 7 * 60 + 55;
 function xCompliance(day) {
   const n = XQ.length;
-  const consented = XQ.filter((l) => l.consent && l.consent.sms && l.consent.email).length;
+  const smsOk = XQ.filter((l) => l.consent && l.consent.sms).length, emailOk = XQ.filter((l) => l.consent && l.consent.email).length;
+  const stops = XQ.filter((l) => l.consent && l.consent.stop);
   const msgs = day.touches.filter((t) => t.ch !== "call");
   const msgOk = msgs.every((t) => xAllowed(t.ch, t.lead));
   const live = day.touches.filter((t) => t.ch !== "email" && !t.tomorrow && !XS.done[t.id]);
@@ -1697,10 +1702,10 @@ function xCompliance(day) {
   const sends = recs.filter((d) => d.k === "sent" || d.k === "scheduled");
   const signed = sends.filter((d) => d.by).length;
   return [
-    { k: "Consent on file", ok: consented === n && msgOk, how: "System", t: `${consented} of ${n} people, written or e-signed, for text and email, each with its source and date`, ref: "T7" },
+    { k: "Consent on file", ok: msgOk, how: "System", t: `Written or e-signed, each with its source and date: ${emailOk} of ${n} for email, ${smsOk} of ${n} for text${stops.length ? ` (${stops.length} texted STOP today, so texts are off for ${stops.length === 1 ? "her" : "them"})` : ""}`, ref: "T7" },
     { k: "Calling hours", ok: hoursOk, how: "System", t: "Calls and texts only 8 am\u20138 pm their time; after 8 pm they wait for the morning", ref: "T7" },
     { k: "Do Not Call", ok: dnc === 0, how: `System \xB7 ${xFmt(XCOMP_SCRUB)}`, t: `National and agency lists checked: ${dnc === 0 ? "no matches" : `${dnc} match${dnc === 1 ? "" : "es"}, held back`}`, ref: "T7" },
-    { k: "Opt-out and disclosures", ok: true, how: "System", t: "Opt-out line on every text, and STOP takes effect at once (the federal limit is 10 business days); license line, postal address and unsubscribe on every email", ref: "T37" },
+    { k: "Opt-out and disclosures", ok: true, how: stops.length ? `System \xB7 ${stops[0].consent.stop}` : "System", t: `Opt-out line on every text, and STOP takes effect at once${stops.length ? `: ${stops.length} received today at ${stops[0].consent.stop}, texts suppressed in 4 seconds, the next touch moved to email or a call` : ""} (the federal limit is 10 business days); license line, postal address and unsubscribe on every email`, ref: "T37" },
     { k: "Approvals on record", ok: signed === sends.length, how: "Each send", t: sends.length ? `${signed} of ${sends.length} sends today show who approved them and when` : "Every send will show who approved it and when; opening a message is not approving it", ref: "T37" }
   ];
 }
@@ -1708,7 +1713,7 @@ function XCompliance({ day }) {
   useXS();
   const checks = xCompliance(day);
   const pass = checks.filter((c) => c.ok).length, all = checks.length, ok = pass === all;
-  return /* @__PURE__ */ I.createElement("details", { className: "x-comp" + (ok ? " is-ok" : " is-warn") }, /* @__PURE__ */ I.createElement("summary", { "aria-label": `Compliance check: ${pass} of ${all} passed. Show the checks.` }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-icon", "aria-hidden": "true" }, ok ? "\u2713" : "!"), /* @__PURE__ */ I.createElement("span", { className: "x-comp-text" }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-k" }, "Compliance check"), /* @__PURE__ */ I.createElement("span", { className: "x-comp-n" }, ok ? "All clear" : `${all - pass} to fix`, " \xB7 ", pass, " of ", all, " passed"))), /* @__PURE__ */ I.createElement("div", { className: "x-comp-body" }, /* @__PURE__ */ I.createElement("div", { className: "x-comp-head" }, "Checked by the system before every touch, not ticked by hand \xB7 last run ", xFmt(xClock())), /* @__PURE__ */ I.createElement("ul", null, checks.map((c) => /* @__PURE__ */ I.createElement("li", { key: c.k, className: c.ok ? "ok" : "warn" }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-mark", "aria-hidden": "true" }, c.ok ? "\u2713" : "!"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("b", null, c.k, "."), " ", c.t, ". ", /* @__PURE__ */ I.createElement("span", { className: "x-comp-how" }, c.how), " ", c.ref && /* @__PURE__ */ I.createElement(XRefs, { ids: [c.ref] }))))), /* @__PURE__ */ I.createElement("details", { className: "x-comp-recs" }, /* @__PURE__ */ I.createElement("summary", null, "See the ", XQ.length, " consent records"), /* @__PURE__ */ I.createElement("ul", null, XQ.map((l) => /* @__PURE__ */ I.createElement("li", { key: l.id }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-rec-name" }, l.name), /* @__PURE__ */ I.createElement("span", { className: "x-comp-rec-ch" }, l.consent.sms ? "\u2713 Text" : "\u2715 Text", " \xB7 ", l.consent.email ? "\u2713 Email" : "\u2715 Email"), /* @__PURE__ */ I.createElement("span", { className: "x-comp-rec-src" }, l.consent.basis))))), /* @__PURE__ */ I.createElement("div", { className: "x-comp-foot" }, "In the live version these come from the phone, email and consent records. Demo people only.")));
+  return /* @__PURE__ */ I.createElement("details", { className: "x-comp" + (ok ? " is-ok" : " is-warn") }, /* @__PURE__ */ I.createElement("summary", { "aria-label": `Compliance check: ${pass} of ${all} passed. Show the checks.` }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-icon", "aria-hidden": "true" }, ok ? "\u2713" : "!"), /* @__PURE__ */ I.createElement("span", { className: "x-comp-text" }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-k" }, "Compliance check"), /* @__PURE__ */ I.createElement("span", { className: "x-comp-n" }, ok ? "All clear" : `${all - pass} to fix`, " \xB7 ", pass, " of ", all, " passed"))), /* @__PURE__ */ I.createElement("div", { className: "x-comp-body" }, /* @__PURE__ */ I.createElement("div", { className: "x-comp-head" }, "Checked by the system before every touch, not ticked by hand \xB7 last run ", xFmt(xClock())), /* @__PURE__ */ I.createElement("ul", null, checks.map((c) => /* @__PURE__ */ I.createElement("li", { key: c.k, className: c.ok ? "ok" : "warn" }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-mark", "aria-hidden": "true" }, c.ok ? "\u2713" : "!"), /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("b", null, c.k, "."), " ", c.t, ". ", /* @__PURE__ */ I.createElement("span", { className: "x-comp-how" }, c.how), " ", c.ref && /* @__PURE__ */ I.createElement(XRefs, { ids: [c.ref] }))))), /* @__PURE__ */ I.createElement("details", { className: "x-comp-recs" }, /* @__PURE__ */ I.createElement("summary", null, "See the ", XQ.length, " consent records"), /* @__PURE__ */ I.createElement("ul", null, XQ.map((l) => /* @__PURE__ */ I.createElement("li", { key: l.id }, /* @__PURE__ */ I.createElement("span", { className: "x-comp-rec-name" }, l.name), /* @__PURE__ */ I.createElement("span", { className: "x-comp-rec-ch" + (l.consent.stop ? " is-stop" : "") }, l.consent.sms ? "\u2713 Text" : l.consent.stop ? `\u2715 Text (STOP ${l.consent.stop})` : "\u2715 Text", " \xB7 ", l.consent.email ? "\u2713 Email" : "\u2715 Email"), /* @__PURE__ */ I.createElement("span", { className: "x-comp-rec-src" }, l.consent.basis))))), /* @__PURE__ */ I.createElement("div", { className: "x-comp-foot" }, "In the live version these come from the phone, email and consent records. Demo people only.")));
 }
 const XCOL = { call: "#2a78d6", email: "#c8790f", text: "#1baf7a", plan: "#C9D3E3", done: "#1F3864", grid: "#ECE8DE", axis: "#C3C2B7", now: "#8C2F39" };
 function xProgress(day, now) {

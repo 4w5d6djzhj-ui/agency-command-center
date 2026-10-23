@@ -597,3 +597,4 @@ details.x-later[open]>summary::before{content:"▾ "}
   .x-lean .x-board-group{padding:5px 10px 8px}
 }
 .x-strip-model{display:inline;margin:0;font-size:11px;color:var(--ink-3)}
+.x-comp-rec-ch.is-stop{color:var(--signal)}
