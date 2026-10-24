@@ -474,7 +474,7 @@ const XFRESH = (() => {
     return false;
   }
 })();
-const XS = { state: "WA", done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved(), seeded: false };
+const XS = { state: "US", done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved(), seeded: false };
 const XSEED_CALLS = ["quoted", "talked", "noanswer", "talked", "quoted", "noanswer", "talked", "noanswer"];
 function xSeedUpTo(minutes, silent) {
   const apply = silent ? (patch) => Object.assign(XS, patch) : xSet;
@@ -569,6 +569,7 @@ function xParseAt(s) {
 }
 const XREF = {};
 const XSTATE = {
+  US: { label: "Most states", hours: [8 * 60, 20 * 60], textConsent: "prior express written consent for marketing texts", cap: null, note: "The federal TCPA floor most states follow: 8 am\u20138 pm their time, written consent before marketing texts, the Do Not Call list honored. State overlays are a setting, never a change to the plan" },
   WA: { label: "Washington", hours: [8 * 60, 20 * 60], textConsent: "clear, affirmative consent in advance; a quote request is not consent", cap: null, note: "$100 statutory damages per unsolicited commercial text (RCW 19.190, ESHB 2274, from June 11, 2026)" },
   MD: { label: "Maryland", hours: [8 * 60, 20 * 60], textConsent: "prior express written consent", cap: 3, note: "Md. Code Com. Law \xA7 14-3201 et seq., in force since Jan 1, 2024" },
   FL: { label: "Florida", hours: [8 * 60, 20 * 60], textConsent: "written consent, a signature or checkbox", cap: 3, note: "FTSA as amended May 2023; a 15-day cure notice precedes any text suit" },
@@ -2522,14 +2523,14 @@ Object.assign(XSTYLE, {
     short: "Thinkers: something to reread, no pressure",
     why: { email: "Thinker: a side-by-side by email to reread (style rule)", text: "Thinker: a short text, no pressure (style rule)", call: "Thinker: a calm call, no hype (style rule)" }
   },
-  noTextFirst: "No text before the first conversation: Washington needs their OK in advance, and a text alone did worse than a letter in a randomized trial"
+  noTextFirst: "No text before the first conversation: most states need their written OK in advance, and a text alone did worse than a letter in a randomized trial"
 });
 XRULES.push(...[
   { k: "1\u201320\u201360, then 6-5-3 in 22", t: "A new internet lead: call inside a minute (five at most), email the quote at 20 minutes, call again at 30\u201360 minutes and once more by two hours. Then six calls and five emails over about 22 days, and at most three texts, only after they've talked to you and okayed texts. Then a short burst again at about 45 days. A default built from the largest lead datasets, not a proven formula; the test below is how it gets proven.", ref: ["T1", "T2", "T3", "T15"] },
   { k: "Lead type starts the clock", t: "Referral: same day, naming who sent them, the same six calls and five emails. X-date: 60 and 45 days out, then through the 30 days after the renewal notice. Rate increase: before the notice lands. Life event: within days, three touches. Win-back: three weeks before the anniversary, then the quote. Quoted, no decision: within 24 hours, then at three and six months.", ref: ["T6", "T12", "T13"] },
   { k: "Style changes the words, never the pace", t: "All four styles get the same cadence. Style changes the words, the length, the ask, and which channel carries the substance: a side-by-side email for a Thinker, logistics by text for a Doer once texts are okayed, voice first for a Storyteller, the numbers in writing for a Questioner. A wrong style guess about halves the response, so the style is set on a clear signal: what they said, how and how fast they reply.", ref: ["T11"] },
   { k: "Speed, then persistence, then the hour", t: "The best and worst hours differ by about 2.6 contact points; the full six-call sequence is worth about +110%. So the hour is set last and never delays a first call. Later touches fit a 9-to-5 day: emails at 9, calls and texts 10 to noon, lunch off, texts and emails 1\u20133, calls 3\u20135. The evidence's 4\u20136 pm calling window is traded for a day that ends at 5; a new lead still gets its first call inside a minute, lunch or not.", ref: ["T4", "T5", "T8", "T9"] },
-  { k: "Consent and the law set the walls", t: "Washington: no commercial text without their clear OK in advance, and asking for a quote is not that OK; $100 a text. Texts only after the first conversation. Calls and texts 8 am\u20138 pm their time; after 8 pm they wait for the morning. A Do Not Call number is not called.", ref: ["T7", "T10"] },
+  { k: "Consent and the law set the walls", t: "Most states: written consent before any marketing text, and asking for a quote is not that consent; calls and texts 8 am\u20138 pm their time; a Do Not Call number is not called. Texts only after the first conversation. State overlays (Washington's $100 a text, the three-calls-a-day cap in Maryland, Florida and Oklahoma) are settings on top; the plan is built for the majority and never bent to one state.", ref: ["T7", "T10"] },
   { k: "Two voicemails at most", t: "None on the first call to a new lead. About 15 seconds on the second; one more, under 30 seconds, on a later call. Customers can always get one.", ref: ["T14"] },
   { k: "Priority sets the order", t: "New leads inside their first five minutes (freshest first), then booked calls, then X-dates within three days, then today's referrals, then the day's due steps, then renewals and win-backs. The queue is this order; the Now bar is its first line.", ref: ["T1", "T12"] }
 ]);
@@ -2545,7 +2546,7 @@ XHOURS.push(...[
   { h: 16, label: "Calls until 5", why: XWIN.reach.why, ref: "T5" },
   { h: 17, label: "Wrap-up: one line on what worked", why: "The plan ends at 5; a few minutes of reflection improved later performance", ref: "T34" },
   { h: 18, label: "Evening: nothing planned", why: "Calls and texts are legal until 8 pm; the plan keeps them inside the day", ref: "T7" },
-  { h: 19, label: "Last legal hour for calls and texts", why: "Washington: calls 8 am\u20138 pm their time", ref: "T7" },
+  { h: 19, label: "Last legal hour for calls and texts", why: "Most states: calls and texts 8 am\u20138 pm their time", ref: "T7" },
   { h: 20, label: "After 8 pm: email only", why: "Calls and texts wait for 8 am; email can still go out", ref: "T7" }
 ]);
 XTEST.push(...[

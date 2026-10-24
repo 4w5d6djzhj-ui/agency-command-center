@@ -7,7 +7,7 @@
 // coaching on (tips and the why on every touch) helps newer team members; experienced ones can turn it off
 function xCoachSaved() { try { const v = window.localStorage.getItem("acc.coach"); return v == null ? true : v === "1"; } catch (e) { return true; } }
 const XFRESH = (() => { try { return /[?&]fresh=1/.test(window.location.search); } catch (e) { return false; } })();
-const XS = { state: "WA", done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved(), seeded: false };
+const XS = { state: "US", done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved(), seeded: false };
 // The demo opens mid-morning with the morning's work already logged, so the board shows progress, not zeros.
 // Everything before (clock − 30 min) is marked done: messages sent, calls in a steady pattern of outcomes.
 const XSEED_CALLS = ["quoted", "talked", "noanswer", "talked", "quoted", "noanswer", "talked", "noanswer"];
@@ -72,6 +72,7 @@ const XREF = {};
 // Rules by state: the federal TCPA floor plus the state overlay the agency sits in. The engine reads hours,
 // the text-consent rule and any attempt cap from here, so a second state is a row, not a rebuild.
 const XSTATE = {
+  US: { label: "Most states", hours: [8 * 60, 20 * 60], textConsent: "prior express written consent for marketing texts", cap: null, note: "The federal TCPA floor most states follow: 8 am\u20138 pm their time, written consent before marketing texts, the Do Not Call list honored. State overlays are a setting, never a change to the plan" },
   WA: { label: "Washington", hours: [8 * 60, 20 * 60], textConsent: "clear, affirmative consent in advance; a quote request is not consent", cap: null, note: "$100 statutory damages per unsolicited commercial text (RCW 19.190, ESHB 2274, from June 11, 2026)" },
   MD: { label: "Maryland", hours: [8 * 60, 20 * 60], textConsent: "prior express written consent", cap: 3, note: "Md. Code Com. Law \u00a7 14-3201 et seq., in force since Jan 1, 2024" },
   FL: { label: "Florida", hours: [8 * 60, 20 * 60], textConsent: "written consent, a signature or checkbox", cap: 3, note: "FTSA as amended May 2023; a 15-day cure notice precedes any text suit" },
