@@ -21,12 +21,13 @@ function xClassicOpen(name) {
   if (!lead || !XQ.includes(lead)) return;
   xSet({ open: lead.id, classicWork: true });
 }
-// view switch a team member can see: the queue or the classic board
+// view switch a team member can see: the workflow (default), the classic board or the action queue
+const XVIEWS = [["workflow", "Workflow"], ["classic", "Classic"], ["queue", "Action queue"]];
 function XViewSwitch({ view }) {
   return (
     <div className="x-seg x-viewswitch" role="group" aria-label="Today view">
-      {[["queue", "Action queue"], ["classic", "Classic"]].map(([k, l]) => (
-        <button key={k} className={view === k ? "active" : ""} aria-pressed={view === k} onClick={() => xSet({ view: k, classicWork: false })}>{l}</button>
+      {XVIEWS.map(([k, l]) => (
+        <button key={k} className={view === k ? "active" : ""} aria-pressed={view === k} onClick={() => xSet({ view: k, home: k, classicWork: false })}>{l}</button>
       ))}
     </div>
   );

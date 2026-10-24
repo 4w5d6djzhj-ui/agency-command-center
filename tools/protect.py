@@ -70,4 +70,16 @@ out = os.path.join(dist, "_enc2")
 run_staticrypt(v2_plain, out, "Agency Command Center · Demonstration")
 shutil.move(os.path.join(out, "index.html"), v2_root)
 shutil.rmtree(out)
+
+# ---- next/: the team tool. Its plain source stays OUTSIDE the repo (NEXT_SRC); only the locked page is written.
+next_src = os.environ.get("NEXT_SRC")
+if next_src:
+    if not os.path.exists(next_src):
+        sys.exit(f"NEXT_SRC not found: {next_src}")
+    os.makedirs(os.path.join(repo, "next"), exist_ok=True)
+    out = os.path.join(dist, "_enc3")
+    run_staticrypt(next_src, out, "Next Step · Agency Command Center")
+    shutil.move(os.path.join(out, os.path.basename(next_src)), os.path.join(repo, "next", "index.html"))
+    shutil.rmtree(out)
+    print("locked: next/index.html (plain source kept outside the repo)")
 print("locked: index.html and v2/index.html; plain builds in tools/dist/")

@@ -12,6 +12,7 @@ console.log('status:', (await p.locator('.x-status').innerText()).replace(/\s+/g
 console.log('cap:', (await p.locator('.x-strip-cap').innerText()).replace(/\s+/g, ' '));
 console.log('open:', (await p.locator('.x-open').innerText()).replace(/\s+/g, ' ').slice(0, 900));
 // day plan view at 11
+await p.locator('.x-demo-btn').click(); await p.waitForTimeout(150); // the view bar lives in the Demo drawer since v13
 await p.locator('.x-viewbar button', { hasText: 'Day plan' }).click(); await p.waitForTimeout(300);
 await p.screenshot({ path: out + 'v12-plan.png', fullPage: true });
 await p.locator('.x-viewbar button', { hasText: 'Charts' }).click().catch(() => {}); await p.waitForTimeout(300);

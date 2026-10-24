@@ -7,13 +7,15 @@
 // coaching on (tips and the why on every touch) helps newer team members; experienced ones can turn it off
 function xCoachSaved() { try { const v = window.localStorage.getItem("acc.coach"); return v == null ? true : v === "1"; } catch (e) { return true; } }
 const XFRESH = (() => { try { return /[?&]fresh=1/.test(window.location.search); } catch (e) { return false; } })();
-const XS = { state: "US", done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved(), seeded: false };
+// the Today view the page opens on: Workflow by default; ?view=workflow|classic|queue picks another
+const XVIEW0 = (() => { try { const m = /[?&]view=(workflow|classic|queue)(?=&|#|$)/.exec(window.location.search); return m ? m[1] : "workflow"; } catch (e) { return "workflow"; } })();
+const XS = { state: "US", done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: XVIEW0, home: XVIEW0, wfStrike: {}, wfLast: null, wfScroll: null, seed: 7, coach: xCoachSaved(), seeded: false };
 // The demo opens mid-morning with the morning's work already logged, so the board shows progress, not zeros.
 // Everything before (clock − 30 min) is marked done: messages sent, calls in a steady pattern of outcomes.
 const XSEED_CALLS = ["quoted", "talked", "noanswer", "talked", "quoted", "noanswer", "talked", "noanswer"];
 function xSeedUpTo(minutes, silent) {
   const apply = silent ? (patch) => Object.assign(XS, patch) : xSet;
-  const base = { chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, bump: {} };
+  const base = { chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, bump: {}, wfStrike: {}, wfLast: null };
   if (minutes == null) { apply({ ...base, done: {} }); return; }
   const cutoff = minutes - 20;
   let done = {}, asks = {}, ci = 0;

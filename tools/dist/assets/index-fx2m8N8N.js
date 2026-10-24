@@ -474,11 +474,19 @@ const XFRESH = (() => {
     return false;
   }
 })();
-const XS = { state: "US", done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved(), seeded: false };
+const XVIEW0 = (() => {
+  try {
+    const m = /[?&]view=(workflow|classic|queue)(?=&|#|$)/.exec(window.location.search);
+    return m ? m[1] : "workflow";
+  } catch (e) {
+    return "workflow";
+  }
+})();
+const XS = { state: "US", done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: XVIEW0, home: XVIEW0, wfStrike: {}, wfLast: null, wfScroll: null, seed: 7, coach: xCoachSaved(), seeded: false };
 const XSEED_CALLS = ["quoted", "talked", "noanswer", "talked", "quoted", "noanswer", "talked", "noanswer"];
 function xSeedUpTo(minutes, silent) {
   const apply = silent ? (patch) => Object.assign(XS, patch) : xSet;
-  const base = { chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, bump: {} };
+  const base = { chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, bump: {}, wfStrike: {}, wfLast: null };
   if (minutes == null) {
     apply({ ...base, done: {} });
     return;
@@ -1050,6 +1058,100 @@ function xSampleSize(p1, p2, power) {
   if (!(d > 0) || p1 <= 0 || p2 >= 1) return null;
   const num = za * Math.sqrt(2 * pb * (1 - pb)) + zb * Math.sqrt(p1 * (1 - p1) + p2 * (1 - p2));
   return Math.ceil(num * num / (d * d));
+}
+const TB_PHI = 1.618;
+const TB_COLORS = {
+  call: { c: "#1F6FD1", top: "#8FB7EA", front: "#E1ECFB", right: "#174F93" },
+  text: { c: "#178A5B", top: "#8BC9AC", front: "#DFF3E8", right: "#116543" },
+  email: { c: "#B8640F", top: "#DCB086", front: "#FBEBD9", right: "#8A4A0B" },
+  ok: { c: "#2E7D4F", top: "#95C2A6", front: "#DFF3E8", right: "#225C3B" },
+  bad: { c: "#8C2F39", top: "#C59299", front: "#F6E3E5", right: "#66222A" }
+};
+const TB_GLYPH = {
+  // 24×24 line glyphs, white, 2-px strokes, upright on the top face
+  call: '<path d="M6 3h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 12l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z"/>',
+  text: '<path d="M4 5h16v10H9l-5 4z"/>',
+  email: '<path d="M3 6h18v12H3z M3 6l9 7 9-7"/>'
+};
+function timeBoxSVG(o) {
+  const h = o.h || 21, w = Math.round(h * TB_PHI), d = h / TB_PHI, dx = d * 0.5, dy = d * 0.5;
+  const st = o.state || "planned";
+  const pal = TB_COLORS[st === "done" ? "ok" : st === "blocked" ? "bad" : o.ch || "call"] || TB_COLORS.call;
+  const done = st === "done";
+  const H = done ? Math.round(h / TB_PHI) : h;
+  const W = w + dx, VH = H + dy, x0 = 0, y0 = dy;
+  const frac = done || st === "blocked" ? 0 : Math.max(0, Math.min(1, o.frac || 0));
+  const fillH = frac * H;
+  const top = `${x0},${y0} ${x0 + w},${y0} ${x0 + w + dx},${y0 - dy} ${x0 + dx},${y0 - dy}`;
+  const right = `${x0 + w},${y0} ${x0 + w + dx},${y0 - dy} ${x0 + w + dx},${y0 - dy + H} ${x0 + w},${y0 + H}`;
+  const small = h <= 21;
+  const fs = small ? 9.5 : h <= 34 ? 13 : 21;
+  const inkOnFill = !small && frac > 0.55;
+  const fillOpacity = small ? 0.38 : 1;
+  const labelColor = done || st === "blocked" ? "#fff" : inkOnFill ? "#fff" : "#1A2330";
+  const label = done ? "" : st === "blocked" ? "" : o.label || "";
+  const sub = done || st === "blocked" ? "" : o.sub || "";
+  const glyph = !small && TB_GLYPH[o.ch] ? `<g transform="translate(${x0 + dx / 2 + w / 2 - dy * 0.375},${y0 - dy + dy * 0.125}) scale(${dy * 0.75 / 24})" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${TB_GLYPH[o.ch]}</g>` : "";
+  const mark = st === "approved" || done ? "\u2713" : st === "blocked" ? "!" : "";
+  const markSize = small ? 9 : h <= 34 ? 13 : 21;
+  const markEl = mark ? `<text x="${done ? x0 + w / 2 : x0 + w + dx / 2}" y="${done ? y0 + H / 2 + markSize * 0.36 : y0 + H / 2 + markSize * 0.36 - dy / 2}" text-anchor="middle" font-size="${done ? markSize * 1.3 : markSize}" font-weight="700" fill="#fff" font-family="var(--mono, ui-monospace, monospace)">${mark}</text>` : "";
+  const title = o.title || "";
+  return `<svg class="tb tb-${st} tb-${o.ch || "call"}" viewBox="0 0 ${W} ${VH}" width="${W}" height="${VH}" role="img" aria-label="${title}"${title ? ` data-title="${title}"` : ""}>${title ? `<title>${title}</title>` : ""}
+<polygon class="tb-top" points="${top}" fill="${pal.top}"/>
+<polygon class="tb-right" points="${right}" fill="${pal.right}"/>
+<rect class="tb-front" x="${x0}" y="${y0}" width="${w}" height="${H}" fill="${done || st === "blocked" ? pal.c : pal.front}"/>
+${fillH > 0 ? `<rect class="tb-fill" x="${x0}" y="${y0 + H - fillH}" width="${w}" height="${fillH}" fill="${pal.c}" fill-opacity="${fillOpacity}"/><rect x="${x0}" y="${y0 + H - fillH}" width="${w}" height="1" fill="${pal.right}" opacity=".6"/>` : ""}
+<rect class="tb-ring" x="${x0 + 0.5}" y="${y0 + 0.5}" width="${w - 1}" height="${H - 1}" fill="none" stroke="${pal.right}" stroke-opacity=".35"/>
+${label ? (() => {
+    const lw = label.length * fs * 0.6, sw = sub ? sub.length * fs * 0.55 * 0.6 + fs * 0.2 : 0;
+    const start = x0 + w / 2 - (lw + sw) / 2, halo = inkOnFill ? pal.right : "#fff";
+    return `<text class="tb-label" x="${start}" y="${y0 + H / 2 + fs * 0.36}" font-size="${fs}" font-weight="500" fill="${labelColor}" stroke="${halo}" stroke-width="${fs * 0.18}" stroke-linejoin="round" paint-order="stroke" font-family="var(--mono, ui-monospace, monospace)">${label}</text>` + (sub ? `<text class="tb-sub" x="${start + lw + fs * 0.2}" y="${y0 + H / 2 + fs * 0.36}" font-size="${fs * 0.55}" fill="${labelColor}" stroke="${halo}" stroke-width="${fs * 0.12}" paint-order="stroke" font-family="var(--mono, ui-monospace, monospace)">${sub}</text>` : "");
+  })() : ""}
+${glyph}${markEl}</svg>`;
+}
+function markSVG(o) {
+  const h = 8, w = 13, d = 5, dx = 2.5, dy = 2.5, W = w + dx, VH = h + dy, y0 = dy;
+  const pal = TB_COLORS[o.kind === "ok" ? "ok" : o.kind] || TB_COLORS.ok;
+  const on = !!o.on;
+  const top = `0,${y0} ${w},${y0} ${w + dx},${y0 - dy} ${dx},${y0 - dy}`;
+  const right = `${w},${y0} ${w + dx},${y0 - dy} ${w + dx},${y0 - dy + h} ${w},${y0 + h}`;
+  const body = on ? `<polygon points="${top}" fill="${pal.top}"/><polygon points="${right}" fill="${pal.right}"/><rect x="0" y="${y0}" width="${w}" height="${h}" fill="${pal.c}"/><path d="M3.2 ${y0 + 4.2} l2.4 2.4 l4.4 -4.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>` : `<polygon points="${top}" fill="none" stroke="${pal.c}" stroke-width=".9" stroke-opacity=".55"/><polygon points="${right}" fill="none" stroke="${pal.c}" stroke-width=".9" stroke-opacity=".55"/><rect x=".45" y="${y0 + 0.45}" width="${w - 0.9}" height="${h - 0.9}" fill="none" stroke="${pal.c}" stroke-width=".9" stroke-opacity=".7"/>${o.barred ? `<path d="M1.5 ${y0 + h - 1.5} L${w - 1.5} ${y0 + 1.5}" stroke="${pal.c}" stroke-width="1.2" stroke-linecap="round"/>` : ""}`;
+  return `<svg class="tbm tbm-${o.kind}${on ? " on" : ""}" viewBox="0 0 ${W} ${VH}" width="${W}" height="${VH}" role="img" aria-label="${o.title || ""}"><title>${o.title || ""}</title>${body}</svg>`;
+}
+function xTbEsc(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function XTimeBox({ h, ch, label, sub, frac, state, title, badge }) {
+  const [still, setStill] = I.useState(false);
+  I.useEffect(() => {
+    if (state !== "due") return void 0;
+    setStill(false);
+    const id = setTimeout(() => setStill(true), 1700);
+    return () => clearTimeout(id);
+  }, [state]);
+  const q = Math.round(Math.max(0, Math.min(1, frac || 0)) * 55) / 55;
+  const html = timeBoxSVG({ h: h || 21, ch: ch || "call", label: label || "", sub: sub || "", frac: q, state: state || "planned", title: xTbEsc(title) }) + (badge ? `<span class="tb-badge" aria-hidden="true">${xTbEsc(badge)}</span>` : "");
+  return /* @__PURE__ */ I.createElement("span", { className: "tb-wrap" + (still ? " tb-still" : ""), dangerouslySetInnerHTML: { __html: html } });
+}
+function xMarks(lead, v) {
+  const c = lead.consent || {};
+  const first = xFirst(lead.name);
+  const email = c.email ? { kind: "email", on: true, title: "Email ready: OK on file" } : { kind: "email", on: false, title: "Email waits: no OK on file" };
+  const talked = !!lead.contacted || !!(v && v.p && v.p.contacted);
+  const text = c.stop ? { kind: "text", on: false, barred: true, title: "Texted STOP" } : !c.sms ? { kind: "text", on: false, barred: true, title: "Text waits: no OK on file" } : !talked ? { kind: "text", on: false, title: "Text waits: after the first conversation" } : { kind: "text", on: true, title: "Text ready: OK on file" };
+  const ts = v ? v.ts : [];
+  const consentOk = ts.filter((t) => t.ch !== "call").every((t) => xAllowed(t.ch, lead));
+  const hoursOk = ts.filter((t) => t.ch !== "email" && !t.tomorrow && !XS.done[t.id]).every((t) => t.slot >= XLEGAL[t.ch][0] && t.slot < XLEGAL[t.ch][1]);
+  const dncOk = !lead.dnc;
+  const okAll = consentOk && hoursOk && dncOk;
+  const why = !consentOk ? "a touch has no consent on file" : !hoursOk ? "a touch sits outside the legal hours" : "on the Do Not Call list";
+  const comp = okAll ? { kind: "ok", on: true, title: `Compliance \u2713: consent, hours and state rules (${xState().label}) checked for ${first} today` } : { kind: "ok", on: false, title: `Compliance: needs a look, ${why}` };
+  return [email, text, comp];
+}
+function XMarks({ lead, v }) {
+  const ms = xMarks(lead, v);
+  const html = `<span class="tbm-row">${ms.map((m) => markSVG({ kind: m.kind, on: m.on, barred: m.barred, title: xTbEsc(m.title) })).join("")}</span>`;
+  return /* @__PURE__ */ I.createElement("span", { className: "tb-wrap x-marks", role: "group", "aria-label": ms.map((m) => m.title).join(" \xB7 "), dangerouslySetInnerHTML: { __html: html } });
 }
 const XQ = [
   // New today: the first call goes out inside five minutes
@@ -1860,8 +1962,12 @@ function XToday({ persona }) {
     const t = setInterval(() => setTick((x) => x + 1), 1e3);
     return () => clearInterval(t);
   }, []);
+  if (s.view === "workflow") return /* @__PURE__ */ I.createElement(XWorkflow, { persona });
   if (s.view === "classic") return /* @__PURE__ */ I.createElement(XClassic, { persona });
-  if (s.view === "plan") return /* @__PURE__ */ I.createElement(I.Fragment, null, /* @__PURE__ */ I.createElement("div", { className: "x-backbar" }, /* @__PURE__ */ I.createElement("button", { className: "x-planlink", onClick: () => xSet({ view: "queue" }) }, "\u2190 Back to today's queue")), /* @__PURE__ */ I.createElement(XDayPlan, { persona }));
+  if (s.view === "plan") {
+    const home = s.home === "workflow" || s.home === "classic" ? s.home : "queue";
+    return /* @__PURE__ */ I.createElement(I.Fragment, null, /* @__PURE__ */ I.createElement("div", { className: "x-backbar" }, /* @__PURE__ */ I.createElement("button", { className: "x-planlink", onClick: () => xSet({ view: home }) }, home === "workflow" ? "\u2190 Back to Workflow" : home === "classic" ? "\u2190 Back to Classic" : "\u2190 Back to today's queue")), /* @__PURE__ */ I.createElement(XDayPlan, { persona }));
+  }
   XS.persona = persona;
   if (!XS.seeded) {
     XS.seeded = true;
@@ -2309,6 +2415,11 @@ function XNowBar() {
   const order = xWorkOrder(views, now);
   const v = order[0];
   const go = (id) => {
+    if (XS.home === "workflow") {
+      xSet({ view: "workflow", open: id, focus: false, wfLast: null, wfScroll: id });
+      if (XNav.go) XNav.go("today");
+      return;
+    }
     xSet({ view: "queue", open: id, focus: false });
     if (XNav.go) XNav.go("today");
     try {
@@ -2342,8 +2453,8 @@ function XDemoDrawer({ persona, onPersonaChange }) {
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
-  return /* @__PURE__ */ I.createElement("div", { className: "x-demo" + (open ? " is-open" : ""), ref }, /* @__PURE__ */ I.createElement("button", { className: "x-demo-btn", "aria-expanded": open, "aria-controls": "x-demo-panel", onClick: () => xSet({ demoOpen: !open }), title: "Demo controls: persona, clock, views" }, /* @__PURE__ */ I.createElement("span", { className: "x-demo-dot", "aria-hidden": "true" }), "Demo", open ? " \xD7" : ""), open && /* @__PURE__ */ I.createElement("div", { className: "x-demo-panel", id: "x-demo-panel", role: "region", "aria-label": "Demo controls" }, /* @__PURE__ */ I.createElement("div", { className: "x-demo-row" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Acting as"), /* @__PURE__ */ I.createElement("div", { className: "x-seg", role: "group", "aria-label": "Acting persona" }, ["Alex", "Maya"].map((n) => /* @__PURE__ */ I.createElement("button", { key: n, className: persona === n ? "active" : "", "aria-pressed": persona === n, onClick: () => onPersonaChange(n) }, n, n === "Alex" ? " \xB7 Agent" : " \xB7 Producer")))), /* @__PURE__ */ I.createElement("div", { className: "x-demo-row x-clockbar" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Clock"), /* @__PURE__ */ I.createElement("div", { className: "x-seg", role: "group", "aria-label": "Demo clock" }, XCLOCKS.map(([l, v]) => /* @__PURE__ */ I.createElement("button", { key: l, className: s.clock === v ? "active" : "", "aria-pressed": s.clock === v, onClick: () => xSetClock(v) }, l)))), /* @__PURE__ */ I.createElement("div", { className: "x-demo-row x-viewbar" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Today view"), /* @__PURE__ */ I.createElement("div", { className: "x-seg", role: "group", "aria-label": "Today view" }, [["queue", "Action queue"], ["plan", "Day plan"], ["classic", "Classic"]].map(([k, l]) => /* @__PURE__ */ I.createElement("button", { key: k, className: s.view === k ? "active" : "", "aria-pressed": s.view === k, onClick: () => {
-    xSet({ view: k, demoOpen: false });
+  return /* @__PURE__ */ I.createElement("div", { className: "x-demo" + (open ? " is-open" : ""), ref }, /* @__PURE__ */ I.createElement("button", { className: "x-demo-btn", "aria-expanded": open, "aria-controls": "x-demo-panel", onClick: () => xSet({ demoOpen: !open }), title: "Demo controls: persona, clock, views" }, /* @__PURE__ */ I.createElement("span", { className: "x-demo-dot", "aria-hidden": "true" }), "Demo", open ? " \xD7" : ""), open && /* @__PURE__ */ I.createElement("div", { className: "x-demo-panel", id: "x-demo-panel", role: "region", "aria-label": "Demo controls" }, /* @__PURE__ */ I.createElement("div", { className: "x-demo-row" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Acting as"), /* @__PURE__ */ I.createElement("div", { className: "x-seg", role: "group", "aria-label": "Acting persona" }, ["Alex", "Maya"].map((n) => /* @__PURE__ */ I.createElement("button", { key: n, className: persona === n ? "active" : "", "aria-pressed": persona === n, onClick: () => onPersonaChange(n) }, n, n === "Alex" ? " \xB7 Agent" : " \xB7 Producer")))), /* @__PURE__ */ I.createElement("div", { className: "x-demo-row x-clockbar" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Clock"), /* @__PURE__ */ I.createElement("div", { className: "x-seg", role: "group", "aria-label": "Demo clock" }, XCLOCKS.map(([l, v]) => /* @__PURE__ */ I.createElement("button", { key: l, className: s.clock === v ? "active" : "", "aria-pressed": s.clock === v, onClick: () => xSetClock(v) }, l)))), /* @__PURE__ */ I.createElement("div", { className: "x-demo-row x-viewbar" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Today view"), /* @__PURE__ */ I.createElement("div", { className: "x-seg", role: "group", "aria-label": "Today view" }, [...XVIEWS, ["plan", "Day plan"]].map(([k, l]) => /* @__PURE__ */ I.createElement("button", { key: k, className: s.view === k ? "active" : "", "aria-pressed": s.view === k, onClick: () => {
+    xSet(k === "plan" ? { view: k, demoOpen: false } : { view: k, home: k, classicWork: false, demoOpen: false });
     if (XNav.go) XNav.go("today");
   } }, l)))), /* @__PURE__ */ I.createElement("div", { className: "x-demo-row x-statebar" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "State rules"), /* @__PURE__ */ I.createElement("div", { className: "x-seg", role: "group", "aria-label": "Agency state" }, Object.keys(XSTATE).map((k) => /* @__PURE__ */ I.createElement("button", { key: k, className: s.state === k ? "active" : "", "aria-pressed": s.state === k, onClick: () => xSet({ state: k }), title: XSTATE[k].note }, k))), /* @__PURE__ */ I.createElement("span", { className: "x-demo-hint" }, xState().cap ? `${xState().label}: ${xState().cap} calls per person in 24 h` : `${xState().label}: no attempt cap`)), /* @__PURE__ */ I.createElement("div", { className: "x-demo-row" }, /* @__PURE__ */ I.createElement("span", { className: "x-viewbar-label" }, "Coaching"), /* @__PURE__ */ I.createElement("div", { className: "x-seg", role: "group", "aria-label": "Coaching" }, [[true, "On"], [false, "Off"]].map(([v, l]) => /* @__PURE__ */ I.createElement("button", { key: l, className: s.coach === v ? "active" : "", "aria-pressed": s.coach === v, onClick: () => xSetCoach(v) }, l))), /* @__PURE__ */ I.createElement("button", { className: "btn ghost x-demo-reset", onClick: () => xStartOver() }, "Start the day over")), /* @__PURE__ */ I.createElement("div", { className: "x-demo-note" }, "These controls exist for the demonstration only; a team member's screen opens on today's plan with none of them.")));
 }
@@ -2360,8 +2471,9 @@ function xClassicOpen(name) {
   if (!lead || !XQ.includes(lead)) return;
   xSet({ open: lead.id, classicWork: true });
 }
+const XVIEWS = [["workflow", "Workflow"], ["classic", "Classic"], ["queue", "Action queue"]];
 function XViewSwitch({ view }) {
-  return /* @__PURE__ */ I.createElement("div", { className: "x-seg x-viewswitch", role: "group", "aria-label": "Today view" }, [["queue", "Action queue"], ["classic", "Classic"]].map(([k, l]) => /* @__PURE__ */ I.createElement("button", { key: k, className: view === k ? "active" : "", "aria-pressed": view === k, onClick: () => xSet({ view: k, classicWork: false }) }, l)));
+  return /* @__PURE__ */ I.createElement("div", { className: "x-seg x-viewswitch", role: "group", "aria-label": "Today view" }, XVIEWS.map(([k, l]) => /* @__PURE__ */ I.createElement("button", { key: k, className: view === k ? "active" : "", "aria-pressed": view === k, onClick: () => xSet({ view: k, home: k, classicWork: false }) }, l)));
 }
 function XClassicWork({ views, order, now, persona }) {
   const s = useXS();
@@ -2407,6 +2519,360 @@ function XClassic({ persona }) {
     if (nameEl) xClassicOpen(nameEl.textContent.trim());
   };
   return /* @__PURE__ */ I.createElement("section", { className: "view active x-today x-lean x-classic" + (s.classicWork ? " has-work" : "") }, /* @__PURE__ */ I.createElement("div", { className: "x-top" }, /* @__PURE__ */ I.createElement("div", { className: "x-top-left" }, /* @__PURE__ */ I.createElement("h1", null, Gm(Math.floor(now / 60)), ", ", /* @__PURE__ */ I.createElement("span", null, persona), "."), /* @__PURE__ */ I.createElement(XStatusLine, { pr, next, now, onOpen: (id) => xSet({ open: id, classicWork: true }) })), /* @__PURE__ */ I.createElement("div", { className: "x-top-right" }, /* @__PURE__ */ I.createElement(XCompliance, { day }), /* @__PURE__ */ I.createElement(XViewSwitch, { view: "classic" }), /* @__PURE__ */ I.createElement("button", { className: "x-planlink", onClick: () => xSet({ view: "plan" }), title: "The whole day, hour by hour" }, "Day plan \u2192"))), /* @__PURE__ */ I.createElement("div", { className: "x-topgrid x-topgrid-classic" }, /* @__PURE__ */ I.createElement("div", { className: "x-topright" }, /* @__PURE__ */ I.createElement(XDayStrip, { pr, now, mix, clock: s.clock }), /* @__PURE__ */ I.createElement(XScoreboard, { pr, score, F, bump: s.bump, onStart: start, fresh, pro: xProCount(day), cool: xCoolCount() }))), /* @__PURE__ */ I.createElement("div", { className: "x-classic-grid", onClick: onBoardClick }, /* @__PURE__ */ I.createElement("div", { className: "x-classic-board" }, /* @__PURE__ */ I.createElement(Uf, { persona })), /* @__PURE__ */ I.createElement(XClassicWork, { views, order, now, persona })));
+}
+const XWF_FOLD_MS = 1021;
+function xTbTime(min, full) {
+  const m = (Math.round(min) % 1440 + 1440) % 1440, h = Math.floor(m / 60), mm = m % 60;
+  const hh = String((h + 11) % 12 + 1), sub = h >= 12 ? "PM" : "AM", hm = `${hh}:${String(mm).padStart(2, "0")}`;
+  if (full) return { label: hm, sub };
+  return mm ? { label: hm, sub: "" } : { label: hh, sub };
+}
+function xTbWindow(t, d) {
+  if (d && d.k === "scheduled") return [d.when != null ? Math.min(d.when, d.t) : XDAY.open, d.t];
+  if (!t || t.tomorrow) return null;
+  if (t.ch !== "call") return [Math.min(XDAY.open, t.slot), t.slot];
+  if (t.booked) return [t.slot - 60, t.slot];
+  if (t.wk === "now" && t.lead.seen != null) {
+    const l = xLanded(t.lead);
+    return [l, l + 5];
+  }
+  const W = XWIN[t.wk];
+  if (W && W.rel && t.p && t.p.anchor != null) return [t.p.anchor + W.rel[0], t.p.anchor + W.rel[1]];
+  if (W && W.lo != null) return [W.lo, W.hi];
+  return [XDAY.open, XDAY.close];
+}
+function xTbFrac(win, now) {
+  if (!win) return 0;
+  const [lo, hi] = win;
+  if (hi <= lo) return now >= hi ? 1 : 0;
+  return Math.max(0, Math.min(1, (now - lo) / (hi - lo)));
+}
+function xWFWhy(t) {
+  if (!t) return "";
+  if (t.booked && !t.late) return "They picked this time. Be early.";
+  if (t.tomorrow) return "After 8 pm, calls and texts wait for the morning.";
+  const w = XWIN[t.wk];
+  if (!w || !w.why) return "";
+  const parts = w.why.split(/;\s|, and |:\s/);
+  let s = parts[0];
+  if (s.length < 21 && parts[1]) s += ": " + parts[1].split(/, with /)[0];
+  return s.replace(/\.$/, "") + ".";
+}
+function xWFWaitWords(reason) {
+  if (!reason) return "waits";
+  if (/Do Not Call/.test(reason)) return "waits: Do Not Call";
+  if (/^No \w+ consent/.test(reason)) return "waits: no OK on file";
+  if (reason === XSTYLE.noTextFirst) return "waits: after the first conversation";
+  return "waits";
+}
+function xWFPending(v, now) {
+  let pend = null;
+  for (const t of v.doneTs) {
+    const d = XS.done[t.id];
+    if (d && d.k === "scheduled" && d.t > now) pend = t;
+  }
+  return pend;
+}
+function xWFInfo(v, now, full) {
+  const pend = xWFPending(v, now), t = v.current;
+  if (pend && (!t || !xIsDue(t, now))) {
+    const d = XS.done[pend.id], tm = xTbTime(d.t, full);
+    return {
+      mode: "approved",
+      t: pend,
+      ch: pend.ch,
+      sort: d.t,
+      label: tm.label,
+      sub: tm.sub,
+      frac: xTbFrac(xTbWindow(pend, d), now),
+      state: "approved",
+      title: `${XCH[pend.ch]} \xB7 approved \xB7 sends ${xFmt(d.t)}`,
+      step: `Approved \xB7 ${xFmt(d.t)}`,
+      stepTitle: `Approved${d.by ? ` by ${d.by}` : ""} at ${xFmt(d.when != null ? d.when : now)}; it sends by itself at ${xFmt(d.t)}`
+    };
+  }
+  if (t) {
+    const due = xIsDue(t, now), msg = t.ch !== "call", st = xStatusOf(t, now);
+    const tm = t.tomorrow ? { label: full ? "9:00" : "9", sub: "AM" } : xTbTime(t.slot, full);
+    const state = t.blocked ? "blocked" : due ? "due" : msg ? "ready" : "planned";
+    const now1 = t.wk === "now" && t.lead.seen != null;
+    const when = t.tomorrow ? "tomorrow 9:00 AM" : now1 ? "now" : xFmt(t.slot);
+    let step;
+    if (t.blocked) step = `${XCH[t.ch]} \xB7 ${xWFWaitWords(t.chReason)}`;
+    else if (msg) step = due ? `${XCH[t.ch]} \xB7 ${st.text.toLowerCase()}` : `${XCH[t.ch]} \xB7 sends ${when}`;
+    else if (!due) step = `Call \xB7 ${when}${t.booked ? " \xB7 booked" : ""}`;
+    else if (now1) step = `Call \xB7 now \xB7 ${st.text}`;
+    else step = /^Due since/.test(st.text) ? `Call \xB7 ${st.text.toLowerCase()}` : `Call \xB7 ${when} \xB7 due now`;
+    const words = t.blocked ? `blocked: ${t.chReason || "this step waits"}` : due ? "due now" : msg ? "ready to check" : "planned";
+    return {
+      mode: "live",
+      t,
+      ch: t.ch,
+      due,
+      sort: t.tomorrow ? 1e4 + t.slot : t.slot,
+      label: tm.label,
+      sub: tm.sub,
+      frac: t.blocked ? 0 : xTbFrac(xTbWindow(t, null), now),
+      state,
+      title: `${XCH[t.ch]} \xB7 ${msg && !t.blocked && !now1 ? "sends " : ""}${when} \xB7 ${words}`,
+      step,
+      stepTitle: t.blocked ? t.chReason : `${t.step.what} \xB7 ${xTouchWhy(t)}`,
+      badge: state === "ready" ? "Check" : null,
+      btn: msg ? "Check" : "Call"
+    };
+  }
+  if (v.last) {
+    const d = XS.done[v.last.id], at = d.k === "scheduled" ? d.t : d.when != null ? d.when : d.t;
+    const what = d.k === "scheduled" ? "Sent" : XOUT[d.k] || "Done";
+    return {
+      mode: "done",
+      t: v.last,
+      ch: v.last.ch,
+      sort: at,
+      label: "",
+      sub: "",
+      frac: 0,
+      state: "done",
+      title: `${XCH[v.last.ch]} \xB7 done \xB7 ${what} ${xFmt(at)}`,
+      step: `${what} \xB7 ${xFmt(at)}`,
+      stepTitle: xOutcomeText(v)
+    };
+  }
+  return { mode: "none", t: null, ch: "call", sort: 2e4, label: "", sub: "", frac: 0, state: "planned", title: "Nothing due today", step: "Nothing due today" };
+}
+function xWFCoolInfo(l) {
+  const ch = xCoolChannel(l), d = XS.cool[l.id];
+  if (d != null) return { mode: "done", ch, label: "", sub: "", frac: 0, state: "done", title: `${XCH[ch]} \xB7 done ${xFmt(d)}`, step: `Done \xB7 ${xFmt(d)}` };
+  return { mode: "cool", ch, label: "open", sub: "", frac: 0, state: "planned", title: `${XCH[ch]} \xB7 any open minute \xB7 planned`, step: `${XCH[ch]} \xB7 any open minute`, btn: ch === "call" ? "Call" : "Check" };
+}
+function xWFTimeline(v, now) {
+  const out = [], lead = v.lead;
+  if (v.last) {
+    const d = XS.done[v.last.id], pending = d.k === "scheduled" && d.t > now, at = d.k === "scheduled" ? d.t : d.when != null ? d.when : d.t;
+    const tm = xTbTime(at, false);
+    out.push({
+      k: "Done",
+      ch: v.last.ch,
+      state: pending ? "approved" : "done",
+      label: tm.label,
+      sub: tm.sub,
+      frac: pending ? xTbFrac(xTbWindow(v.last, d), now) : 0,
+      words: `${pending ? "Approved, sends" : d.k === "scheduled" ? "Sent" : XOUT[d.k]} \xB7 ${xFmt(at)}`,
+      title: `Done today \xB7 ${XCH[v.last.ch]} \xB7 ${v.last.step.what}`
+    });
+  } else if ((lead.done || 0) > 0) {
+    const s = XSRC[lead.source].steps.find((x) => x.n === lead.done);
+    if (s) out.push({ k: "Done", ch: s.ch[0], state: "done", label: "", sub: "", frac: 0, words: `Step ${s.n} \xB7 ${s.what}`, title: `Done before today \xB7 step ${s.n}: ${s.what}` });
+  }
+  const t = v.current;
+  if (t) {
+    const i = xWFInfo({ ...v, doneTs: [] }, now, false);
+    out.push({ k: "Now", ch: t.ch, state: i.state, label: i.label, sub: i.sub, frac: i.frac, words: `${i.step} \xB7 ${t.step.what}`, title: i.title });
+    const later = v.ts.filter((x) => !XS.done[x.id] && x.id !== t.id && (x.tomorrow - t.tomorrow || x.slot - t.slot) >= 0);
+    if (later[0]) {
+      const x = later[0], tm = x.tomorrow ? { label: "9", sub: "AM" } : xTbTime(x.slot, false);
+      out.push({
+        k: "Next",
+        ch: x.ch,
+        state: x.blocked ? "blocked" : "planned",
+        label: tm.label,
+        sub: tm.sub,
+        frac: 0,
+        words: `${XCH[x.ch]} \xB7 ${x.tomorrow ? "tomorrow 9:00 AM" : xFmt(x.slot)} \xB7 ${x.step.what}`,
+        title: `${XCH[x.ch]} \xB7 ${x.label} \xB7 planned`
+      });
+      return out;
+    }
+  }
+  if (v.p && v.p.next) {
+    const s = v.p.next, back = lead.source === "XD" || lead.source === "RI", dd = s.dayS;
+    const label = back ? dd < 0 ? `X\u2212${-dd}` : `X+${dd}` : `D${dd}`;
+    const ch = xPickChannel(s, lead, v.p.contacted).ch;
+    out.push({ k: "Next", ch, state: "planned", label, sub: "", frac: 0, words: xNextLabel(v.p).replace(/^Next: /, ""), title: `${XCH[ch]} \xB7 ${xNextLabel(v.p)}` });
+  }
+  return out;
+}
+function XWFTimeline({ v, now }) {
+  const items = xWFTimeline(v, now);
+  if (!items.length) return null;
+  return /* @__PURE__ */ I.createElement("ol", { className: "x-wf-tl", "aria-label": "This lead's timeline: done, now, next" }, items.map((it) => /* @__PURE__ */ I.createElement("li", { key: it.k, className: "x-wf-tl-" + it.k.toLowerCase() }, /* @__PURE__ */ I.createElement(XTimeBox, { h: 21, ch: it.ch, label: it.label, sub: it.sub, frac: it.frac, state: it.state, title: it.title }), /* @__PURE__ */ I.createElement("div", { className: "x-wf-tl-text" }, /* @__PURE__ */ I.createElement("div", { className: "x-wf-tl-k" }, it.k), /* @__PURE__ */ I.createElement("div", { className: "x-wf-tl-t" }, it.words)))));
+}
+function xWFFacts(s, lead, key) {
+  const first = xFirst(lead.name).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = String(s).split(new RegExp(`(\\$\\d[\\d,]*(?:\\/mo\\.?)?|\\b${first}\\b|\\[[^\\]]+\\])`, "g"));
+  return parts.map((p, i) => i % 2 ? /* @__PURE__ */ I.createElement("mark", { key: key + "-" + i, className: /^\[/.test(p) ? "x-fill" : "" }, p) : p);
+}
+function XWFDraft({ body, lead, email }) {
+  const [hover, setHover] = I.useState(0);
+  const parts = xSplit(body, email, lead.scenario, lead.style);
+  return /* @__PURE__ */ I.createElement("div", { className: "x-msg-body x-marked x-wf-draft", onMouseLeave: () => setHover(0) }, parts.map((p, i) => p.k ? /* @__PURE__ */ I.createElement("span", { key: i, className: `x-mv x-mv-${p.k}${hover === p.k ? " is-hot" : ""}`, title: XMOVE_NAMES[p.k - 1], onMouseEnter: () => setHover(p.k) }, /* @__PURE__ */ I.createElement("span", { className: `x-badge x-badge-${p.k} x-mv-n`, "data-n": p.k, "aria-hidden": "true" }), xWFFacts(p.s, lead, i)) : /* @__PURE__ */ I.createElement(I.Fragment, { key: i }, xWFFacts(p.s, lead, i))));
+}
+function XWFMsgCard({ v, now, persona, onAct }) {
+  const t = v.current, lead = v.lead, ch = t.ch;
+  const [edit, setEdit] = I.useState(false);
+  const [text, setText] = I.useState(null);
+  const msg = xMessage(lead, ch, persona);
+  const okText = !!lead.consent.sms, okEmail = !!lead.consent.email;
+  const noConsent = ch === "text" && !okText || ch === "email" && !okEmail;
+  const blocked = noConsent || t.blocked;
+  const k = xOuts(ch, t)[0];
+  const sendsAt = k === "scheduled" ? xFmt(t.slot) : xFmt(now);
+  const cell = XMOVES[lead.scenario] && XMOVES[lead.scenario][lead.style];
+  const body = text != null ? text : msg ? msg.body : "";
+  return /* @__PURE__ */ I.createElement("div", { className: "x-wf-compose" }, blocked && /* @__PURE__ */ I.createElement("div", { className: "x-wf-blocked", role: "note" }, /* @__PURE__ */ I.createElement("span", null, /* @__PURE__ */ I.createElement("b", null, "This step waits."), " ", noConsent ? `No ${ch} consent on file` : t.chReason || "The system stopped it", ". Pick another channel:"), /* @__PURE__ */ I.createElement("div", { className: "x-seg x-chan", role: "group", "aria-label": "Channel" }, ["call", "text", "email"].map((c) => {
+    const dis = c === "text" && !okText || c === "email" && !okEmail;
+    return /* @__PURE__ */ I.createElement("button", { key: c, className: ch === c ? "active" : "", "aria-pressed": ch === c, disabled: dis, title: dis ? `No ${c} consent on file` : void 0, onClick: () => xSet((s) => ({ chan: { ...s.chan, [t.id]: c } })) }, XCH[c]);
+  }))), msg && /* @__PURE__ */ I.createElement("div", { className: "x-msg x-wf-msg" }, ch === "email" && /* @__PURE__ */ I.createElement("div", { className: "x-msg-subject" }, msg.subject), edit ? /* @__PURE__ */ I.createElement("textarea", { className: "x-wf-edit", value: body, onChange: (e) => setText(e.target.value), rows: ch === "email" ? 10 : 4, "aria-label": "Edit the draft" }) : /* @__PURE__ */ I.createElement(XWFDraft, { body, lead, email: ch === "email" }), /* @__PURE__ */ I.createElement("div", { className: "x-msg-foot" }, /* @__PURE__ */ I.createElement("span", { className: "x-msg-note" }, "Check: ", xFacts(lead, ch)), /* @__PURE__ */ I.createElement("span", { className: "x-msg-note" }, ch === "text" ? `${Zm(body + cf).len} characters with the opt-out line` : "Signature and license line are added on send"))), cell && /* @__PURE__ */ I.createElement("div", { className: "x-wf-coach" }, /* @__PURE__ */ I.createElement("span", { className: "x-wf-coach-k" }, "Why this draft \xB7 Hakobian Strategic Coaching:"), " ", XESSENCE[lead.style], " ", cell.a.why), /* @__PURE__ */ I.createElement(XWFTimeline, { v, now }), /* @__PURE__ */ I.createElement("div", { className: "x-wf-acts" }, /* @__PURE__ */ I.createElement("button", { className: "btn primary x-wf-approve", disabled: blocked || !msg, onClick: () => onAct(k) }, "Approve \xB7 sends ", sendsAt), /* @__PURE__ */ I.createElement("button", { className: "btn x-wf-editbtn", "aria-pressed": edit, onClick: () => setEdit(!edit) }, edit ? "Done editing" : "Edit"), text != null && !edit && /* @__PURE__ */ I.createElement("span", { className: "x-override" }, "changed by you"), /* @__PURE__ */ I.createElement("button", { className: "btn ghost x-skip", onClick: () => onAct("skip") }, "Skip")));
+}
+function XWFCard({ v, info, now, persona, onAct, onUndo }) {
+  if (info.mode === "approved") {
+    const d = XS.done[info.t.id];
+    return /* @__PURE__ */ I.createElement("div", { className: "x-wf-card" }, /* @__PURE__ */ I.createElement("div", { className: "x-wf-note" }, /* @__PURE__ */ I.createElement("span", { className: "x-check" }, "\u2713"), " Approved", d.by ? ` by ${d.by}` : "", " at ", xFmt(d.when != null ? d.when : now), ". It sends by itself at ", xFmt(d.t), ", and the send records who approved it."), /* @__PURE__ */ I.createElement(XWFTimeline, { v, now }), /* @__PURE__ */ I.createElement("div", { className: "x-wf-acts" }, /* @__PURE__ */ I.createElement("button", { className: "btn", onClick: onUndo }, "Undo the approval")));
+  }
+  if (!v.current) return null;
+  return v.current.ch === "call" ? /* @__PURE__ */ I.createElement("div", { className: "x-wf-card x-wf-callcard" }, /* @__PURE__ */ I.createElement(XWFTimeline, { v, now }), /* @__PURE__ */ I.createElement(XDo, { v, persona, onAct })) : /* @__PURE__ */ I.createElement("div", { className: "x-wf-card x-wf-msgcard" }, /* @__PURE__ */ I.createElement(XWFMsgCard, { key: v.current.id, v, now, persona, onAct }));
+}
+function XWFCoolCard({ l, ch, onDone, onClose }) {
+  return /* @__PURE__ */ I.createElement("div", { className: "x-wf-card x-wf-coolcard" }, /* @__PURE__ */ I.createElement("div", { className: "x-wf-note" }, l.why), /* @__PURE__ */ I.createElement("div", { className: "x-call x-wf-say" }, /* @__PURE__ */ I.createElement("div", { className: "x-say-k" }, ch === "call" ? `Say it \xB7 dial ${l.phone}` : `${XCH[ch]} \xB7 one line`), /* @__PURE__ */ I.createElement("div", { className: "x-say-t" }, xFillSay(l.say, l, XS.persona || "Alex"))), /* @__PURE__ */ I.createElement("div", { className: "x-wf-acts" }, /* @__PURE__ */ I.createElement("button", { className: "btn primary", onClick: onDone }, "Mark done \xB7 5 min"), /* @__PURE__ */ I.createElement("button", { className: "btn ghost x-skip", onClick: onClose }, "Close")));
+}
+function XWFRowLine({ lead, v, info, isOpen, onToggle, onUndo }) {
+  const clickable = info.mode === "live" || info.mode === "approved" || info.mode === "cool";
+  const btn = info.mode === "live" || info.mode === "cool" ? /* @__PURE__ */ I.createElement("button", { className: "btn x-wf-btn" + (isOpen ? " primary" : ""), "aria-expanded": isOpen, onClick: (e) => {
+    e.stopPropagation();
+    onToggle();
+  } }, info.btn) : info.mode === "approved" || info.mode === "done" ? /* @__PURE__ */ I.createElement("button", { className: "btn x-wf-btn x-wf-undo", onClick: (e) => {
+    e.stopPropagation();
+    onUndo();
+  } }, "Undo") : /* @__PURE__ */ I.createElement("span", { className: "x-wf-btn" });
+  return /* @__PURE__ */ I.createElement("div", { className: "x-wf-row", onClick: clickable ? onToggle : void 0 }, /* @__PURE__ */ I.createElement(XTimeBox, { h: 21, ch: info.ch, label: info.label, sub: info.sub, frac: info.frac, state: info.state, title: info.title, badge: info.badge }), /* @__PURE__ */ I.createElement("div", { className: "x-wf-who" }, /* @__PURE__ */ I.createElement("span", { className: "x-name" }, lead.name), /* @__PURE__ */ I.createElement("span", { className: `style-pill ${lead.style}`, title: "Communication style" }, rf[lead.style] ? rf[lead.style].label : lead.style)), /* @__PURE__ */ I.createElement("div", { className: "x-wf-step" + (info.due ? " is-due" : ""), title: info.stepTitle || info.title }, info.step), /* @__PURE__ */ I.createElement(XMarks, { lead, v }), btn);
+}
+function XWFItem({ v, info, now, persona, isOpen, extra, onToggle, onAct, onUndo }) {
+  return /* @__PURE__ */ I.createElement("div", { className: "x-wf-item" + (isOpen ? " is-open" : "") + (info.mode === "done" ? " is-done" : "") + (info.mode === "approved" ? " is-approved" : "") + (extra || ""), "data-lead": v.lead.id }, /* @__PURE__ */ I.createElement(XWFRowLine, { lead: v.lead, v, info, isOpen, onToggle, onUndo }), isOpen && /* @__PURE__ */ I.createElement(XWFCard, { v, info, now, persona, onAct, onUndo }));
+}
+function xWFGo(id) {
+  xSet({ open: id, wfLast: null, wfScroll: id });
+}
+function XWFNow({ v, now, last }) {
+  const lastV = last ? XQ.find((l) => l.id === last.id) || null : null;
+  if (!v) {
+    return /* @__PURE__ */ I.createElement("div", { className: "card x-wf-now" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Now"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "all done")), /* @__PURE__ */ I.createElement("div", { className: "x-wf-empty" }, "All ", XQ.length, " touched today. The cooler leads are there for any open minute."));
+  }
+  const t = v.current, info = xWFInfo(v, now, true), due = xIsDue(t, now), g = XQ_GROUPS.find((x) => x.k === v.group);
+  return /* @__PURE__ */ I.createElement("div", { className: "card x-wf-now", "aria-live": "polite" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Now"), /* @__PURE__ */ I.createElement("span", { className: "count" }, due ? "due now" : `next at ${t.tomorrow ? "9:00 AM" : xFmt(t.slot)}`)), /* @__PURE__ */ I.createElement("div", { className: "x-wf-hero" }, lastV && /* @__PURE__ */ I.createElement("div", { className: "x-wf-hero-last" }, /* @__PURE__ */ I.createElement("span", { className: "x-check" }, "\u2713"), " ", lastV.name, " \xB7 ", last.k === "scheduled" ? "Approved" : XOUT[last.k] || "Done", ". Next up:"), /* @__PURE__ */ I.createElement(XTimeBox, { h: 55, ch: info.ch, label: info.label, sub: info.sub, frac: info.frac, state: info.state, title: info.title }), /* @__PURE__ */ I.createElement("div", { className: "x-wf-hero-text" }, /* @__PURE__ */ I.createElement("div", { className: "x-wf-hero-name" }, v.lead.name), /* @__PURE__ */ I.createElement("div", { className: "x-wf-hero-chips" }, /* @__PURE__ */ I.createElement("span", { className: `style-pill ${v.lead.style}`, title: "Communication style" }, rf[v.lead.style].label), g && /* @__PURE__ */ I.createElement("span", { className: "x-tag" }, g.tag)), /* @__PURE__ */ I.createElement("div", { className: "x-wf-hero-step" }, info.step), /* @__PURE__ */ I.createElement("div", { className: "x-wf-hero-why" }, xWFWhy(t)), /* @__PURE__ */ I.createElement("button", { className: "btn primary x-wf-hero-btn" + (lastV ? " is-next" : ""), onClick: () => xWFGo(v.lead.id) }, lastV ? "Next \u2192" : info.btn))));
+}
+function XWFFirst({ views, now }) {
+  const firsts = views.filter((v) => v.current && v.lead.seen != null && v.lead.day === 0 && v.current.wk === "now").sort((a, b) => xFreshKey(a.lead, now) - xFreshKey(b.lead, now));
+  return /* @__PURE__ */ I.createElement("div", { className: "card x-wf-first" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Needs first touch"), /* @__PURE__ */ I.createElement("span", { className: "count" }, firsts.length ? `${firsts.length} waiting` : "none")), firsts.length ? firsts.map((v) => {
+    const t = v.current, landed = xLanded(v.lead), tm = xTbTime(t.slot, false), st = xStatusOf(t, now), w = Math.max(0, Math.round(now - landed));
+    return /* @__PURE__ */ I.createElement("div", { key: v.lead.id, className: "x-wf-mini", onClick: () => xWFGo(v.lead.id) }, /* @__PURE__ */ I.createElement(XTimeBox, { h: 21, ch: "call", label: tm.label, sub: tm.sub, frac: xTbFrac([landed, landed + 5], now), state: "due", title: `Call \xB7 landed ${xFmt(landed)} \xB7 ${w} min ago \xB7 due now` }), /* @__PURE__ */ I.createElement("div", { className: "x-wf-mini-t" }, /* @__PURE__ */ I.createElement("span", { className: "x-name" }, v.lead.name), /* @__PURE__ */ I.createElement("span", { className: "x-wf-mini-sub" }, "Landed ", xFmt(landed), " \xB7 ", st.text)), /* @__PURE__ */ I.createElement("button", { className: "btn x-wf-btn", onClick: (e) => {
+      e.stopPropagation();
+      xWFGo(v.lead.id);
+    } }, "Call"));
+  }) : /* @__PURE__ */ I.createElement("div", { className: "x-wf-empty" }, "None waiting \xB7 a new lead gets its first call inside a minute."));
+}
+function XWFSoon({ views, now }) {
+  const near = (l) => (l.source === "XD" || l.source === "RI") && l.day >= -3 && l.day <= 0;
+  const list = views.filter((v) => v.current && (v.lead.at || near(v.lead))).sort((a, b) => a.current.tomorrow - b.current.tomorrow || a.current.slot - b.current.slot);
+  return /* @__PURE__ */ I.createElement("div", { className: "card x-wf-soon" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Coming up"), /* @__PURE__ */ I.createElement("span", { className: "count" }, "next 3 days")), list.length ? /* @__PURE__ */ I.createElement("div", { className: "x-wf-soon-list" }, list.map((v) => {
+    const t = v.current, tm = t.tomorrow ? { label: "9:00", sub: "AM" } : xTbTime(t.slot, true), due = xIsDue(t, now);
+    const kind = v.lead.at ? /^(Booked|Callback)\b/.test(v.lead.reason) ? v.lead.reason : `Booked \xB7 ${v.lead.reason}` : v.lead.day === 0 ? `Renews today \xB7 ${t.step.what}` : `Renews in ${-v.lead.day} days \xB7 ${t.step.what}`;
+    return /* @__PURE__ */ I.createElement("button", { key: v.lead.id, className: "x-wf-mini x-wf-soon-row", onClick: () => xWFGo(v.lead.id) }, /* @__PURE__ */ I.createElement(XTimeBox, { h: 34, ch: t.ch, label: tm.label, sub: tm.sub, frac: xTbFrac(xTbWindow(t, null), now), state: t.blocked ? "blocked" : due ? "due" : "planned", title: `${XCH[t.ch]} \xB7 ${t.tomorrow ? "tomorrow 9:00 AM" : xFmt(t.slot)} \xB7 ${due ? "due now" : "planned"}` }), /* @__PURE__ */ I.createElement("span", { className: "x-wf-mini-t" }, /* @__PURE__ */ I.createElement("span", { className: "x-name" }, v.lead.name), /* @__PURE__ */ I.createElement("span", { className: "x-wf-mini-sub", title: kind }, XCH[t.ch], " \xB7 ", t.tomorrow ? "tomorrow 9:00 AM" : xFmt(t.slot), due ? " \xB7 due now" : "", " \xB7 ", kind)));
+  })) : /* @__PURE__ */ I.createElement("div", { className: "x-wf-empty" }, "Nothing booked or renewing in the next three days."));
+}
+function XWorkflow({ persona }) {
+  const s = useXS();
+  const [, bump] = I.useState(0);
+  const prevIds = I.useRef([]);
+  XS.persona = persona;
+  if (!XS.seeded) {
+    XS.seeded = true;
+    if (!XFRESH) xSeedUpTo(XS.clock, true);
+  }
+  const now = xClock();
+  const day = xBuildDay(XQ, now);
+  const pr = xProgress(day, now);
+  const views = pr.views;
+  const order = xWorkOrder(views, now);
+  const next = order.find((v) => xIsDue(v.current, now)) || order[0] || null;
+  const handled = views.filter((v) => !v.current && v.doneTs.length);
+  const coolDone = XCOOL.filter((l) => s.cool[l.id] != null).length;
+  const wins = handled.length + coolDone;
+  const open = s.open;
+  const info = {};
+  for (const v of views) info[v.lead.id] = xWFInfo(v, now, false);
+  const byId = {};
+  for (const v of views) byId[v.lead.id] = v;
+  const t0 = Date.now(), strike = s.wfStrike || {};
+  const striking = (id) => strike[id] != null && t0 - strike[id] < XWF_FOLD_MS;
+  const dueIds = order.filter((v) => xIsDue(v.current, now) && info[v.lead.id].mode === "live").map((v) => v.lead.id);
+  const restIds = views.filter((v) => !dueIds.includes(v.lead.id) && info[v.lead.id].mode !== "done").sort((a, b) => info[a.lead.id].sort - info[b.lead.id].sort).map((v) => v.lead.id);
+  const mainIds = [...dueIds, ...restIds];
+  for (const v of views) {
+    const id = v.lead.id;
+    if (info[id].mode !== "done" || !striking(id)) continue;
+    const at = prevIds.current.indexOf(id);
+    mainIds.splice(at < 0 ? mainIds.length : Math.min(at, mainIds.length), 0, id);
+  }
+  const doneIds = views.filter((v) => info[v.lead.id].mode === "done" && !striking(v.lead.id)).sort((a, b) => info[b.lead.id].sort - info[a.lead.id].sort).map((v) => v.lead.id);
+  I.useEffect(() => {
+    prevIds.current = mainIds;
+  });
+  I.useEffect(() => {
+    const id = XS.wfScroll;
+    if (!id) return;
+    XS.wfScroll = null;
+    const el = document.querySelector(`.x-wf [data-lead="${id}"]`);
+    if (!el) return;
+    let calm = false;
+    try {
+      calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (e) {
+    }
+    const r = el.getBoundingClientRect();
+    if (r.top < 89 || r.top > window.innerHeight * 0.618) el.scrollIntoView({ block: "start", behavior: calm ? "auto" : "smooth" });
+  });
+  const act = (v, k) => {
+    if (k !== "skip") {
+      xSet((st) => ({ wfStrike: { ...st.wfStrike || {}, [v.lead.id]: Date.now() }, wfLast: { id: v.lead.id, k, at: Date.now() } }));
+      setTimeout(() => bump((x) => x + 1), 34);
+      setTimeout(() => bump((x) => x + 1), XWF_FOLD_MS + 13);
+    }
+    xAct(v, k, order);
+  };
+  const toggle = (id) => xSet({ open: open === id ? "" : id, wfLast: null });
+  const item = (id, extra) => {
+    const v = byId[id];
+    return /* @__PURE__ */ I.createElement(
+      XWFItem,
+      {
+        key: id,
+        v,
+        info: info[id],
+        now,
+        persona,
+        isOpen: open === id && info[id].mode !== "done",
+        extra,
+        onToggle: () => toggle(id),
+        onAct: (k) => act(v, k),
+        onUndo: () => xUndo(v)
+      }
+    );
+  };
+  const coolToggle = (id) => xSet((st) => {
+    const cool = { ...st.cool };
+    if (cool[id] != null) delete cool[id];
+    else cool[id] = xClock();
+    return { cool, open: st.open === id ? "" : st.open };
+  });
+  const nextT = next && next.current;
+  const nextWhen = nextT ? nextT.wk === "now" && next.lead.seen != null ? "now" : xIsDue(nextT, now) ? "due now" : nextT.tomorrow ? "tomorrow 9:00 AM" : `at ${xFmt(nextT.slot)}` : "";
+  return /* @__PURE__ */ I.createElement("section", { className: "view active x-today x-wf" }, /* @__PURE__ */ I.createElement("div", { className: "x-wf-line" }, /* @__PURE__ */ I.createElement("div", { className: "x-wf-line-l" }, /* @__PURE__ */ I.createElement("span", { className: "x-wf-clock", title: "Demo clock" }, xFmt(now)), /* @__PURE__ */ I.createElement(XStatusLine, { pr, next, now, onOpen: xWFGo }), next && /* @__PURE__ */ I.createElement("span", { className: "x-wf-next" }, "Next: ", /* @__PURE__ */ I.createElement("b", null, XCH[nextT.ch], " ", next.lead.name), " \xB7 ", nextWhen, /* @__PURE__ */ I.createElement("button", { className: "x-wf-open", onClick: () => xWFGo(next.lead.id) }, "Open"))), /* @__PURE__ */ I.createElement("div", { className: "x-wf-line-r" }, /* @__PURE__ */ I.createElement(XCompliance, { day }), /* @__PURE__ */ I.createElement(XViewSwitch, { view: "workflow" }), /* @__PURE__ */ I.createElement("button", { className: "x-planlink", onClick: () => xSet({ view: "plan" }), title: "The whole day, hour by hour" }, "Day plan \u2192"))), /* @__PURE__ */ I.createElement("div", { className: "x-wf-grid" }, /* @__PURE__ */ I.createElement("div", { className: "card x-wf-list" }, /* @__PURE__ */ I.createElement("div", { className: "card-head" }, /* @__PURE__ */ I.createElement("span", { className: "title" }, "Today's prospects"), /* @__PURE__ */ I.createElement("span", { className: "count" }, XQ.length + XCOOL.length, " today \xB7 ", wins, " small win", wins === 1 ? "" : "s")), /* @__PURE__ */ I.createElement("div", { className: "x-wf-rows" }, mainIds.map((id) => {
+    if (info[id].mode === "done" && striking(id)) return item(id, " row-done-anim" + (t0 - strike[id] > 30 ? " is-fold" : ""));
+    return item(id);
+  })), /* @__PURE__ */ I.createElement("details", { className: "x-later x-cool x-wf-fold x-wf-cool" }, /* @__PURE__ */ I.createElement("summary", null, XCOOL.length, " cooler leads \xB7 open time", coolDone ? ` \xB7 ${coolDone} done` : ""), XCOOL.map((l) => {
+    const ci = xWFCoolInfo(l), isOpen = open === l.id && ci.mode === "cool";
+    return /* @__PURE__ */ I.createElement("div", { key: l.id, className: "x-wf-item x-wf-coolitem" + (isOpen ? " is-open" : "") + (ci.mode === "done" ? " is-done" : ""), "data-lead": l.id }, /* @__PURE__ */ I.createElement(XWFRowLine, { lead: l, v: null, info: ci, isOpen, onToggle: () => toggle(l.id), onUndo: () => coolToggle(l.id) }), isOpen && /* @__PURE__ */ I.createElement(XWFCoolCard, { l, ch: ci.ch, onDone: () => coolToggle(l.id), onClose: () => toggle(l.id) }));
+  })), doneIds.length > 0 && /* @__PURE__ */ I.createElement("details", { className: "x-later x-wf-fold x-wf-done" }, /* @__PURE__ */ I.createElement("summary", null, "Done today (", doneIds.length, ")"), doneIds.map((id) => item(id)))), /* @__PURE__ */ I.createElement(XWFNow, { v: next, now, last: s.wfLast }), /* @__PURE__ */ I.createElement(XWFFirst, { views, now }), /* @__PURE__ */ I.createElement(XWFSoon, { views, now })));
 }
 function xLook(views, order, now, handled, score) {
   const firsts = views.filter((v) => v.current && v.lead.seen != null && v.lead.day === 0 && v.current.wk === "now").sort((a, b) => xFreshKey(a.lead, now) - xFreshKey(b.lead, now));

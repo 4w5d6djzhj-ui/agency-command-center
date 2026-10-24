@@ -1,5 +1,5 @@
 // Workflow test for a new team member: can they find the first action without instruction, and how many
-// taps and how much scrolling do the five daily tasks take? Run against v1 (/) and v2 (/v2/).
+// taps and how much scrolling do the five daily tasks take? Run against v1 (/, plain) and v2 (/tools/dist/v2/).
 import { chromium } from '/opt/npm-tools/node_modules/playwright/index.mjs';
 const base = 'http://127.0.0.1:4210';
 const b = await chromium.launch();
@@ -11,7 +11,7 @@ async function open(site, vp) {
   const p = await ctx.newPage(); const errs = [];
   p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error' && !/fonts.googleapis|gstatic|ERR_TUNNEL/.test(m.text())) errs.push(m.text()); });
   const t0 = Date.now();
-  await p.goto(site === 'v1' ? `${base}/` : `${base}/v2/`, { waitUntil: 'networkidle' });
+  await p.goto(site === 'v1' ? `${base}/` : `${base}/tools/dist/v2/?view=lanes`, { waitUntil: 'networkidle' });
   const g = p.locator('button.gate-accept, #gateAccept'); if (await g.count()) await g.first().click();
   await p.waitForTimeout(400);
   const load = Date.now() - t0;
@@ -35,19 +35,19 @@ for (const vp of ['desk', 'phone']) {
     log('v1', vp, 'colors', await colors(p));
     // T1: first call — where is the primary Call button and the script?
     const callBtn = p.locator('.x-row.is-open .x-act, .x-row .btn:has-text("Call")').first();
-    log('v1', vp, 'T1_call_button_y', await boxY(p.locator('.x-row.is-open .btn, .x-row.is-open .x-act')));
+    log('v1', vp, 'T1_call_button_y', await boxY(p.locator('.x-row.is-open .btn, .x-row.is-open .x-act, .x-wf-now .x-wf-hero-btn'))); // v17: Workflow's Now box
     log('v1', vp, 'T1_nowbar_in_first_screen', (await p.locator('.x-nowbar').count()) > 0);
     log('v1', vp, 'T1_script_visible_at_load', (await p.locator('.x-row.is-open .x-say, .x-row.is-open .x-script, .x-row.is-open .x-moves').count()) > 0);
     log('v1', vp, 'T1_status_line_y', await boxY(p.locator('.x-status')));
     // T2: log an outcome
     const talked = p.locator('.x-row.is-open button', { hasText: 'Talked' }).first();
-    log('v1', vp, 'T2_outcome_clicks', (await talked.count()) ? 1 : null);
+    log('v1', vp, 'T2_outcome_clicks', (await talked.count()) ? 1 : (await p.locator('.x-wf-hero-btn').count()) ? 2 : null);
     // T3: approve routine messages: one button
     log('v1', vp, 'T3_approve_clicks', (await p.locator('.x-approve-all').count()) ? 1 : 'per-message');
     // T4: STOP gate: is the reason visible on the lead's row without opening?
     await p.$$eval('details.x-later', ds => ds.forEach(d => { d.open = true; }));
-    const nadia = p.locator('.x-row', { has: p.locator('.x-name:text-is("Nadia Sandbox")') }).first();
-    log('v1', vp, 'T4_stop_reason_on_row', /STOP/i.test(await nadia.innerText().catch(() => '')));
+    const nadia = p.locator('.x-row, .x-wf-item', { has: p.locator('.x-name:text-is("Nadia Sandbox")') }).first();
+    log('v1', vp, 'T4_stop_reason_on_row', /STOP/i.test(await nadia.textContent().catch(() => ''))); // textContent: the Workflow's Text mark says it in its title
     // T5: compliance records: clicks to see them
     const comp = p.locator('.x-comp > summary').first();
     log('v1', vp, 'T5_compliance_clicks', (await comp.count()) ? 1 : null);

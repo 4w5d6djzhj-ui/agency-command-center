@@ -190,8 +190,9 @@ function XToday({ persona }) {
   const s = useXS();
   const [, setTick] = I.useState(0);
   I.useEffect(() => { const t = setInterval(() => setTick((x) => x + 1), 1000); return () => clearInterval(t); }, []);
+  if (s.view === "workflow") return <XWorkflow persona={persona} />;
   if (s.view === "classic") return <XClassic persona={persona} />;
-  if (s.view === "plan") return <><div className="x-backbar"><button className="x-planlink" onClick={() => xSet({ view: "queue" })}>← Back to today's queue</button></div><XDayPlan persona={persona} /></>;
+  if (s.view === "plan") { const home = s.home === "workflow" || s.home === "classic" ? s.home : "queue"; return <><div className="x-backbar"><button className="x-planlink" onClick={() => xSet({ view: home })}>{home === "workflow" ? "← Back to Workflow" : home === "classic" ? "← Back to Classic" : "← Back to today's queue"}</button></div><XDayPlan persona={persona} /></>; }
 
   XS.persona = persona;
   if (!XS.seeded) { XS.seeded = true; if (!XFRESH) xSeedUpTo(XS.clock, true); }

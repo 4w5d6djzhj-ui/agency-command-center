@@ -9,12 +9,13 @@ holds the built files (`index.html`, `assets/`) plus everything needed to rebuil
 | Path | What |
 | --- | --- |
 | `index.html`, `v2/index.html` | The two demos **as served: encrypted with the access code** (StatiCrypt, PBKDF2 + AES, decrypted in the browser). `assets/` and `v2/fonts/` hold fonts only. |
+| `next/index.html` | The Next Step team tool, encrypted the same way. **Its plain source is not in this repo** (it holds the word tracks); `protect.py` reads it from `NEXT_SRC`. |
 | `tools/dist/` | The plain builds: `index.html` + `assets/` (main site) and `v2/index.html` + `fonts/`. Tests run against these; edit v2 here. |
 | `tools/protect.py` | Inlines the main bundle, encrypts both pages with the code, moves the plain builds to `tools/dist/`. |
 | `tools/patch/patch.py` | Rebuilds `index.html` + `assets/` from the v6 base commit and `src/`. |
-| `tools/patch/src/*.jsx`, `ext.css` | The injected components: engine (sequencing), today (leads), queue (Today view), compose, compare, compliance, charts, protime (open time + cooler leads), daystrip, plan, nowbar, evidence (rules and tags), moves. |
+| `tools/patch/src/*.jsx`, `ext.css` | The injected components: engine (sequencing), timebox (the time box and the marks), today (leads), queue (Action queue), compose, compare, compliance, charts, protime (open time + cooler leads), daystrip, plan, nowbar, classic, workflow (the default Today view since v17), evidence (rules and tags), moves. |
 | `tools/patch/harness.mjs` | Headless run of the day builder: `node harness.mjs [clockMinutes] [--fresh] [--list]`. |
-| `tools/tests/*.mjs` | Playwright suites: `v11-check` (seeded 11 AM state, open time, cooler leads), `v9-check` (fresh day, lanes, compliance, Compose corner), `v6-check`, `v5-check`, `demo-test`, `v8-mobile`, `v12-look` (screenshots). |
+| `tools/tests/*.mjs` | Playwright suites: `workflow-v17` (the Workflow view), `v11-check` (seeded 11 AM state, open time, cooler leads), `v9-check` (fresh day, lanes, compliance, Compose corner), `v6-check`, `v5-check`, `demo-test`, `v8-mobile`, `v12-look` (screenshots). |
 
 ## Rebuild
 
@@ -23,7 +24,7 @@ cd tools/patch
 npm install esbuild            # once; node_modules is not committed
 python3 -I patch.py /path/to/this/repo          # writes the plain page + assets at the repo root
 cd .. && npm install staticrypt                 # once, anywhere; point STATICRYPT_DIR at that folder
-STATICRYPT_DIR=/path/to/that python3 tools/protect.py /path/to/this/repo <access code>
+STATICRYPT_DIR=/path/to/that NEXT_SRC=/private/path/next-step.html python3 tools/protect.py /path/to/this/repo <access code>
 ```
 
 `protect.py` moves the plain build to `tools/dist/`, inlines the bundle into one file and encrypts it; the
@@ -39,9 +40,14 @@ matters (engine before the views, evidence last).
 
 ```
 python3 -m http.server 4210 --bind 127.0.0.1      # from the repo root
-node tools/tests/v11-check.mjs "http://127.0.0.1:4210/tools/dist/"           # seeded state: run WITHOUT ?fresh=1
-node tools/tests/v9-check.mjs  "http://127.0.0.1:4210/tools/dist/?fresh=1"   # the others run WITH ?fresh=1
+node tools/tests/workflow-v17.mjs "http://127.0.0.1:4210/tools/dist/"                   # the default view, no parameters
+node tools/tests/v11-check.mjs "http://127.0.0.1:4210/tools/dist/?view=queue"           # seeded state: run WITHOUT ?fresh=1
+node tools/tests/v9-check.mjs  "http://127.0.0.1:4210/tools/dist/?fresh=1&view=queue"   # the others run WITH ?fresh=1
 ```
+
+Today opens on the Workflow view; `?view=workflow|classic|queue` picks the view the page opens on (the older
+suites test the Action queue, so they pass `view=queue`). Before `protect.py` has run, the plain page sits at
+the repo root, so use `http://127.0.0.1:4210/` in place of `/tools/dist/`.
 
 Playwright is imported from `/opt/npm-tools/node_modules/playwright/index.mjs` in these scripts; change the
 import path to your install.

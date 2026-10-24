@@ -4,7 +4,10 @@ v8: sequencing engine (lead type x style x consent x hour), Day plan with logic,
 test calculator, demo clock, Now bar on every screen, Compose best-now corner, brand line + tagline.
 v9: lean Today (andon line, process before results, calls vs messages to check, small wins), compliance
 check, plan-vs-done and strategy charts, warm leads with consent on file.
-Usage: python3 -I patch.py REPO_DIR"""
+v17: Workflow is the default Today view (one status line, four boxes, a time box on every task).
+Usage: python3 -I patch.py REPO_DIR
+Writes a plain index.html + assets/ at the repo root; when the root page is the encrypted one, the plain
+page is rebuilt from tools/dist/index.html (or the v6 base page). tools/protect.py locks it afterwards."""
 import base64, glob, hashlib, os, re, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -63,7 +66,7 @@ def match_end(s, i):
 
 
 # 0. compile the components (JSX -> React.createElement on the bundle's React, `I`)
-src_files = ["moves.jsx", "compose.jsx", "engine.jsx", "compare.jsx", "today.jsx", "queue.jsx", "compliance.jsx", "charts.jsx", "protime.jsx", "daystrip.jsx", "plan.jsx", "nowbar.jsx", "demo.jsx", "classic.jsx", "look.jsx", "evidence.jsx"]
+src_files = ["moves.jsx", "compose.jsx", "engine.jsx", "compare.jsx", "timebox.jsx", "today.jsx", "queue.jsx", "compliance.jsx", "charts.jsx", "protime.jsx", "daystrip.jsx", "plan.jsx", "nowbar.jsx", "demo.jsx", "classic.jsx", "workflow.jsx", "look.jsx", "evidence.jsx"]
 src = "\n".join(open(os.path.join(HERE, "src", f), encoding="utf-8").read() for f in src_files)
 os.makedirs(os.path.join(HERE, "build"), exist_ok=True)
 open(os.path.join(HERE, "build", "ext.jsx"), "w", encoding="utf-8").write(src)
@@ -155,6 +158,10 @@ def digest(s):
 
 html_path = os.path.join(repo, "index.html")
 html = open(html_path, encoding="utf-8").read()
+if "staticrypt" in html or not re.search(r"assets/index-[\w]+\.js", html):
+    # the served page is the locked one: start the plain page from the plain build (or the v6 page)
+    plain = os.path.join(repo, "tools", "dist", "index.html")
+    html = open(plain, encoding="utf-8").read() if os.path.exists(plain) else base_html
 cur_js = re.search(r"assets/(index-[\w]+\.js)", html).group(1)
 cur_css = re.search(r"assets/(index-[\w]+\.css)", html).group(1)
 new_js = f"index-{digest(js)}.js"

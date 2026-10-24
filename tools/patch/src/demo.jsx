@@ -1,5 +1,5 @@
 // Demo controls live in one drawer, out of a team member's way: who you're acting as, the demo clock, the
-// Today view (queue, day plan, classic), coaching on or off, and start the day over. The header shows one
+// Today view (workflow, classic, queue, day plan), coaching on or off, and start the day over. The header shows one
 // small "Demo" button; the product itself carries none of these switches.
 function XDemoDrawer({ persona, onPersonaChange }) {
   const s = useXS();
@@ -34,7 +34,7 @@ function XDemoDrawer({ persona, onPersonaChange }) {
           <div className="x-demo-row x-viewbar">
             <span className="x-viewbar-label">Today view</span>
             <div className="x-seg" role="group" aria-label="Today view">
-              {[["queue", "Action queue"], ["plan", "Day plan"], ["classic", "Classic"]].map(([k, l]) => <button key={k} className={s.view === k ? "active" : ""} aria-pressed={s.view === k} onClick={() => { xSet({ view: k, demoOpen: false }); if (XNav.go) XNav.go("today"); }}>{l}</button>)}
+              {[...XVIEWS, ["plan", "Day plan"]].map(([k, l]) => <button key={k} className={s.view === k ? "active" : ""} aria-pressed={s.view === k} onClick={() => { xSet(k === "plan" ? { view: k, demoOpen: false } : { view: k, home: k, classicWork: false, demoOpen: false }); if (XNav.go) XNav.go("today"); }}>{l}</button>)}
             </div>
           </div>
           <div className="x-demo-row x-statebar">

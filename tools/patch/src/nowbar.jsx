@@ -7,7 +7,11 @@ function XNowBar() {
   const views = xLeadViews(xBuildDay(XQ, now));
   const order = xWorkOrder(views, now);
   const v = order[0];
-  const go = (id) => { xSet({ view: "queue", open: id, focus: false }); if (XNav.go) XNav.go("today"); try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {} };
+  const go = (id) => {
+    // on the Workflow the card opens beneath its row and scrolls into view; elsewhere the queue opens at the top
+    if (XS.home === "workflow") { xSet({ view: "workflow", open: id, focus: false, wfLast: null, wfScroll: id }); if (XNav.go) XNav.go("today"); return; }
+    xSet({ view: "queue", open: id, focus: false }); if (XNav.go) XNav.go("today"); try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {}
+  };
   if (!v) return <button className="x-nowbar is-clear" onClick={() => go(null)}><span className="x-nowbar-k">Done</span><span className="x-nowbar-name">All {XQ.length} touched today</span></button>;
   const t = v.current, due = xIsDue(t, now), st = xStatusOf(t, now);
   return (

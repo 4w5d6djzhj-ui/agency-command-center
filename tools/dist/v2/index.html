@@ -314,6 +314,136 @@ select{width:100%;font:inherit;font-size:13px;padding:8px 8px;min-height:44px;bo
   .nowstat b{font-size:34px}
   .meter{grid-template-columns:89px 1fr 55px}
 }
+
+/* The time box · states and motion (Fibonacci timings). Same in v1, v2 and the Next Step tool. */
+.tb { display: inline-block; vertical-align: middle; overflow: visible; flex: none; }
+.tb text { user-select: none; }
+.tb-due .tb-front, .tb-due .tb-fill { filter: saturate(1.15); }
+.tb-due .tb-ring { stroke: var(--accent, #0F3D5C); stroke-opacity: .9; stroke-width: 1.5; }
+.tb-due { animation: tb-pulse 1618ms cubic-bezier(.33,0,.2,1) 1; }
+@keyframes tb-pulse { 0% { transform: scale(1); } 23% { transform: scale(1.0618); } 61% { transform: scale(1); } 100% { transform: scale(1); } }
+.tb-done { opacity: .85; }
+.tb-blocked .tb-ring { stroke: #8C2F39; stroke-opacity: .7; stroke-dasharray: 2 2; }
+.tb-wrap { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
+.tb-badge { font: 500 10px/1.272 var(--mono, ui-monospace, monospace); letter-spacing: .02em; color: var(--muted, #5D6772); text-transform: uppercase; }
+.tbm { display: inline-block; vertical-align: middle; margin-right: 3px; }
+.tbm-row { display: inline-flex; align-items: center; gap: 2px; }
+/* a row that just completed: strike, then fold (377 + 610 ms) */
+.row-done-anim { text-decoration: line-through; text-decoration-color: var(--muted, #5D6772); opacity: .62; transition: opacity 377ms ease, max-height 610ms ease 377ms, margin 610ms ease 377ms; }
+@media (prefers-reduced-motion: reduce) { .tb-due { animation: none; } .row-done-anim { transition: none; } }
+
+/* v2.5 · Workflow: one status line, four boxes on the golden split, a time box for every task */
+.tb-calm .tb-due{animation:none}
+#view-today[data-view="workflow"]>.lanespanel,#view-today[data-view="workflow"]>.cols{display:none}
+#view-today:not([data-view="workflow"])>.wf,#view-today:not([data-view="workflow"]) .wfstat{display:none}
+#view-today[data-view="lanes"] #look{display:none}
+#view-today[data-view="look"] .strip,#view-today[data-view="look"] .striplegend,#view-today[data-view="look"] .burnbox,#view-today[data-view="look"]>.cols{display:none}
+#view-today[data-view="look"] .nowline{grid-template-columns:minmax(0,1fr)}
+.wfbar{display:flex;align-items:center;gap:8px 21px;flex-wrap:wrap;padding:0 0 13px}
+.wfstat{display:flex;align-items:center;gap:5px 8px;flex-wrap:wrap;min-width:0;font-size:16.5px;line-height:1.272}
+.wfstat .clock{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:500}
+.wfstat .dot{color:var(--muted)}
+.wfstat .btn{margin-left:5px}
+.wfctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto}
+.cpill{position:relative}
+.cpill>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:5px 13px;border-radius:21px;font-size:13px;font-weight:700;color:var(--ok);background:var(--ok-soft);white-space:nowrap}
+.cpill>summary::-webkit-details-marker{display:none}
+.cpop{position:absolute;right:0;top:calc(100% + 5px);z-index:30;width:377px;max-width:calc(100vw - 26px);background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 34px rgba(0,0,0,.13);padding:13px}
+.cpop .checks{margin:0;padding:0;border:0;font-size:13px;display:grid;gap:3px}
+.cpop .sub{margin:0 0 5px}
+.vsw button{min-height:34px;padding:5px 13px}
+.planlink{display:inline-flex;align-items:center;min-height:34px;padding:5px;font-size:13px;font-weight:700;color:var(--accent);text-decoration:none;white-space:nowrap}
+.planlink:hover{text-decoration:underline;text-underline-offset:3px}
+@media (pointer:coarse){.vsw button,.cpill>summary,.planlink{min-height:44px}}
+.wf{display:grid;grid-template-columns:minmax(0,61.8fr) minmax(0,38.2fr);gap:21px;align-items:start}
+.wfside{display:flex;flex-direction:column;gap:21px;min-width:0}
+@media (min-width:988px) and (min-height:610px){.wfside{position:sticky;top:13px}}
+.wbhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:5px}
+.wbhead h2{font-size:16.5px;line-height:1.272}
+.wbhead .meta{font-size:13px;color:var(--muted);white-space:nowrap}
+.wnowbox{border-color:var(--accent)}
+.wchip{flex:none;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.04em;line-height:1.618;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:0 5px;white-space:nowrap}
+.wempty{font-size:13px;color:var(--muted);margin:3px 0 0}
+/* box 1 · the rows */
+.wlist{list-style:none;margin:0;padding:0}
+.wrow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:13px;padding:8px 0;border-top:1px solid var(--line2)}
+.wlist>.wrow:first-child{border-top:0}
+.wrow-head{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;column-gap:13px;min-width:0}
+.wrow-head[data-act]{cursor:pointer}
+.wrow-box{display:flex;align-items:center}
+.wrow-who{display:flex;align-items:center;gap:8px;min-width:0}
+.wrow-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.wrow-head[data-act]:hover .wrow-name{color:var(--accent)}
+.wrow-meta{display:flex;align-items:center;gap:13px;min-width:0}
+.wrow-next{font-size:13px;width:233px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.wrow-meta .tbm-row{flex:none}
+.wn-s{display:none}
+.tb-calm{display:inline-flex}
+.wrow>.btn{min-width:68px;justify-content:center}
+.wrow.is-approved .wrow-next{color:var(--ok);font-weight:700}
+.wrow.is-blocked .wrow-next{color:var(--bad);font-weight:700}
+.wrow.is-done .wrow-name,.wrow.is-done .wrow-next{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--muted)}
+.wrow.is-done .wrow-name{font-weight:400}
+.wrow.row-fold{overflow:hidden}
+.wlistbox details.fold{border-top:1px solid var(--line2)}
+.wlistbox details.fold>summary{font-size:13px}
+.wlistbox details.wdone>summary{color:var(--ok)}
+/* the work card beneath a row */
+.wcard{grid-column:1/-1;margin-top:8px;padding:13px;background:var(--soft);border-radius:5px;display:grid;gap:13px;min-width:0}
+.wcard .workhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wcard .script .move{padding:5px 8px 5px 55px}
+.wwhy{margin:0;font-size:13px;line-height:1.618;max-width:68ch}
+.wwhy b{color:var(--accent)}
+body.nocoach .wwhy{display:none}
+.wtl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 21px}
+.wtl li{display:flex;align-items:center;gap:8px;min-width:0}
+.wtl-k{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wtl-t{display:block;font-size:13px;line-height:1.272}
+.wacts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wedit{width:100%;font:inherit;font-size:16.5px;line-height:1.618;border:1px solid var(--line);border-radius:5px;padding:8px 13px;background:var(--panel);color:var(--ink);resize:vertical}
+.wstop{margin:0;font-size:13px;max-width:68ch}
+/* box 2 · now */
+.wnow-done{font-size:13px;color:var(--ok);font-weight:700;margin:0 0 8px}
+.wnow{display:flex;gap:21px;align-items:center;min-width:0}
+.wnow-box{flex:none;display:flex}
+.wnow-body{min-width:0;display:grid;gap:3px}
+.wnow-name{font-family:var(--display);font-weight:700;font-size:21px;line-height:1.272;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.wnow-why{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wnow-act{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-top:5px}
+.wnow-when{font-size:13px;font-variant-numeric:tabular-nums}
+/* boxes 3 and 4 · short lists of time boxes */
+.wmini-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.wmini{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:3px 0;min-height:44px;border-radius:5px}
+.wmini-box{flex:none;display:flex;width:66px}
+.wmini-txt{min-width:0}
+.wmini-name{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wmini-when{display:block;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wmini:hover .wmini-name{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.wsoon{background:linear-gradient(var(--line),var(--line)) 27px 13px/1px calc(100% - 26px) no-repeat}
+@media (max-width:1279px){
+  .wrow-head{grid-template-columns:42px minmax(0,1fr);grid-template-areas:"box who" "box meta";row-gap:2px}
+  .wrow-box{grid-area:box}.wrow-who{grid-area:who}.wrow-meta{grid-area:meta;gap:8px}
+  .wrow-next{width:auto;flex:0 1 auto}
+}
+@media (max-width:987px){
+  .wf{display:flex;flex-direction:column;gap:13px}
+  .wfside{display:contents}
+  .wnowbox{order:1}.wlistbox{order:2}.wfirstbox{order:3}.wsoonbox{order:4}
+  .wf{align-items:stretch}
+  .wfbar{row-gap:8px}
+  .wfstat .d2,.cpill .cp-t{display:none}
+  .wfctl{margin-left:0;gap:8px}
+  .cpill>summary{padding:5px 8px}
+  .vsw button{padding:5px 8px}
+  .planlink{padding:5px 0}
+  .cpop{left:0;right:auto}
+  .wnow{gap:13px}
+  .wrow{column-gap:8px}
+  .wrow-head{column-gap:8px}
+  .wrow>.btn{min-width:55px;padding:5px 8px}
+  .wn-l{display:none}.wn-s{display:inline}
+  .wtl{grid-template-columns:minmax(0,1fr)}
+}
 </style>
 
 </head>
@@ -343,6 +473,7 @@ select{width:100%;font:inherit;font-size:13px;padding:8px 8px;min-height:44px;bo
       <div class="demopanel" id="demoPanel" hidden>
         <div class="demorow"><span class="lbl">Acting as</span><div class="seg" role="group" aria-label="Viewing as" id="persona"><button class="on" data-p="Maya">Maya · Producer</button><button data-p="Alex">Alex · Principal</button></div></div>
         <div class="demorow"><span class="lbl">Clock</span><div class="seg" role="group" aria-label="Demo clock" id="clocks"></div></div>
+        <div class="demorow"><span class="lbl">View</span><div class="seg" role="group" aria-label="Today's view" id="views"></div></div>
         <div class="demorow"><span class="lbl">Coaching</span><div class="seg" role="group" aria-label="Coaching" id="coach"><button class="on" data-c="1">On</button><button data-c="0">Off</button></div></div>
         <div class="demonote">Demonstration controls only. A team member's screen opens on today's plan with none of them.</div>
       </div>
@@ -360,8 +491,24 @@ select{width:100%;font:inherit;font-size:13px;padding:8px 8px;min-height:44px;bo
 </nav>
 
 <!-- TODAY -->
-<section id="view-today" class="view on">
-  <div class="panel">
+<section id="view-today" class="view on" data-view="workflow">
+  <div class="wfbar" id="wfbar">
+    <div class="wfstat" id="wfstat"></div>
+    <div class="wfctl">
+      <details class="cpill" id="cpill"><summary id="cpillSum"></summary><div class="cpop"><p class="sub" id="cpillNote"></p><ul class="checks" id="cpillList"></ul></div></details>
+      <div class="seg vsw" id="vsw" role="group" aria-label="View"></div>
+      <a class="planlink" href="#plans" id="planlink" title="Every lead type's plan, step by step">Day plan →</a>
+    </div>
+  </div>
+  <div class="wf" id="wf">
+    <section class="panel wlistbox" aria-labelledby="wb1"><div class="wbhead"><h2 id="wb1">Today's prospects</h2><span class="meta" id="wb1meta"></span></div><div id="wflist"></div></section>
+    <div class="wfside">
+      <section class="panel wnowbox" aria-labelledby="wb2"><div class="wbhead"><h2 id="wb2">Now</h2><span class="meta" id="wb2meta"></span></div><div id="wfnow"></div></section>
+      <section class="panel wfirstbox" aria-labelledby="wb3"><div class="wbhead"><h2 id="wb3">Needs first touch</h2><span class="meta" id="wb3meta"></span></div><div id="wffirst"></div></section>
+      <section class="panel wsoonbox" aria-labelledby="wb4"><div class="wbhead"><h2 id="wb4">Coming up</h2><span class="meta">next three days</span></div><div id="wfsoon"></div></section>
+    </div>
+  </div>
+  <div class="panel lanespanel">
     <div class="nowline">
       <div>
         <div class="nowstat" id="nowstat"></div>
@@ -370,7 +517,7 @@ select{width:100%;font:inherit;font-size:13px;padding:8px 8px;min-height:44px;bo
         <div class="striplegend"><span><i class="sw d"></i>touched</span><span><i class="sw"></i>planned, 20 warm</span><span><i class="sw c"></i>planned, 8 cooler</span><span id="helpcount"></span></div>
         <div class="look" id="look" role="group" aria-label="Today's look"></div>
       </div>
-      <div style="min-width:0;width:377px;max-width:100%"><svg class="burn" id="burn" viewBox="0 0 300 185" role="img" aria-label="Burn-up: touches done against the hour-by-hour plan"></svg><div class="tip" style="text-align:center">Done against the plan, hour by hour.</div></div>
+      <div class="burnbox" style="min-width:0;width:377px;max-width:100%"><svg class="burn" id="burn" viewBox="0 0 300 185" role="img" aria-label="Burn-up: touches done against the hour-by-hour plan"></svg><div class="tip" style="text-align:center">Done against the plan, hour by hour.</div></div>
     </div>
   </div>
 
@@ -1196,7 +1343,7 @@ const GROUPS = [
   { k: "renew", tag: "Renewal", title: "Renewal window", rule: "Counting back from the renewal: before the notice, then the 30 days after it." }
 ];
 const PRINC = [{"k": "1–20–60, then 6-5-3 in 22", "t": "A new internet lead: call inside a minute (five at most), email the quote at 20 minutes, call again at 30–60 minutes and once more by two hours. Then six calls and five emails over about 22 days, and at most three texts, only after they've talked to you and okayed texts. Then a short burst again at about 45 days. A default built from the largest lead datasets, not a proven formula; the test below is how it gets proven.", "ref": ["T1", "T2", "T3", "T15"]}, {"k": "Lead type starts the clock", "t": "Referral: same day, naming who sent them, the same six calls and five emails. X-date: 60 and 45 days out, then through the 30 days after the renewal notice. Rate increase: before the notice lands. Life event: within days, three touches. Win-back: three weeks before the anniversary, then the quote. Quoted, no decision: within 24 hours, then at three and six months.", "ref": ["T6", "T12", "T13"]}, {"k": "Style changes the words, never the pace", "t": "All four styles get the same cadence. Style changes the words, the length, the ask, and which channel carries the substance: a side-by-side email for a Thinker, logistics by text for a Doer once texts are okayed, voice first for a Storyteller, the numbers in writing for a Questioner. A wrong style guess about halves the response, so the style is set on a clear signal: what they said, how and how fast they reply.", "ref": ["T11"]}, {"k": "Speed, then persistence, then the hour", "t": "The best and worst hours differ by about 2.6 contact points; the full six-call sequence is worth about +110%. So the hour is set last and never delays a first call. Later touches fit a 9-to-5 day: emails at 9, calls and texts 10 to noon, lunch off, texts and emails 1–3, calls 3–5. The evidence's 4–6 pm calling window is traded for a day that ends at 5; a new lead still gets its first call inside a minute, lunch or not.", "ref": ["T4", "T5", "T8", "T9"]}, {"k": "Consent and the law set the walls", "t": "Washington: no commercial text without their clear OK in advance, and asking for a quote is not that OK; $100 a text. Texts only after the first conversation. Calls and texts 8 am–8 pm their time; after 8 pm they wait for the morning. A Do Not Call number is not called.", "ref": ["T7", "T10"]}, {"k": "Two voicemails at most", "t": "None on the first call to a new lead. About 15 seconds on the second; one more, under 30 seconds, on a later call. Customers can always get one.", "ref": ["T14"]}, {"k": "Priority sets the order", "t": "New leads inside their first five minutes (freshest first), then booked calls, then X-dates within three days, then today's referrals, then the day's due steps, then renewals and win-backs. The queue is this order; the Now bar is its first line.", "ref": ["T1", "T12"]}, {"k": "One line says what needs you", "t": "The top line of Today is the whole status: done, planned by now, and the next touch with its button. Read it in a glance and act; the 10-second goal is an acceptance test, not a proven threshold.", "ref": ["T22", "T19"]}, {"k": "Normal is quiet; exceptions get their own lane", "t": "Lanes in a fixed order: Needs a decision, Your calls, Messages to check. A lead the system stopped sits at the top with the reason in plain words; everything on plan looks calm.", "ref": ["T22", "T23"]}, {"k": "It stops itself and says why", "t": "No text without consent on file, no call or text after 8 pm, nothing to a Do Not Call number. A locked button says why; the compliance check at the top shows what was checked, how and when, and opens to the 20 consent records.", "ref": ["T23", "T20", "T7", "T37"]}, {"k": "Check the facts, then approve", "t": "Each drafted message shows the facts it was built from (name, quote, consent) with those parts marked. Approve sends it at its hour; at a pause point, one button approves the routine ones, and life-insurance messages are checked one at a time. Every send records who approved it and when.", "ref": ["T24", "T36"]}, {"k": "Like work together, in the system's order", "t": "Calls in one lane, messages in another, both in the order the plan sets. Choosing easy-first lowers output in large field data.", "ref": ["T25"]}, {"k": "Few things open at once", "t": "Each lane shows what's due and the next three; the rest of the day folds away until it's due.", "ref": ["T25", "T32"]}, {"k": "Stuck? One tap", "t": "The help button names the person it goes to and marks the card until they answer, like pulling the andon cord.", "ref": ["T23"]}, {"k": "Process first, results after", "t": "The scoreboard puts the work you control (touches, calls, life talks, referrals asked) ahead of the results (quotes, apps, households). Apps and households show week to date, because a day's count is too small to read.", "ref": ["T28", "T29"]}, {"k": "Done early, left late", "t": "Under halfway, each meter shows what's done; past halfway, what's left. Each person on the list is one square that fills when their touch is done.", "ref": ["T27", "T32"]}, {"k": "Your plan, not a ranking", "t": "Everyone sees team totals and their own plan. No leaderboard; a private ranking cut sales in a randomized trial.", "ref": ["T30"]}, {"k": "Coaching on or off", "t": "Newer team members see the tips and the why on every touch; experienced ones switch them off and keep the same layout and buttons.", "ref": ["T31"]}, {"k": "It starts set up, with no tour", "t": "The plan, the hours and the words are preset; a change is kept and marked “changed by you.” The guidance is in the work, not in a tutorial.", "ref": ["T16", "T17"]}, {"k": "Three pause points", "t": "Start (the huddle), midday, wrap-up: each under 90 seconds. Two if-then commitments for the week; one line on what worked at the end of the day.", "ref": ["T18", "T26", "T35", "T34"]}, {"k": "Counted by a tap, not ticked", "t": "A touch counts when a person sends, approves or logs it. In the live version the call, text and email logs confirm it.", "ref": ["T28", "T18"]}, {"k": "Undo, big targets, words with color", "t": "Anything reversible happens at once, with Undo. Buttons at least 44 px on touch screens; status always in words as well as color.", "ref": ["T21"]}, {"k": "One person at a time", "t": "Roll out to one team member, and move to the next after two weeks of better numbers, with a local champion to ask.", "ref": ["T19"]}, {"k": "Craft", "t": "Type and spacing step by the golden ratio (1.618), motion runs on Fibonacci timings, and the lettering is kerned with true ligatures. A finish choice, not a usability claim.", "ref": []}];
-const EVID = {"T1": "Speed to the first call. Within an hour, a web lead was about 7× likelier to qualify than after an hour, and 60× likelier than after a day (HBR 2011 audit and 1.25M leads). A first call inside one minute: +391% conversion (Velocify, 3.5M leads). Observational: trust the direction, not the multiplier. · Vendor data", "T2": "Day one, minute by minute: email at about 20 minutes, a second call at 30–60 minutes, a third at 1–2 hours. Emailed leads were 16% likelier to be reached by phone (Velocify contact-strategy data; never tested against other schedules). · Vendor data", "T3": "Six calls, five emails. 93% of eventual buyers were reached by the sixth call; calls on days 0, 0, 0, 1, 5 and 15, emails on days 0, 4, 8, 14 and 22. More than five emails before a conversation cut conversion 36% (Velocify, 3.5M leads). · Vendor data", "T4": "The hour matters least: the best and worst calling hours differ by about 2.6 contact points (about +7%), against about +110% from a full six-call sequence (Velocify). · Vendor data", "T5": "Calling windows: 10–11 am and 4–6 pm, with midday (12–3 pm) the weakest; Wednesday best, Friday worst (call-platform data, mostly office lines; MIT/InsideSales, 2007). · Vendor data", "T6": "Referrals: referred customers left about 18% less often and were worth more (Schmitt, Skiera & Van den Bulte, Journal of Marketing, 2011). Same day, naming who sent them. · Peer-reviewed", "T7": "Washington: no commercial text to a Washington cell number without clear, affirmative consent in advance, with no exception for people who asked for a quote; $100 a text since June 11, 2026 (RCW 19.190.060, .070 and .040; HB 2274). Sales calls 8 am–8 pm, name yourself within 30 seconds, honor do-not-call for a year (RCW 80.36.390). · Law", "T8": "Texts: replies peak near noon, with a small 3–4 pm bump in financial services; early-morning texts get fewer replies (35M lead texts, 2025). · Vendor data", "T9": "Email: Tuesday to Thursday 8–10 am, plus a 5–7 pm window for consumers; Saturday worst. Best and worst days differ by about 1.2 open-rate points, and 88.5% of replies arrive within 24 hours (email-platform data). · Vendor data", "T10": "Text after the first conversation, not before. In a 2,010-person randomized trial a live call beat a letter (31.8% vs 23.7%) and a text alone did worse than the letter (16.9%) (Coronado et al., 2018). Texting before phone contact cut reach 39%; texting after contact lifted conversion 112.6% (Velocify). · Peer-reviewed and vendor data", "T11": "Style: adapting to the buyer tracks with sales performance (r = .27 across 268 studies and 79,747 salespeople; Verbeke et al., 2011). Matched messages raised purchases up to 50%; mismatched ones converted at about half the matched rate (Matz et al., 2017, 3.7M people). No study tests pacing by style. · Peer-reviewed", "T12": "Renewals: shoppers tend to renew within 30 days of the renewal notice; 45% of switchers moved for $100 or less; people who quoted but stayed re-shop at about twice the rate within six months (LexisNexis; J.D. Power). The exact windows are inferences. · Industry data", "T13": "Win-back: price leavers came back most often and stayed longest; bundles won the most back but kept them the shortest; service fixes won fewer, longer-staying customers (Kumar, Bhagwat & Zhang, Journal of Marketing, 2015; about 53,000 customers). · Peer-reviewed", "T14": "Voicemail: across 300M calls, one or two voicemails doubled email replies, and three or more pushed replies below leaving none (Gong). None on the first call, about 15 seconds on the second, one more under 30 seconds later. · Vendor data", "T15": "Why structure pays: 70% of marketing leads were never followed up (461 reps at four firms; Sabnis et al., 2013). A 2014 secret shop of 25 insurers found 2.3 days to the first call, 1.45 call attempts, and 39% never called. After six calls and five emails, a short burst again at two weeks to 45 days (InsideSales). · Peer-reviewed and vendor data", "T16": "Defaults: across 58 studies and 73,675 people, defaults moved choices with d = 0.68 (Jachimowicz et al., 2019); automatic 401(k) enrollment took participation from 37% to about 86% (Madrian & Shea, 2001). · Peer-reviewed", "T17": "No tours: in a 70-person test, tutorials left task success unchanged (91% vs 94%) and made the same tasks feel harder (Nielsen Norman Group). Apple's guidance: people should understand an app by using it. · Guidance", "T18": "Pause points: the WHO 19-item checklist, read at three pauses that already existed, was followed by deaths falling from 1.5% to 0.8% in eight hospitals (Haynes et al., 2009). Mandated across 101 Ontario hospitals with self-reported ticks, it changed nothing: count actions, not ticks. · Peer-reviewed", "T19": "Guidance inside the work: suggested replies raised support agents' resolutions per hour 14%, and 34% for novices (5,179 agents; Brynjolfsson, Li & Raymond). Voice-directed picking cut errors 61%. UPS took its routing software to about 55,000 drivers by letting it set the next stop, moving to a new center only after two weeks of better results. · Peer-reviewed", "T20": "Block the error: an interface that blocked error states (the IBM 'training wheels' study) sped learning; the control group spent almost a quarter of its time recovering from errors. · Peer-reviewed", "T21": "Touch and reading: targets at least 44 × 44 px and never under 24; contrast at least 4.5:1; status never shown by color alone; reading lines around 55–70 characters (WCAG 2.2; Apple guidelines; Dyson, 2004). · Standards", "T22": "Standard work: every task specified by content, sequence, timing and outcome, with a built-in test, so a step done late or out of order is 'immediately apparent' (Spear & Bowen, 'Decoding the DNA of the Toyota Production System,' HBR 1999). No study measures a 5- or 10-second rule; treat it as an acceptance test for the screen. · Practitioner", "T23": "Jidoka and the andon cord: the machine stops itself when something is abnormal and a person is called to that one spot; normal work flows without attention (Toyota Production System). People under-report problems, so the system flags them from its own events (Tucker & Spear, 2006). · Company and peer-reviewed", "T24": "Automation bias: a review of 74 studies found reviewers over-trust good automation more under workload and time pressure; showing the facts behind a suggestion and making the reviewer accountable reduced it (Goddard, Roudsari & Wyatt, JAMIA 2012). In a field experiment with 181 recruiters, better AI drew less effort and lower accuracy, mostly from the experienced ones (Dell'Acqua). · Peer-reviewed and working paper", "T25": "Batch like work, in the order the system sets: grouping similar tasks raised productivity in a bank's loan processing (Staats & Gino, Management Science 2012); in 2.4M radiology reads, choosing your own order (easy first) lowered productivity (Ibanez et al., Management Science 2018). · Peer-reviewed", "T26": "Short daily huddles: a review of 24 studies found unit-level huddles positive, though most were uncontrolled before-and-after studies (Franklin et al., BMJ Quality & Safety 2020). Daily review of the numbers was part of the management bundle that raised output in a randomized trial in Indian textile plants (Bloom et al.). · Peer-reviewed", "T27": "Done early, left late: people try harder when they look at whichever is smaller, what's done or what's left. Early in the day show what's done; past halfway, show what's left (Koo & Fishbach, Journal of Consumer Research 2012). · Peer-reviewed", "T28": "Watching progress works: across 138 randomized studies (19,951 people), prompting people to track progress raised goal attainment, d = 0.40, and more when progress was physically recorded or shared (Harkin et al., Psychological Bulletin 2016). So a person's tap counts the touch, not the send. · Peer-reviewed", "T29": "Feedback can backfire: across 607 effects, feedback helped on average (d = .41) but more than a third of interventions lowered performance, mostly when it pointed at the person instead of the task (Kluger & DeNisi, Psychological Bulletin 1996). So every number here points at the next task. · Peer-reviewed", "T30": "No rankings: in a three-year randomized trial with commissioned salespeople, removing a private sales ranking raised sales; the drop came from people who learned they were behind and eased off (Barankay). Team totals and each person against their own plan instead. · Field experiment", "T31": "Help for newer people, less for experienced ones: across 60 studies, novices learned more with more guidance (d = 0.51) and experienced people learned more with less (d = −0.43) (expertise-reversal meta-analysis, 2025). Hence the Coaching switch. AI suggestions lifted novice support agents 34%, experienced ones barely (Brynjolfsson, Li & Raymond). · Peer-reviewed", "T32": "Charts read at a glance: simple bars were read correctly in about a quarter of a second; ring-style radial charts took about 1.5 seconds (Blascheck et al., IEEE 2019). Up to about four items are counted at a glance, so small counts show as squares. · Peer-reviewed", "T33": "Burn-up, not burn-down: when the plan grows or shrinks during the day, a burn-up shows it; a burn-down hides it and can make someone look behind only because the list grew. The plan line follows the hour-by-hour plan, not a straight line (agile and lean practice; Few's bullet graph). · Practitioner", "T34": "One line of reflection: across 10 studies (4,340 people), a few minutes of reflecting on what worked improved later performance, most of all early in the learning curve (Di Stefano, Gino, Pisano & Staats, Harvard Business School). · Working paper", "T36": "Reviewing good automation: people with a reliable aid caught 65% of the problems it missed, against 97% without it; a 'please verify' prompt and a second reviewer didn't help (Skitka et al., NASA studies). Being accountable for the approval did (Mosier et al., 1996). Approve all is for routine template messages; anything about life insurance is checked one at a time. · Peer-reviewed", "T37": "Evidence, not a badge: regulated review records name the reviewer, the item, the date and the action, and 'merely opening a communication is not sufficient review' (FINRA Rule 3110). Sites with a trust seal were more than twice as likely to be untrustworthy (Edelman, 2009), so the check opens to its records. Opt-outs must be honored within 10 business days, with at most one confirmation text (47 CFR 64.1200). · Rules and peer-reviewed", "T35": "If-then plans: across 94 tests, plans written as 'if X happens, then I'll do Y' raised goal attainment with d = .65 (Gollwitzer & Sheeran, Advances in Experimental Social Psychology 2006). · Peer-reviewed"};
+const EVID = {"T1": "Speed to the first call. Within an hour, a web lead was about 7× likelier to qualify than after an hour, and 60× likelier than after a day (HBR 2011 audit and 1.25M leads). A first call inside one minute: +391% conversion (Velocify, 3.5M leads). Observational: trust the direction, not the multiplier. · Vendor data", "T2": "Day one, minute by minute: email at about 20 minutes, a second call at 30–60 minutes, a third at 1–2 hours. Emailed leads were 16% likelier to be reached by phone (Velocify contact-strategy data; never tested against other schedules). · Vendor data", "T3": "Six calls, five emails. 93% of eventual buyers were reached by the sixth call; calls on days 0, 0, 0, 1, 5 and 15, emails on days 0, 4, 8, 14 and 22. More than five emails before a conversation cut conversion 36% (Velocify, 3.5M leads). · Vendor data", "T4": "The hour matters least: the best and worst calling hours differ by about 2.6 contact points (about +7%), against about +110% from a full six-call sequence (Velocify). · Vendor data", "T5": "Calling windows: 10–11 am and 4–6 pm, with midday (12–3 pm) the weakest; Wednesday best, Friday worst (call-platform data, mostly office lines; MIT/InsideSales, 2007). · Vendor data", "T6": "Referrals: referred customers left about 18% less often and were worth more (Schmitt, Skiera & Van den Bulte, Journal of Marketing, 2011). Same day, naming who sent them. · Peer-reviewed", "T7": "Washington: no commercial text to a Washington cell number without clear, affirmative consent in advance, with no exception for people who asked for a quote; $100 a text since June 11, 2026 (RCW 19.190.060, .070 and .040; HB 2274). Sales calls 8 am–8 pm, name yourself within 30 seconds, honor do-not-call for a year (RCW 80.36.390). · Law", "T8": "Texts: replies peak near noon, with a small 3–4 pm bump in financial services; early-morning texts get fewer replies (35M lead texts, 2025). · Vendor data", "T9": "Email: Tuesday to Thursday 8–10 am, plus a 5–7 pm window for consumers; Saturday worst. Best and worst days differ by about 1.2 open-rate points, and 88.5% of replies arrive within 24 hours (email-platform data). · Vendor data", "T10": "Text after the first conversation, not before. In a 2,010-person randomized trial a live call beat a letter (31.8% vs 23.7%) and a text alone did worse than the letter (16.9%) (Coronado et al., 2018). Texting before phone contact cut reach 39%; texting after contact lifted conversion 112.6% (Velocify). · Peer-reviewed and vendor data", "T11": "Style: adapting to the buyer tracks with sales performance (r = .27 across 268 studies and 79,747 salespeople; Verbeke et al., 2011). Matched messages raised purchases up to 50%; mismatched ones converted at about half the matched rate (Matz et al., 2017, 3.7M people). No study tests pacing by style. · Peer-reviewed", "T12": "Renewals: shoppers tend to renew within 30 days of the renewal notice; 45% of switchers moved for $100 or less; people who quoted but stayed re-shop at about twice the rate within six months (LexisNexis; J.D. Power). The exact windows are inferences. · Industry data", "T13": "Win-back: price leavers came back most often and stayed longest; bundles won the most back but kept them the shortest; service fixes won fewer, longer-staying customers (Kumar, Bhagwat & Zhang, Journal of Marketing, 2015; about 53,000 customers). · Peer-reviewed", "T14": "Voicemail: across 300M calls, one or two voicemails doubled email replies, and three or more pushed replies below leaving none (Gong). None on the first call, about 15 seconds on the second, one more under 30 seconds later. · Vendor data", "T15": "Why structure pays: 70% of marketing leads were never followed up (461 reps at four firms; Sabnis et al., 2013). A 2014 secret shop of 25 insurers found 2.3 days to the first call, 1.45 call attempts, and 39% never called. After six calls and five emails, a short burst again at two weeks to 45 days (InsideSales). · Peer-reviewed and vendor data", "T16": "Defaults: across 58 studies and 73,675 people, defaults moved choices with d = 0.68 (Jachimowicz et al., 2019); automatic 401(k) enrollment took participation from 37% to about 86% (Madrian & Shea, 2001). · Peer-reviewed", "T17": "No tours: in a 70-person test, tutorials left task success unchanged (91% vs 94%) and made the same tasks feel harder (Nielsen Norman Group). Apple's guidance: people should understand an app by using it. · Guidance", "T18": "Pause points: the WHO 19-item checklist, read at three pauses that already existed, was followed by deaths falling from 1.5% to 0.8% in eight hospitals (Haynes et al., 2009). Mandated across 101 Ontario hospitals with self-reported ticks, it changed nothing: count actions, not ticks. · Peer-reviewed", "T19": "Guidance inside the work: suggested replies raised support agents' resolutions per hour 14%, and 34% for novices (5,179 agents; Brynjolfsson, Li & Raymond). Voice-directed picking cut errors 61%. UPS took its routing software to about 55,000 drivers by letting it set the next stop, moving to a new center only after two weeks of better results. · Peer-reviewed", "T20": "Block the error: an interface that blocked error states (the IBM 'training wheels' study) sped learning; the control group spent almost a quarter of its time recovering from errors. · Peer-reviewed", "T21": "Touch and reading: targets at least 44 × 44 px and never under 24; contrast at least 4.5:1; status never shown by color alone; reading lines around 55–70 characters (WCAG 2.2; Apple guidelines; Dyson, 2004). · Standards", "T22": "Standard work: every task specified by content, sequence, timing and outcome, with a built-in test, so a step done late or out of order is 'immediately apparent' (Spear & Bowen, 'Decoding the DNA of the Toyota Production System,' HBR 1999). No study measures a 5- or 10-second rule; treat it as an acceptance test for the screen. · Practitioner", "T23": "Jidoka and the andon cord: the machine stops itself when something is abnormal and a person is called to that one spot; normal work flows without attention (Toyota Production System). People under-report problems, so the system flags them from its own events (Tucker & Spear, 2006). · Company and peer-reviewed", "T24": "Automation bias: a review of 74 studies found reviewers over-trust good automation more under workload and time pressure; showing the facts behind a suggestion and making the reviewer accountable reduced it (Goddard, Roudsari & Wyatt, JAMIA 2012). In a field experiment with 181 recruiters, a better algorithm drew less effort and lower accuracy, mostly from the experienced ones (Dell'Acqua). · Peer-reviewed and working paper", "T25": "Batch like work, in the order the system sets: grouping similar tasks raised productivity in a bank's loan processing (Staats & Gino, Management Science 2012); in 2.4M radiology reads, choosing your own order (easy first) lowered productivity (Ibanez et al., Management Science 2018). · Peer-reviewed", "T26": "Short daily huddles: a review of 24 studies found unit-level huddles positive, though most were uncontrolled before-and-after studies (Franklin et al., BMJ Quality & Safety 2020). Daily review of the numbers was part of the management bundle that raised output in a randomized trial in Indian textile plants (Bloom et al.). · Peer-reviewed", "T27": "Done early, left late: people try harder when they look at whichever is smaller, what's done or what's left. Early in the day show what's done; past halfway, show what's left (Koo & Fishbach, Journal of Consumer Research 2012). · Peer-reviewed", "T28": "Watching progress works: across 138 randomized studies (19,951 people), prompting people to track progress raised goal attainment, d = 0.40, and more when progress was physically recorded or shared (Harkin et al., Psychological Bulletin 2016). So a person's tap counts the touch, not the send. · Peer-reviewed", "T29": "Feedback can backfire: across 607 effects, feedback helped on average (d = .41) but more than a third of interventions lowered performance, mostly when it pointed at the person instead of the task (Kluger & DeNisi, Psychological Bulletin 1996). So every number here points at the next task. · Peer-reviewed", "T30": "No rankings: in a three-year randomized trial with commissioned salespeople, removing a private sales ranking raised sales; the drop came from people who learned they were behind and eased off (Barankay). Team totals and each person against their own plan instead. · Field experiment", "T31": "Help for newer people, less for experienced ones: across 60 studies, novices learned more with more guidance (d = 0.51) and experienced people learned more with less (d = −0.43) (expertise-reversal meta-analysis, 2025). Hence the Coaching switch. Suggested replies lifted novice support agents 34%, experienced ones barely (Brynjolfsson, Li & Raymond). · Peer-reviewed", "T32": "Charts read at a glance: simple bars were read correctly in about a quarter of a second; ring-style radial charts took about 1.5 seconds (Blascheck et al., IEEE 2019). Up to about four items are counted at a glance, so small counts show as squares. · Peer-reviewed", "T33": "Burn-up, not burn-down: when the plan grows or shrinks during the day, a burn-up shows it; a burn-down hides it and can make someone look behind only because the list grew. The plan line follows the hour-by-hour plan, not a straight line (agile and lean practice; Few's bullet graph). · Practitioner", "T34": "One line of reflection: across 10 studies (4,340 people), a few minutes of reflecting on what worked improved later performance, most of all early in the learning curve (Di Stefano, Gino, Pisano & Staats, Harvard Business School). · Working paper", "T36": "Reviewing good automation: people with a reliable aid caught 65% of the problems it missed, against 97% without it; a 'please verify' prompt and a second reviewer didn't help (Skitka et al., NASA studies). Being accountable for the approval did (Mosier et al., 1996). Approve all is for routine template messages; anything about life insurance is checked one at a time. · Peer-reviewed", "T37": "Evidence, not a badge: regulated review records name the reviewer, the item, the date and the action, and 'merely opening a communication is not sufficient review' (FINRA Rule 3110). Sites with a trust seal were more than twice as likely to be untrustworthy (Edelman, 2009), so the check opens to its records. Opt-outs must be honored within 10 business days, with at most one confirmation text (47 CFR 64.1200). · Rules and peer-reviewed", "T35": "If-then plans: across 94 tests, plans written as 'if X happens, then I'll do Y' raised goal attainment with d = .65 (Gollwitzer & Sheeran, Advances in Experimental Social Psychology 2006). · Peer-reviewed"};
 const AGENCY = {name:"Sample Agency", phone:"(555) 010-0142", lic:"WA-OIC #DEMO-000000", producers:{Alex:{full:"Alex Rivera",title:"Agent / Principal",lic:"WA-OIC #DEMO-AR-001"},Maya:{full:"Maya Lindqvist",title:"Licensed Sales Producer",lic:"WA-OIC #DEMO-ML-002"}}};
 const TAGLINE = "An agent's experience and judgment, at every team member's fingertips.";
 const CLOCKS = [["9:00 AM",540],["11:00 AM",660],["2:30 PM",870],["4:30 PM",990]];
@@ -1307,7 +1454,7 @@ function card(l){
   const ch=channel(l), s=slot(l), lt=late(l), g=group(l), done=isDone(l), st=stepFor(l);
   const when = done?'done': ch!=='call' ? (s==null?'any time':`sends ${fmt(s)}`) : g==='now'||g==='referral' ? (lt>30?`${lt} min late`:`${l.seen} min`) : s==null?'—': s>state.clock?fmt(s): lt>30?`${lt} min late`:'now';
   const wcls = done?'':ch!=='call'?'':(lt>30?'late':(g==='now'&&l.seen<=5)||(s!=null&&Math.abs(s-state.clock)<=15)?'now':'');
-  const say = l.say?l.say[0]:(l.cool?l.say:'') ;
+  const say = Array.isArray(l.say)?l.say[0]:(typeof l.say==='string'?l.say:'');
   const sayTxt = (typeof say==='string'?say:'').replace('{rep}',first(rep().full)).replace('{first}',first(l.name)).replace('{proposed}',l.proposed?'$'+l.proposed:'').replace('{current}',l.current?'$'+l.current:'');
   const vm = ch==='call' && st.vm ? `Voicemail allowed, ${st.vm}s` : ch==='call' ? 'No voicemail on this call' : '';
   const help = state.help[l.id]?`<span class="helpon">Help asked → Alex</span>`:`<button class="help" data-id="${l.id}" data-act="help">Stuck? One tap</button>`;
@@ -1333,7 +1480,7 @@ function scriptFor(l, ch){
   const scn=l.scenario||'raw', sty=l.style, d=(DRAFTS[scn]||DRAFTS.raw)[sty]; if(!d) return '';
   const moves=['Match','Fit','Ask'];
   if(ch==='call'){
-    const say = l.say ? l.say : fillTokens(d.email.body,l).split(/\n\s*\n/).slice(1);
+    const say = l.say ? [].concat(l.say) : fillTokens(d.email.body,l).split(/\n\s*\n/).slice(1);
     return `<div class="script">${say.slice(0,3).map((t,i)=>`<div class="move" data-move="${moves[i]}">${esc(fillTokens(t,l))}</div>`).join('')}<div class="sig">If voicemail (${stepFor(l).vm?stepFor(l).vm+'s allowed':'none on this call'}): ${esc(fillTokens(XVM[scn]||XVM.raw,l))}</div></div>`;
   }
   if(ch==='text'){ const txt=fillTokens(d.sms,l)+' Reply STOP to opt out.'; return `<div class="script"><div class="smsbox">${markPhrases(esc(txt),scn,sty,l)}</div></div>`; }
@@ -1372,6 +1519,7 @@ document.addEventListener('click',e=>{
   if(act==='help'){ state.help[id]=rep().full; toast('Help asked: Alex is notified; the card stays marked until he answers'); renderAll(); return; }
   if(act==='decide'){ state.decided[id]=b.dataset.opt; if(b.dataset.opt==='Skip this step') state.decided[id]='skip'; toast(`${b.dataset.opt} · recorded, ${rep().full} ${fmt(state.clock)}`); renderAll(); return; }
   if(act==='toggle'){ state.open = state.open===id?null:id; state.openAt = Date.now(); renderAll(); const el=document.querySelector(`.card[data-id="${id}"]`); if(el&&state.open===id) el.scrollIntoView({block:'nearest',behavior:'smooth'}); return; }
+  if(act==='go'&&wf.view!=='lanes'){ setView('workflow'); wfOpen(id,true); return; }
   if(act==='go'){ state.open=id; state.openAt=Date.now(); go('today'); renderAll(); const el=document.querySelector(`.card[data-id="${id}"]`); if(el) el.scrollIntoView({block:'center',behavior:'smooth'}); return; }
   if(act==='Edit'){ selectLead(id); go('compose'); return; }
   if(['Talked','Voicemail','No answer','Approve'].includes(act)){ if(act!=='No answer'&&act!=='Voicemail'){ state.done.add(id); } state.log.push({id,t:`${act} · ${rep().full}, ${fmt(state.clock)}`}); if(act==='No answer'||act==='Voicemail'){ state.done.add(id); } toast(`${act} · ${l?l.name:''} · next step is set · logged to ECRM ${fmt(state.clock)}`); const nxt=ordered().find(x=>!isDone(x)&&!isStop(x)&&x.id!==id&&channel(x)===channel(l)&&!x.cool); state.open=nxt?nxt.id:null; state.openAt=Date.now(); renderAll(); return; }
@@ -1410,7 +1558,7 @@ function renderPause(){
 function renderRail(){
   $('#renew').innerHTML = ALL.filter(l=>l.source==='XD'||l.source==='RI').sort((a,b)=>b.day-a.day).map(l=>`<li><span>${esc(l.name)} <span class="tip">· ${esc(l.meta?l.meta[0]:'')}</span></span><span class="mono">${-l.day} d</span></li>`).join('');
   $('#compat').textContent = '7:55 AM';
-  $('#compl').innerHTML = [`20 consent records checked, 1 STOP honored (7:42 AM)`,`No text before a first conversation`,`Calls and texts 8 AM–8 PM only`,`Do Not Call list matched: 0 hits`,`Every send records who approved it and when`].map(c=>`<li>${c}</li>`).join('');
+  $('#compl').innerHTML = COMPLIANCE.map(c=>`<li>${c}</li>`).join('');
 }
 
 /* ======== Compose ======== */
@@ -1444,7 +1592,7 @@ function renderDraft(){
     const txt=fillTokens(d.sms,l)+' Reply STOP to opt out.'; const sg=segments(txt);
     $('#draft').innerHTML = `<div class="smsbox">${markPhrases(esc(txt),scn,sty,l)}</div><div class="count mono">${sg.len} chars · ${sg.seg} segment${sg.seg===1?'':'s'} · ${sg.enc}</div>${!okText?`<div class="checks"><li class="no">Locked: ${l.contacted?'no SMS consent on file':'no text before a first conversation'} (${esc(l.consent?l.consent.basis:'')}). Email or call carries this step.</li></div>`:''}`;
   } else {
-    const say = l.say ? l.say : fillTokens(d.email.body,l).split(/\n\s*\n/).slice(1);
+    const say = l.say ? [].concat(l.say) : fillTokens(d.email.body,l).split(/\n\s*\n/).slice(1);
     const moves=['Match','Fit','Ask'];
     $('#draft').innerHTML = `<div class="subj">Call script · ${esc(STYLES[sty].label)}</div>${say.slice(0,3).map((s,i)=>`<div class="move" data-move="${moves[i]}">${esc(fillTokens(s,l))}</div>`).join('')}
       <div class="sig">If voicemail (${stepFor(l).vm?stepFor(l).vm+'s allowed':'none on this call'}): ${esc(fillTokens(XVM[scn]||XVM.raw,l))}</div>`;
@@ -1554,12 +1702,326 @@ const evKeys=Object.keys(EVID).sort((a,b)=>+a.slice(1)-+b.slice(1));
 $('#evN').textContent = `${evKeys.length} sources`;
 $('#evid').innerHTML = evKeys.map(k=>`<li><b>${k}</b>${esc(EVID[k])}</li>`).join('');
 
+/* ======== v2.5 · Workflow: the default view. One status line, four boxes, a time box for every task ======== */
+// The time box · one SVG for v1, v2 and the Next Step tool. Keep the three copies identical.
+// timeBoxSVG(opts) -> string of <svg>. Cabinet-style oblique box: the front face is a golden rectangle
+// (w = φ·h), the depth is h/φ, receding at 45° and drawn at half length, so the top and right faces read.
+// opts: { h: 21|34|55, ch: 'call'|'text'|'email', label: '3:00', sub: 'PM', frac: 0..1,
+//         state: 'planned'|'due'|'ready'|'approved'|'done'|'blocked', title: 'Call · 3:00 PM · due now' }
+const TB_PHI = 1.618;
+const TB_COLORS = {
+  call:  { c: "#1F6FD1", top: "#8FB7EA", front: "#E1ECFB", right: "#174F93" },
+  text:  { c: "#178A5B", top: "#8BC9AC", front: "#DFF3E8", right: "#116543" },
+  email: { c: "#B8640F", top: "#DCB086", front: "#FBEBD9", right: "#8A4A0B" },
+  ok:    { c: "#2E7D4F", top: "#95C2A6", front: "#DFF3E8", right: "#225C3B" },
+  bad:   { c: "#8C2F39", top: "#C59299", front: "#F6E3E5", right: "#66222A" },
+};
+const TB_GLYPH = {
+  // 24×24 line glyphs, white, 2-px strokes, upright on the top face
+  call: '<path d="M6 3h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 12l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z"/>',
+  text: '<path d="M4 5h16v10H9l-5 4z"/>',
+  email: '<path d="M3 6h18v12H3z M3 6l9 7 9-7"/>',
+};
+function timeBoxSVG(o) {
+  const h = o.h || 21, w = Math.round(h * TB_PHI), d = h / TB_PHI, dx = d * 0.5, dy = d * 0.5;
+  const st = o.state || "planned";
+  const pal = TB_COLORS[st === "done" ? "ok" : st === "blocked" ? "bad" : (o.ch || "call")] || TB_COLORS.call;
+  const done = st === "done";
+  const H = done ? Math.round(h / TB_PHI) : h;           // a done box collapses to a slab
+  const W = w + dx, VH = H + dy, x0 = 0, y0 = dy;       // front face at (0, dy)
+  const frac = done || st === "blocked" ? 0 : Math.max(0, Math.min(1, o.frac || 0));
+  const fillH = frac * H;
+  const top = `${x0},${y0} ${x0 + w},${y0} ${x0 + w + dx},${y0 - dy} ${x0 + dx},${y0 - dy}`;
+  const right = `${x0 + w},${y0} ${x0 + w + dx},${y0 - dy} ${x0 + w + dx},${y0 - dy + H} ${x0 + w},${y0 + H}`;
+  const small = h <= 21;
+  const fs = small ? 9.5 : h <= 34 ? 13 : 21;           // label size: Fibonacci-ish steps
+  // the fill rises behind the label; at row size it is a tint so the small digits never straddle a dark edge
+  const inkOnFill = !small && frac > 0.55;
+  const fillOpacity = small ? 0.38 : 1;
+  const labelColor = done || st === "blocked" ? "#fff" : inkOnFill ? "#fff" : "#1A2330";
+  const label = done ? "" : st === "blocked" ? "" : (o.label || "");
+  const sub = done || st === "blocked" ? "" : (o.sub || "");
+  const glyph = !small && TB_GLYPH[o.ch] ? `<g transform="translate(${x0 + dx / 2 + w / 2 - dy * 0.375},${y0 - dy + dy * 0.125}) scale(${(dy * 0.75) / 24})" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${TB_GLYPH[o.ch]}</g>` : "";
+  const mark = st === "approved" || done ? "✓" : st === "blocked" ? "!" : "";
+  const markSize = small ? 9 : h <= 34 ? 13 : 21;
+  const markEl = mark ? `<text x="${done ? x0 + w / 2 : x0 + w + dx / 2}" y="${done ? y0 + H / 2 + markSize * 0.36 : y0 + H / 2 + markSize * 0.36 - dy / 2}" text-anchor="middle" font-size="${done ? markSize * 1.3 : markSize}" font-weight="700" fill="#fff" font-family="var(--mono, ui-monospace, monospace)">${mark}</text>` : "";
+  const title = o.title || "";
+  return `<svg class="tb tb-${st} tb-${o.ch || "call"}" viewBox="0 0 ${W} ${VH}" width="${W}" height="${VH}" role="img" aria-label="${title}"${title ? ` data-title="${title}"` : ""}>${title ? `<title>${title}</title>` : ""}
+<polygon class="tb-top" points="${top}" fill="${pal.top}"/>
+<polygon class="tb-right" points="${right}" fill="${pal.right}"/>
+<rect class="tb-front" x="${x0}" y="${y0}" width="${w}" height="${H}" fill="${done || st === "blocked" ? pal.c : pal.front}"/>
+${fillH > 0 ? `<rect class="tb-fill" x="${x0}" y="${y0 + H - fillH}" width="${w}" height="${fillH}" fill="${pal.c}" fill-opacity="${fillOpacity}"/><rect x="${x0}" y="${y0 + H - fillH}" width="${w}" height="1" fill="${pal.right}" opacity=".6"/>` : ""}
+<rect class="tb-ring" x="${x0 + 0.5}" y="${y0 + 0.5}" width="${w - 1}" height="${H - 1}" fill="none" stroke="${pal.right}" stroke-opacity=".35"/>
+${label ? (() => {
+    // label and sub laid out as one group, centered on the front face (mono: ~0.6 em per character)
+    const lw = label.length * fs * 0.6, sw = sub ? sub.length * fs * 0.55 * 0.6 + fs * 0.2 : 0;
+    const start = x0 + w / 2 - (lw + sw) / 2, halo = inkOnFill ? pal.right : "#fff";
+    return `<text class="tb-label" x="${start}" y="${y0 + H / 2 + fs * 0.36}" font-size="${fs}" font-weight="500" fill="${labelColor}" stroke="${halo}" stroke-width="${fs * 0.18}" stroke-linejoin="round" paint-order="stroke" font-family="var(--mono, ui-monospace, monospace)">${label}</text>` +
+      (sub ? `<text class="tb-sub" x="${start + lw + fs * 0.2}" y="${y0 + H / 2 + fs * 0.36}" font-size="${fs * 0.55}" fill="${labelColor}" stroke="${halo}" stroke-width="${fs * 0.12}" paint-order="stroke" font-family="var(--mono, ui-monospace, monospace)">${sub}</text>` : "");
+  })() : ""}
+${glyph}${markEl}</svg>`;
+}
+// The marks: the 13-px cube family. markSVG({ kind: 'email'|'text'|'ok', on: true|false, barred: false, title })
+function markSVG(o) {
+  const h = 8, w = 13, d = 5, dx = 2.5, dy = 2.5, W = w + dx, VH = h + dy, y0 = dy;
+  const pal = TB_COLORS[o.kind === "ok" ? "ok" : o.kind] || TB_COLORS.ok;
+  const on = !!o.on;
+  const top = `0,${y0} ${w},${y0} ${w + dx},${y0 - dy} ${dx},${y0 - dy}`;
+  const right = `${w},${y0} ${w + dx},${y0 - dy} ${w + dx},${y0 - dy + h} ${w},${y0 + h}`;
+  const body = on
+    ? `<polygon points="${top}" fill="${pal.top}"/><polygon points="${right}" fill="${pal.right}"/><rect x="0" y="${y0}" width="${w}" height="${h}" fill="${pal.c}"/><path d="M3.2 ${y0 + 4.2} l2.4 2.4 l4.4 -4.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`
+    : `<polygon points="${top}" fill="none" stroke="${pal.c}" stroke-width=".9" stroke-opacity=".55"/><polygon points="${right}" fill="none" stroke="${pal.c}" stroke-width=".9" stroke-opacity=".55"/><rect x=".45" y="${y0 + 0.45}" width="${w - 0.9}" height="${h - 0.9}" fill="none" stroke="${pal.c}" stroke-width=".9" stroke-opacity=".7"/>${o.barred ? `<path d="M1.5 ${y0 + h - 1.5} L${w - 1.5} ${y0 + 1.5}" stroke="${pal.c}" stroke-width="1.2" stroke-linecap="round"/>` : ""}`;
+  return `<svg class="tbm tbm-${o.kind}${on ? " on" : ""}" viewBox="0 0 ${W} ${VH}" width="${W}" height="${VH}" role="img" aria-label="${o.title || ""}"><title>${o.title || ""}</title>${body}</svg>`;
+}
+if (typeof module !== "undefined") module.exports = { timeBoxSVG, markSVG, TB_COLORS };
+// display only: the office windows the engine plans into (emails 9–10 and 1–3, calls 10–12 and 3–5, texts 10–12 and 1–3)
+const WF_WIN = { call:[[600,720],[900,1020]], text:[[600,720],[780,900]], email:[[540,600],[780,900]] };
+const WF_WINLBL = { now:'now', soon:'today', m20:'+20m', m45:'+45m', m90:'+90m', email:'9–10', emailpm:'1–3', call:'10–12', reach:'3–5', text:'10–12', textpm:'1–3' };
+const WF_VIEWS = [['workflow','Workflow'],['lanes','Lanes'],['look','Look']];
+const CHW = { call:'Call', text:'Text', email:'Email' };
+const COMPLIANCE = ['20 consent records checked, 1 STOP honored (7:42 AM)','No text before a first conversation','Calls and texts 8 AM–8 PM only','Do Not Call list matched: 0 hits','Every send records who approved it and when'];
+const wf = { view:'workflow', open:null, openAt:null, approved:{}, last:null, anim:new Set(), edit:{}, text:{}, coolOpen:false, doneOpen:false, pulseAt:{} };
+try{ const v=new URLSearchParams(location.search).get('view'); if(WF_VIEWS.some(x=>x[0]===v)) wf.view=v; }catch(e){}
+const wfReduced = ()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } };
+const hm = m=>{ m=((m%1440)+1440)%1440; let h=Math.floor(m/60); const mm=m%60, ap=h>=12?'PM':'AM'; h=h%12||12; return { h:String(h), hm:h+':'+String(mm).padStart(2,'0'), ap }; };
+const fmtSend = m=>m==null?'':m>=1440?fmt(m-1440)+' tomorrow':fmt(m);
+
+// an approved message stays on the list with its ✓ until its hour, then folds into Done today
+function wfShown(l){ const a=wf.approved[l.id]; return !!a && a.send>state.clock && state.done.has(l.id); }
+function wfInMain(l){ return !isDone(l)||wfShown(l)||wf.anim.has(l.id); }
+function wfSend(l){
+  const a=wf.approved[l.id]; if(a) return a.send;
+  const ch=channel(l), s=slot(l); if(s!=null&&s>=state.clock) return s;
+  for(const [lo,hi] of (WF_WIN[ch]||WF_WIN.email)) if(state.clock<hi) return Math.max(lo, Math.ceil((state.clock+1)/5)*5);
+  return 1440+(ch==='email'?540:600);
+}
+function wfState(l){
+  if(isStop(l)) return 'blocked';
+  if(wfShown(l)) return 'approved';
+  if(isDone(l)) return 'done';
+  const ch=channel(l), g=group(l), s=slot(l);
+  if(ch!=='call') return 'ready';
+  if(late(l)>30) return 'blocked';
+  if(g==='now'||g==='referral'||(s!=null&&s-15<=state.clock)) return 'due';
+  return 'planned';
+}
+// the clock inside the box: the elapsed share of the task's window; a send fills from its approval (or 9:00) to its hour
+function wfFrac(l){
+  const ch=channel(l), g=group(l), s=slot(l), cl=x=>Math.max(0,Math.min(1,x));
+  if(ch==='call'){
+    if(g==='now'||g==='referral') return cl((l.seen||0)/10);
+    if(s==null) return 0;
+    const w=WF_WIN.call.find(([lo,hi])=>s>=lo&&s<=hi)||[s-60,s];
+    return cl((state.clock-w[0])/(w[1]-w[0]));
+  }
+  const send=wfSend(l), a=wf.approved[l.id], from=a?a.at:DAY.open;
+  return cl((state.clock-from)/Math.max(1,send-from));
+}
+function wfLog(l){ return [...state.log].reverse().find(x=>x.id===l.id&&/^(Talked|Voicemail|No answer|Approved|Skipped)/.test(x.t)); }
+// the next step in words: status never by color alone
+function wfWhen(l, short){
+  const ch=channel(l), g=group(l), s=slot(l), st=wfState(l);
+  if(isStop(l)) return (short?'Decide':'Needs a decision')+(/STOP/.test(STOPS[l.id].why)?' · texted STOP':' · nothing set next');
+  if(st==='approved') return `Approved · ${fmtSend(wf.approved[l.id].send)}`;
+  if(st==='done'){
+    if(wf.approved[l.id]) return `Approved, sent · ${fmtSend(wf.approved[l.id].send)}`;
+    if(state.decided[l.id]==='skip') return 'Skipped · next step set';
+    const lg=wfLog(l); if(lg) return lg.t.split(' · ')[0]+' · '+lg.t.split(', ').pop();
+    return ({call:'Called',text:'Text sent',email:'Email sent'})[ch]+(s!=null?' · '+fmt(s):'');
+  }
+  if(ch!=='call') return `${CHW[ch]} · ${short&&wfSend(l)>=1440?'':'sends '}${fmtSend(wfSend(l))}`;
+  if(g==='now'||g==='referral') return `Call · now · ${short?'':'waiting '}${l.seen} min`;
+  if(s==null) return 'Call · any open minute';
+  if(late(l)>30) return short?`Call · ${late(l)} min late`:`Call · ${fmt(s)} · ${late(l)} min late`;
+  if(l.at) return `Call · ${fmt(s)} · booked`;
+  if(st==='due') return short?`Call · due ${fmt(s)}`:`Call · ${fmt(s)} · due now`;
+  return `Call · ${fmt(s)}`;
+}
+function wfTitle(l){
+  const st=wfState(l), W={planned:'planned',due:'due now',ready:'ready to check',approved:'approved',done:'done',blocked:isStop(l)?'stopped, needs a decision':'late'}[st], w=wfWhen(l);
+  return w.toLowerCase().includes(W)?w:`${w} · ${W}`;
+}
+// a due box pulses once (1.6 s), then stays steady through later re-renders
+function wfCalm(id){ const t=wf.pulseAt[id]; if(t==null){ wf.pulseAt[id]=Date.now(); return false; } return Date.now()-t>1618; }
+function wfBox(l,h){
+  const ch=channel(l), st=wfState(l), g=group(l), s=slot(l);
+  let label='', sub='';
+  if(ch==='call'){ if(g==='now'||g==='referral') label='now'; else if(s!=null){ const t=hm(s); label=h<=21?t.h:t.hm; sub=t.ap; } }
+  else { const t=hm(wfSend(l)); label=t.hm; sub=h<=21?'':t.ap; }
+  const svg=timeBoxSVG({ h, ch, label, sub, frac:wfFrac(l), state:st, title:esc(wfTitle(l)) });
+  return st==='due'&&wfCalm(l.id)?`<span class="tb-calm">${svg}</span>`:svg;
+}
+// the three marks, fixed order: Email ready · Text ready · Compliance ✓
+function wfMarks(l){
+  const c=l.consent||{}, stop=/STOP/.test(((STOPS[l.id]||{}).why||'')+' '+(l.meta||[]).join(' '));
+  const em=c.email?markSVG({kind:'email',on:true,title:'Email ready'}):markSVG({kind:'email',on:false,barred:true,title:'Email waits: no OK on file'});
+  const tx=stop?markSVG({kind:'text',on:false,barred:true,title:'Texted STOP'})
+    : !c.sms?markSVG({kind:'text',on:false,barred:true,title:'Text waits: no OK on file'})
+    : !l.contacted?markSVG({kind:'text',on:false,title:'Text waits: no text before a first conversation'})
+    : markSVG({kind:'text',on:true,title:'Text ready'});
+  const ok=markSVG({kind:'ok',on:true,title:stop?'Compliance ✓: STOP honored at 7:42 AM; consent, hours and state rules checked today':'Compliance ✓: consent, hours and state rules checked today at 7:55 AM'});
+  return `<span class="tbm-row">${em}${tx}${ok}</span>`;
+}
+// the lead's plan as three boxes: done · now · next
+function wfTimeline(l){
+  const steps=(XSRC[l.source]||XSRC.IL).steps, cur=stepFor(l), i=steps.indexOf(cur);
+  const chOf=s=>s.ch[0]==='text'?'text':s.ch[0];
+  const ago=d=>d<=0?'earlier today':d===1?'yesterday':`${d} days ago`, ahead=d=>d<=0?'later today':d===1?'tomorrow':`in ${d} days`;
+  const prev=l.cool?[...steps].reverse().find(s=>s.day<l.day):(i>0?steps[i-1]:null);
+  const next=l.cool?steps.find(s=>s.day>l.day):(steps[i+1]||null);
+  const items=[];
+  if(prev) items.push(['Done',timeBoxSVG({h:21,ch:chOf(prev),state:'done',title:esc(`Done · ${prev.what} · ${ago(l.day-prev.day)}`)}),`${prev.what} · ${ago(l.day-prev.day)}`]);
+  items.push(['Now',wfBox(l,21),`${l.cool?'Open-time touch':cur.what} · today`]);
+  if(next) items.push(['Next',timeBoxSVG({h:21,ch:chOf(next),label:WF_WINLBL[next.win]||'',state:'planned',title:esc(`Next · ${next.what} · ${ahead(next.day-l.day)}`)}),`${next.what} · ${ahead(next.day-l.day)}`]);
+  return `<ol class="wtl" aria-label="This lead's plan: done, now, next">${items.map(([k,b,t])=>`<li><span class="wtl-box">${b}</span><span><span class="wtl-k">${k}</span><span class="wtl-t">${esc(t)}</span></span></li>`).join('')}</ol>`;
+}
+function wfChips(l){ const c=l.consent||{}; return `<div class="chips"><span class="chip ${c.email?'ok':'no'}">${c.email?'Email OK':'No email consent'}</span><span class="chip ${c.sms?'ok':'no'}">${c.sms?'Text OK':'No text consent'}</span>${l.dnc?'<span class="chip no">Do Not Call</span>':''}<span class="chip src">ECRM · ${esc(SRCLBL[l.source]||l.source)}</span></div>`; }
+function wfPlain(l){ const d=(DRAFTS[l.scenario||'raw']||DRAFTS.raw)[l.style]; if(!d) return ''; return channel(l)==='text'?fillTokens(d.sms,l)+' Reply STOP to opt out.':'Subject: '+fillTokens(d.email.subject,l)+'\n\n'+fillTokens(d.email.body,l); }
+function wfElapsed(){ const s=wf.openAt?Math.floor((Date.now()-wf.openAt)/1000):0; return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} <small>of 5:00</small>`; }
+// the work card beneath its row: say-lines, timer and outcomes for a call; the marked draft, the coaching line and the plan for a message
+function wfCard(l){
+  const ch=channel(l), st=stepFor(l), id=l.id;
+  if(isStop(l)){ const S=STOPS[id]; return `<div class="wcard" id="wc-${id}"><p class="wstop"><b>Stopped itself:</b> ${esc(S.why)}</p><div class="wacts">${S.opts.map(o=>`<button class="btn sm ${/^(Close|Skip)/.test(o)?'quiet':''}" data-id="${id}" data-act="decide" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`; }
+  if(ch==='call'){
+    const vm=st.vm?`Voicemail allowed, ${st.vm}s`:'No voicemail on this call';
+    const help=state.help[id]?`<span class="helpon">Help asked → Alex</span>`:`<button class="help" data-id="${id}" data-act="help">Stuck? One tap</button>`;
+    return `<div class="wcard" id="wc-${id}">
+      <div class="workhead"><span class="tag">${esc(l.cool?'Open-time call':st.what)}</span><span class="tag">${esc(vm)}</span><span class="timer mono" data-wftimer="${id}">${wfElapsed()}</span></div>
+      ${scriptFor(l,'call')}
+      <div class="tip">${esc(XESSENCE[l.style]||'')}</div>
+      ${wfTimeline(l)}
+      ${wfChips(l)}
+      <div class="wacts">${['Talked','Voicemail','No answer'].map((o,i)=>`<button class="btn sm ${i?'quiet':''}" data-act="wf-out" data-out="${o}" data-id="${id}">${o}</button>`).join('')}${help}</div>
+    </div>`;
+  }
+  const send=fmtSend(wfSend(l)), ed=!!wf.edit[id];
+  return `<div class="wcard" id="wc-${id}">
+    <div class="workhead"><span class="tag">${esc(l.cool?'Open-time '+CHW[ch].toLowerCase():st.what)}</span></div>
+    ${ed?`<textarea class="wedit" data-id="${id}" rows="${ch==='text'?4:10}" aria-label="Edit the draft">${esc(wf.text[id]!=null?wf.text[id]:wfPlain(l))}</textarea>`:scriptFor(l,ch)}
+    <p class="wwhy"><b>Why this draft · Hakobian Strategic Coaching:</b> ${esc(XESSENCE[l.style]||'')} ${esc((STYLES[l.style]||{}).gWhy||'')}</p>
+    ${wfTimeline(l)}
+    ${wfChips(l)}
+    <div class="wacts"><button class="btn sm" data-act="wf-approve" data-id="${id}">Approve · sends ${esc(send)}</button><button class="btn sm ghost" data-act="wf-edit" data-id="${id}">${ed?'Undo edits':'Edit'}</button><button class="btn sm quiet" data-act="wf-skip" data-id="${id}">Skip</button></div>
+  </div>`;
+}
+function wfRow(l){
+  const st=wfState(l), ch=channel(l), id=l.id, open=wf.open===id&&st!=='done'&&st!=='approved';
+  let btn='';
+  if(st==='approved') btn=`<button class="btn sm quiet" data-act="wf-undo" data-id="${id}" aria-label="Undo the approval for ${esc(l.name)}">Undo</button>`;
+  else if(st!=='done') btn=`<button class="btn sm ${open?'quiet':'ghost'}" data-act="wf-toggle" data-id="${id}" aria-expanded="${open}" aria-controls="wc-${id}">${open?'Close':ch==='call'&&!isStop(l)?'Call':'Check'}</button>`;
+  const live=st!=='done'&&st!=='approved';
+  return `<li class="wrow is-${st}${wf.anim.has(id)?' row-done-anim':''}${open?' is-open':''}" data-id="${id}">
+    <div class="wrow-head"${live?` data-act="wf-toggle" data-id="${id}"`:''}>
+      <span class="wrow-box">${wfBox(l,21)}</span>
+      <span class="wrow-who"><span class="wrow-name">${esc(l.name)}</span><span class="wchip">${esc((STYLES[l.style]||{}).label||l.style)}</span></span>
+      <span class="wrow-meta"><span class="wrow-next">${(()=>{ const a=wfWhen(l), b=wfWhen(l,true); return a===b?esc(a):`<span class="wn-l">${esc(a)}</span><span class="wn-s">${esc(b)}</span>`; })()}</span>${wfMarks(l)}</span>
+    </div>${btn}${open?wfCard(l):''}
+  </li>`;
+}
+function wfNext(except){ return ordered().find(x=>!isDone(x)&&!isStop(x)&&x.id!==except); }
+function renderWfBar(){
+  const done=ALL.filter(isDone).length, n=wfNext(null);
+  let nx='nothing due';
+  if(n){ const ch=channel(n), g=group(n), s=slot(n);
+    nx = ch!=='call' ? `check <b>${esc(n.name)}</b>'s ${CHW[ch].toLowerCase()} · sends ${esc(fmtSend(wfSend(n)))}` : `call <b>${esc(n.name)}</b> ${g==='now'||g==='referral'||s==null||s<=state.clock?'now':'at '+fmt(s)}`; }
+  $('#wfstat').innerHTML = `<span class="clock">${fmt(state.clock)}</span><span class="dot">·</span><span><b>${done}</b> of ${ALL.length} done</span><span class="dot d2">·</span><span>Next: ${nx}</span>${n?`<button class="btn sm" data-act="wf-open" data-id="${n.id}">Open</button>`:''}`;
+}
+function renderWfList(){
+  if(wf.open){ const ol=ALL.find(x=>x.id===wf.open); if(!ol||!wfInMain(ol)||wfShown(ol)) wf.open=null; else if(ol.cool) wf.coolOpen=true; }
+  const o=ordered(), warm=o.filter(l=>!l.cool), cool=o.filter(l=>l.cool);
+  const main=warm.filter(wfInMain), coolOpen=cool.filter(wfInMain), done=o.filter(l=>!wfInMain(l));
+  const wins=ALL.filter(isDone).length;
+  $('#wb1meta').textContent=`${ALL.length} today · ${wins} small win${wins===1?'':'s'}`;
+  $('#wflist').innerHTML = (main.length?`<ul class="wlist" aria-label="Today's prospects in the plan's order">${main.map(wfRow).join('')}</ul>`:`<p class="wempty">Nothing due. Every lead has its next step set.</p>`)
+    + (coolOpen.length?`<details class="fold cool wcool"${wf.coolOpen?' open':''}><summary>${coolOpen.length} cooler lead${coolOpen.length===1?'':'s'} · open time</summary><ul class="wlist">${coolOpen.map(wfRow).join('')}</ul></details>`:'')
+    + (done.length?`<details class="fold wdone"${wf.doneOpen?' open':''}><summary>Done today (${done.length})</summary><ul class="wlist">${done.map(wfRow).join('')}</ul></details>`:'');
+}
+function renderWfNow(){
+  const n=wfNext(null), last=wf.last&&ALL.find(x=>x.id===wf.last.id);
+  const done=last?`<p class="wnow-done">✓ ${esc(wf.last.what)} · ${esc(last.name)}</p>`:'';
+  $('#wb2meta').textContent = n?(channel(n)==='call'?'the next call':'the next to check'):'';
+  if(!n){ $('#wfnow').innerHTML = `${done}<div class="wnow"><span class="wnow-box">${timeBoxSVG({h:55,ch:'call',state:'done',title:'Nothing due · every lead has its next step set'})}</span><div class="wnow-body"><div class="wnow-name">All set</div><div class="wnow-why">Nothing due. Every lead has its next step set.</div></div></div>`; return; }
+  const ch=channel(n), why=n.reason||n.why||'';
+  const btn = wf.last ? `<button class="btn" data-act="wf-next" data-id="${n.id}">Next →</button>` : `<button class="btn" data-act="wf-open" data-id="${n.id}">${ch==='call'?'Call':'Check'}</button>`;
+  $('#wfnow').innerHTML = `${done}<div class="wnow" data-id="${n.id}"><span class="wnow-box">${wfBox(n,55)}</span><div class="wnow-body"><div class="wnow-name">${esc(n.name)}<span class="wchip">${esc((STYLES[n.style]||{}).label||n.style)}</span></div><div class="wnow-why" title="${esc(why)}">${esc(why)}</div><div class="wnow-act">${btn}<span class="wnow-when">${esc(wfWhen(n))}</span></div></div></div>`;
+}
+function wfMini(l,when){ return `<li><button class="wmini" data-act="wf-open" data-id="${l.id}"><span class="wmini-box">${wfBox(l,34)}</span><span class="wmini-txt"><span class="wmini-name">${esc(l.name)}</span><span class="wmini-when">${esc(when)}</span></span></button></li>`; }
+function renderWfFirst(){
+  const f=ALL.filter(l=>group(l)==='now'&&!isDone(l)&&!isStop(l)).sort((a,b)=>(a.seen||0)-(b.seen||0));
+  $('#wb3meta').textContent = f.length?`${f.length} waiting · freshest first`:'';
+  $('#wffirst').innerHTML = f.length?`<ul class="wmini-list">${f.map(l=>wfMini(l,`${l.reason||'New lead'} · waiting ${l.seen} min`)).join('')}</ul>`:`<p class="wempty">None waiting · a new lead gets its first call inside a minute.</p>`;
+}
+function renderWfSoon(){
+  const c=ordered().filter(l=>!isDone(l)&&(group(l)==='booked'||group(l)==='xsoon')).sort((a,b)=>(slot(a)??9e9)-(slot(b)??9e9));
+  $('#wfsoon').innerHTML = c.length?`<ul class="wmini-list wsoon">${c.map(l=>{ const s=slot(l), d=-l.day; return wfMini(l, l.at?`Booked call · ${fmt(s)}`:`X-date in ${d} day${d===1?'':'s'} · call ${s!=null?fmt(s):'today'}`); }).join('')}</ul>`:`<p class="wempty">Nothing booked in the next three days.</p>`;
+}
+function renderWorkflow(){ renderWfBar(); renderWfList(); renderWfNow(); renderWfFirst(); renderWfSoon(); }
+function applyView(){
+  $('#view-today').dataset.view=wf.view;
+  document.querySelectorAll('#vsw button,#views button').forEach(b=>{ const on=b.dataset.v===wf.view; b.classList.toggle('on',on); b.setAttribute('aria-pressed',String(on)); });
+}
+function setView(v){
+  wf.view=WF_VIEWS.some(x=>x[0]===v)?v:'workflow';
+  try{ const u=new URL(location.href); u.searchParams.set('view',wf.view); history.replaceState(null,'',u.pathname+u.search+u.hash); }catch(e){}
+  applyView(); if(!$('#view-today').classList.contains('on')) go('today');
+}
+function wfReveal(id, scroll){
+  const row=document.querySelector(`#wflist .wrow[data-id="${id}"]`); if(!row) return;
+  const r=row.getBoundingClientRect(), smooth=wfReduced()?'auto':'smooth';
+  if(scroll) row.scrollIntoView({block:'start',behavior:smooth});
+  else if(r.top<0||r.bottom>innerHeight) row.scrollIntoView({block:'nearest',behavior:smooth});
+  const f=row.querySelector('.wcard .btn'); if(f) f.focus({preventScroll:true});
+}
+function wfOpen(id, scroll){
+  if(wf.view!=='workflow') setView('workflow');
+  wf.open=id; wf.openAt=Date.now();
+  const l=id&&ALL.find(x=>x.id===id); if(l&&l.cool) wf.coolOpen=true;
+  renderWorkflow(); if(id) wfReveal(id, scroll);
+}
+// after an outcome: the row strikes (377 ms), folds into Done today (610 ms), and the next due row opens by itself
+function wfFinish(id, what, fold){
+  wf.last={id,what};
+  if(fold) wf.anim.add(id);
+  const n=wfNext(id); wf.open=n?n.id:null; wf.openAt=Date.now(); if(n&&n.cool) wf.coolOpen=true;
+  renderAll();
+  if(fold){
+    const el=document.querySelector(`#wflist .wrow[data-id="${id}"]`);
+    if(el&&!wfReduced()){ el.style.maxHeight=el.offsetHeight+'px'; el.classList.add('row-fold'); void el.offsetHeight; el.style.maxHeight='0px'; }
+    setTimeout(()=>{ wf.anim.delete(id); renderWorkflow(); },987);
+  }
+  if(n) wfReveal(n.id,false);
+}
+$('#cpillSum').innerHTML = `<span aria-hidden="true">✓</span> Compliance<span class="cp-t"> · 7:55 AM</span>`;
+$('#cpillSum').title = 'Compliance checked at 7:55 AM: consent, hours and state rules, for every lead today';
+$('#cpillNote').textContent = 'Checked for every lead today, before the first touch: consent, hours, state rules.';
+$('#cpillList').innerHTML = COMPLIANCE.map(c=>`<li>${esc(c)}</li>`).join('');
+$('#vsw').innerHTML = $('#views').innerHTML = WF_VIEWS.map(([k,t])=>`<button data-act="wf-view" data-v="${k}" aria-pressed="false">${t}</button>`).join('');
+$('#planlink').addEventListener('click',e=>{ e.preventDefault(); go('plans'); });
+$('#wflist').addEventListener('toggle',e=>{ const d=e.target; if(!d.classList) return; if(d.classList.contains('wcool')){ wf.coolOpen=d.open; if(!d.open){ const ol=ALL.find(x=>x.id===wf.open); if(ol&&ol.cool) wf.open=null; } } else if(d.classList.contains('wdone')) wf.doneOpen=d.open; },true);
+document.addEventListener('pointerdown',e=>{ const p=$('#cpill'); if(p.open&&!e.target.closest('#cpill')) p.open=false; });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('#cpill').open) $('#cpill').open=false; });
+document.addEventListener('input',e=>{ const t=e.target; if(t.matches&&t.matches('.wedit')) wf.text[t.dataset.id]=t.value; });
+setInterval(()=>{ if(!wf.open||!wf.openAt) return; const el=document.querySelector(`[data-wftimer="${wf.open}"]`); if(!el) return; el.innerHTML=wfElapsed(); el.classList.toggle('over',Date.now()-wf.openAt>300000); },1000);
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b||!/^wf-/.test(b.dataset.act||'')) return;
+  const act=b.dataset.act, id=b.dataset.id, l=ALL.find(x=>x.id===id);
+  if(act==='wf-view'){ setView(b.dataset.v); if(b.closest('#demoPanel')){ $('#demoPanel').hidden=true; $('#demoBtn').setAttribute('aria-expanded','false'); } return; }
+  if(!l) return;
+  if(act==='wf-toggle'){ wf.last=null; wfOpen(wf.open===id?null:id,false); return; }
+  if(act==='wf-open'||act==='wf-next'){ wf.last=null; wfOpen(id,true); return; }
+  if(act==='wf-out'){ const o=b.dataset.out; state.done.add(id); state.log.push({id,t:`${o} · ${rep().full}, ${fmt(state.clock)}`}); toast(`${o} · ${l.name} · next step is set · logged to ECRM ${fmt(state.clock)}`); wfFinish(id,o,true); return; }
+  if(act==='wf-approve'){ const send=wfSend(l), edited=wf.text[id]!=null; wf.approved[id]={at:state.clock,send,edited}; delete wf.edit[id]; state.done.add(id); state.log.push({id,t:`Approved${edited?' (edited)':''} · ${rep().full}, ${fmt(state.clock)}`}); toast(`Approved · sends ${fmtSend(send)} · recorded ${rep().full}`); wfFinish(id,'Approved',false); return; }
+  if(act==='wf-edit'){ wf.edit[id]=!wf.edit[id]; if(!wf.edit[id]) delete wf.text[id]; renderWorkflow(); const ta=document.querySelector(`.wedit[data-id="${id}"]`); if(ta) ta.focus({preventScroll:true}); return; }
+  if(act==='wf-skip'){ state.decided[id]='skip'; state.log.push({id,t:`Skipped · ${rep().full}, ${fmt(state.clock)}`}); toast(`Skipped · ${l.name} · the plan moves to its next step`); wfFinish(id,'Skipped',true); return; }
+  if(act==='wf-undo'){ delete wf.approved[id]; state.done.delete(id); state.log.push({id,t:`Approval undone · ${rep().full}, ${fmt(state.clock)}`}); toast(`Approval undone · ${l.name} is back on the list`); renderAll(); return; }
+});
+applyView();
 /* ======== routing ======== */
 function go(tab){ history.replaceState(null,'','#'+tab); route(); }
 function route(){ let tab=(location.hash||'#today').slice(1); if(!$('#view-'+tab)) tab='today'; document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='view-'+tab)); document.querySelectorAll('.tabs a').forEach(a=>a.classList.toggle('on',a.dataset.tab===tab)); }
 document.querySelectorAll('.tabs a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();go(a.dataset.tab);}));
 window.addEventListener('hashchange',route);
-function renderAll(){ renderNow(); renderLanes(); renderPause(); renderRail(); fillLeadPicker(); renderDraft(); renderScore(); renderCoach(); }
+function renderAll(){ renderNow(); renderLanes(); renderPause(); renderRail(); fillLeadPicker(); renderDraft(); renderScore(); renderCoach(); renderWorkflow(); }
 fillLeadPicker('Q01'); selectLead('Q01'); renderPlans(); renderAll(); route();
 // the first due call opens by itself: the day starts on its first five minutes
 (function(){ const o=ordered(); const f=o.find(x=>!isDone(x)&&!isStop(x)&&channel(x)==='call'&&!x.cool); if(f){ state.open=f.id; state.openAt=Date.now(); renderAll(); } })();
