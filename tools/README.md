@@ -8,8 +8,9 @@ holds the built files (`index.html`, `assets/`) plus everything needed to rebuil
 
 | Path | What |
 | --- | --- |
-| `index.html`, `assets/` | The main demo as served (Hakobian edition, golden-ratio layout). |
-| `v2/index.html` | The v2 fresh-design demo, one self-contained file (inline CSS and JS, Google Fonts). |
+| `index.html`, `v2/index.html` | The two demos **as served: encrypted with the access code** (StatiCrypt, PBKDF2 + AES, decrypted in the browser). `assets/` and `v2/fonts/` hold fonts only. |
+| `tools/dist/` | The plain builds: `index.html` + `assets/` (main site) and `v2/index.html` + `fonts/`. Tests run against these; edit v2 here. |
+| `tools/protect.py` | Inlines the main bundle, encrypts both pages with the code, moves the plain builds to `tools/dist/`. |
 | `tools/patch/patch.py` | Rebuilds `index.html` + `assets/` from the v6 base commit and `src/`. |
 | `tools/patch/src/*.jsx`, `ext.css` | The injected components: engine (sequencing), today (leads), queue (Today view), compose, compare, compliance, charts, protime (open time + cooler leads), daystrip, plan, nowbar, evidence (rules and tags), moves. |
 | `tools/patch/harness.mjs` | Headless run of the day builder: `node harness.mjs [clockMinutes] [--fresh] [--list]`. |
@@ -20,8 +21,14 @@ holds the built files (`index.html`, `assets/`) plus everything needed to rebuil
 ```
 cd tools/patch
 npm install esbuild            # once; node_modules is not committed
-python3 -I patch.py /path/to/this/repo
+python3 -I patch.py /path/to/this/repo          # writes the plain page + assets at the repo root
+cd .. && npm install staticrypt                 # once, anywhere; point STATICRYPT_DIR at that folder
+STATICRYPT_DIR=/path/to/that python3 tools/protect.py /path/to/this/repo <access code>
 ```
+
+`protect.py` moves the plain build to `tools/dist/`, inlines the bundle into one file and encrypts it; the
+root `index.html` and `v2/index.html` are what GitHub Pages serves. Edit v2 at `tools/dist/v2/index.html`
+and run `protect.py` again.
 
 `patch.py` compiles `src/*.jsx` with esbuild (`--jsx-factory=I.createElement --jsx-fragment=I.Fragment
 --target=es2020`), injects the result before `function ey(` in the v6 bundle, appends `ext.css`, moves the
@@ -32,8 +39,8 @@ matters (engine before the views, evidence last).
 
 ```
 python3 -m http.server 4210 --bind 127.0.0.1      # from the repo root
-node tools/tests/v11-check.mjs "http://127.0.0.1:4210/"           # seeded state: run WITHOUT ?fresh=1
-node tools/tests/v9-check.mjs  "http://127.0.0.1:4210/?fresh=1"   # the others run WITH ?fresh=1
+node tools/tests/v11-check.mjs "http://127.0.0.1:4210/tools/dist/"           # seeded state: run WITHOUT ?fresh=1
+node tools/tests/v9-check.mjs  "http://127.0.0.1:4210/tools/dist/?fresh=1"   # the others run WITH ?fresh=1
 ```
 
 Playwright is imported from `/opt/npm-tools/node_modules/playwright/index.mjs` in these scripts; change the
@@ -50,7 +57,8 @@ git push -f origin main:gh-pages
 gh run list --limit 1        # the "pages build and deployment" run must show success
 ```
 
-Browsers cache Pages for 10 minutes; append `?r=2` or hard-refresh to see a new deploy.
+Browsers cache Pages for 10 minutes; append `?r=2` or hard-refresh to see a new deploy. The served pages ask for
+the access code; "remember on this device" keeps it for a day.
 
 ## Rules encoded in the engine (summary)
 

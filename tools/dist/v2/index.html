@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" href="../favicon.svg">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Agency Command Center · Hakobian Strategic Follow-Up</title>
+<style>
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/bricolage-grotesque-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/bricolage-grotesque-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url(fonts/atkinson-hyperlegible-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/atkinson-hyperlegible-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2")}
+</style>
+<style>
+/* Layout: a work board. One status line at the top, a burn-up beside it, then three lanes (decisions, calls, messages) in a fixed order; the rest of the day folds away. One column on a phone. */
+:root{
+  --bg:#F4F5F1; --panel:#FFFFFF; --ink:#1A2330; --muted:#5D6772; --line:#D8DCD4; --line2:#EAECE6; --soft:#F0F2EC;
+  --accent:#0F3D5C; --accent-ink:#FFFFFF; --accent-soft:#DCE8F0;
+  --call:#1F6FD1; --call-soft:#E1ECFB; --email:#B8640F; --email-soft:#FBEBD9; --text:#178A5B; --text-soft:#DFF3E8;
+  --ok:#2E7D4F; --warn:#B8640F; --bad:#8C2F39; --bad-soft:#F6E3E5; --warn-soft:#FBEBD9; --ok-soft:#DFF3E8;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10151B; --panel:#171E26; --ink:#E6EAEE; --muted:#97A2AE; --line:#2C3640; --line2:#222B34; --soft:#1C242D;
+  --accent:#7FB6E0; --accent-ink:#10151B; --accent-soft:#1B3042;
+  --call:#6EA6F0; --call-soft:#17293F; --email:#E4A050; --email-soft:#3A2814; --text:#5BC78F; --text-soft:#15311F;
+  --ok:#5BC78F; --warn:#E4A050; --bad:#E57B86; --bad-soft:#3F1F24; --warn-soft:#3A2814; --ok-soft:#15311F;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151B; --panel:#171E26; --ink:#E6EAEE; --muted:#97A2AE; --line:#2C3640; --line2:#222B34; --soft:#1C242D;
+  --accent:#7FB6E0; --accent-ink:#10151B; --accent-soft:#1B3042;
+  --call:#6EA6F0; --call-soft:#17293F; --email:#E4A050; --email-soft:#3A2814; --text:#5BC78F; --text-soft:#15311F;
+  --ok:#5BC78F; --warn:#E4A050; --bad:#E57B86; --bad-soft:#3F1F24; --warn-soft:#3A2814; --ok-soft:#15311F;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16.5px;line-height:1.618;
+  padding-left:max(13px,env(safe-area-inset-left,0px));padding-right:max(13px,env(safe-area-inset-right,0px));padding-block:0 34px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--accent)}
+.wrap{max-width:1597px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:700;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:21px}h3{font-size:16.5px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sub{color:var(--muted);font-size:13px;margin:5px 0 8px}
+.tip{color:var(--muted);font-size:13px}
+body.nocoach .tip{display:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:5px;padding:8px 13px;min-height:44px;font-weight:700;font-size:13px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.quiet{background:transparent;color:var(--muted);border-color:var(--line)}
+.btn.sm{min-height:34px;padding:5px 8px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:13px 13px;min-width:0}
+mark{background:var(--accent-soft);color:inherit;padding:0 2px;border-radius:2px}
+.fact{border-bottom:2px solid var(--email);padding:0 1px}
+.ch{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;padding:1px 5px;border-radius:3px;border:1px solid}
+.ch.call{color:var(--call);border-color:var(--call);background:var(--call-soft)}
+.ch.email{color:var(--email);border-color:var(--email);background:var(--email-soft)}
+.ch.text{color:var(--text);border-color:var(--text);background:var(--text-soft)}
+.pill{font-size:13px;border:1px solid var(--line);border-radius:3px;padding:1px 8px;color:var(--muted);white-space:nowrap}
+.tag{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
+
+/* legal band + header */
+.band{background:var(--accent);color:var(--accent-ink);font-size:13px;padding:5px 0;text-align:center;margin:0 calc(-1 * max(13px,env(safe-area-inset-left,0px))) 0 calc(-1 * max(13px,env(safe-area-inset-right,0px)))}
+.band span{display:inline-block;padding:0 13px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:13px;padding:13px 0 8px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px}
+.mark{display:grid;grid-template-columns:repeat(7,5px);gap:2px;padding:5px;border:1px solid var(--line);border-radius:3px;background:var(--panel)}
+.mark i{width:5px;height:5px;border-radius:1px;background:var(--accent)}.mark i.c{background:transparent;border:1px solid var(--accent)}
+.agency{font-family:var(--display);font-weight:700;font-size:21px;line-height:1.272}
+.product{font-size:13px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.seg button{padding:8px 13px;min-height:44px;font-size:13px;color:var(--muted)}
+.seg button.on{background:var(--accent-soft);color:var(--ink);font-weight:700}
+.method{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.brandtag{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--accent-soft);background:var(--accent-soft);border-radius:3px;padding:1px 5px;margin-left:8px;vertical-align:middle;white-space:nowrap}
+.thesis{font-family:var(--display);font-size:21px;line-height:1.272;color:var(--ink);margin:0 0 13px;max-width:34ch}
+.thesis small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+.foot em{font-style:italic;color:var(--ink)}
+
+/* v2.2: the work card, folds, the demo drawer, the gate */
+.card .r1[data-act=toggle]{cursor:pointer}
+.card .caret{margin-left:auto;color:var(--muted);font-size:13px}
+.card .mins{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--accent);background:var(--accent-soft);border-radius:21px;padding:1px 8px}
+.card.open{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.card.isdone{opacity:.72}
+.say.quiet{color:var(--muted)}
+.work{border-top:1px solid var(--line2);margin-top:8px;padding-top:8px;display:grid;gap:8px}
+.workhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.workhead .timer{margin-left:auto;font-size:16.5px;font-weight:500}
+.workhead .timer small{font-size:10px;color:var(--muted);font-weight:400}
+.workhead .timer.over{color:var(--warn)}
+.script{display:grid;gap:5px}
+.script .move{position:relative;padding:5px 8px 5px 55px;font-size:16.5px;line-height:1.618}
+.script .sig{font-size:13px;color:var(--muted);margin-top:3px}
+.script .smsbox{background:var(--text-soft);border-radius:13px;padding:8px 13px;font-size:16.5px;line-height:1.618}
+.script .subj{font-weight:700;margin-bottom:3px}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:10px;letter-spacing:.04em;padding:1px 8px;border-radius:21px;border:1px solid var(--line)}
+.chip.ok{color:var(--ok);background:var(--ok-soft);border-color:transparent}
+.chip.no{color:var(--bad);background:var(--bad-soft);border-color:transparent}
+.chip.src{color:var(--muted)}
+.fold.cool>summary{color:var(--accent)}
+.demo{position:relative}
+.demobtn{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:21px;padding:5px 13px;min-height:34px;background:var(--panel)}
+.demobtn i{width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.demopanel{position:absolute;right:0;top:40px;z-index:40;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 34px rgba(0,0,0,.13);padding:13px;min-width:377px;display:grid;gap:8px}
+.demorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.demorow .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:76px}
+.demonote{font-size:13px;color:var(--muted);border-top:1px solid var(--line2);padding-top:8px}
+.gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:21px}
+.gatebox{max-width:610px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:21px 34px 34px}
+.gateband{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:13px}
+.gatebox h1{font-family:var(--display);font-size:21px;margin:0 0 8px}
+.gatebox ul{padding-left:21px}
+.gatenote{font-size:13px;color:var(--muted)}
+.gate-accept{margin:13px 0 8px}
+body.gated .wrap{filter:blur(3px);pointer-events:none}
+@media (max-width:987px){.demopanel{position:fixed;left:13px;right:13px;top:auto;bottom:21px;min-width:0}}
+
+/* v2.3: today's look */
+.nowstat .wins{font-family:var(--mono);font-size:13px;color:var(--ok);background:var(--ok-soft);border-radius:21px;padding:2px 8px}
+.look{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}
+.lookq{border:1px solid var(--line);border-left-width:3px;border-radius:5px;padding:8px 13px;display:flex;flex-direction:column;gap:3px;min-width:0;background:var(--panel)}
+.lookq.is-now{border-left-color:var(--accent)}.lookq.is-late{border-left-color:var(--bad)}.lookq.is-win{border-left-color:var(--ok)}.lookq.is-quiet{border-left-color:var(--line)}
+.lookhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.looktitle{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.lookn{font-family:var(--display);font-size:21px;line-height:1;font-weight:700}
+.lookn small{font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:500}
+.looksub{font-size:13px;color:var(--muted)}
+.looklist{list-style:none;margin:2px 0 0;padding:0;display:grid;gap:2px}
+.looklist li{display:flex;justify-content:space-between;gap:8px;font-size:13px;min-width:0}
+.lookname{background:none;border:0;padding:0;color:var(--ink);font:inherit;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;min-height:0}
+.lookname:hover{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.lookwhen{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+.lookempty{font-size:13px;color:var(--muted);font-style:italic}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;margin-bottom:13px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{padding:13px 13px;text-decoration:none;color:var(--muted);font-weight:700;font-size:13px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs a.on{color:var(--ink);border-bottom-color:var(--accent)}
+.view{display:none}.view.on{display:block}
+
+/* now line */
+.nowline{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:13px;align-items:center}
+.nowstat{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.nowstat b{font-family:var(--display);font-size:43px;line-height:1;font-weight:700}
+.nowstat .lbl{font-size:13px;color:var(--muted)}
+.nowstat .plan{font-size:13px;padding:3px 8px;border-radius:5px;background:var(--soft);color:var(--muted)}
+.nowstat .plan.ahead{background:var(--ok-soft);color:var(--ok)}
+.nowstat .plan.behind{background:var(--warn-soft);color:var(--warn)}
+.nextt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:13px}
+.nextt .who{font-weight:700}
+.strip{display:grid;grid-template-columns:repeat(28,1fr);gap:3px;margin-top:13px}
+.strip i{display:block;height:21px;border-radius:2px;border:1px solid var(--accent);background:transparent;position:relative}
+.strip i.d{background:var(--accent)}
+.strip i.c{border-style:dashed}
+.strip i.late{border-color:var(--bad);border-width:2px}
+.strip i.gap{margin-left:5px}
+.striplegend{display:flex;gap:13px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:5px}
+.sw{display:inline-block;width:8px;height:8px;border-radius:2px;border:1px solid var(--accent);vertical-align:-1px;margin-right:5px}
+.sw.d{background:var(--accent)}.sw.c{border-style:dashed}
+.burn{width:100%;height:auto;display:block}
+.cols{display:grid;grid-template-columns:minmax(0,1.618fr) minmax(0,1fr);gap:13px;margin-top:13px}
+.rail{display:flex;flex-direction:column;gap:13px;min-width:0}
+
+/* lanes */
+.lane{margin-top:13px}
+.lanehead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:5px}
+.lanehead h2{font-size:16.5px}
+.lanehead .rule{font-size:13px;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:5px;padding:8px 13px;margin-bottom:8px}
+.card.call{border-left-color:var(--call)}.card.email{border-left-color:var(--email)}.card.text{border-left-color:var(--text)}
+.card.stop{border-left-color:var(--bad);background:var(--panel)}
+.card.cool{border-left-style:dashed}
+.r1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.when{font-family:var(--mono);font-size:13px;padding:2px 8px;border-radius:3px;background:var(--soft);color:var(--muted);font-weight:700;white-space:nowrap}
+.when.now{background:var(--ok-soft);color:var(--ok)}
+.when.late{background:var(--bad-soft);color:var(--bad)}
+.who{font-weight:700;flex:1;min-width:0}
+.who small{font-weight:400;color:var(--muted);margin-left:5px;font-size:13px}
+.r2{font-size:13px;color:var(--muted);margin-top:3px}
+.say{border-left:3px solid var(--accent);padding:8px 13px;background:var(--soft);border-radius:0 5px 5px 0;font-size:13px;line-height:1.618;margin:8px 0 0;max-width:62ch}
+.r3{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap}
+.acts{display:flex;gap:5px;flex-wrap:wrap}
+.help{font-size:13px;color:var(--muted);text-decoration:underline;padding:5px 0;min-height:34px}
+.helpon{font-size:13px;color:var(--warn);font-weight:700}
+details.fold summary{cursor:pointer;color:var(--muted);font-size:13px;padding:8px 0;list-style:none;min-height:44px;display:flex;align-items:center}
+details.fold summary::before{content:"+";font-family:var(--mono);margin-right:8px;width:13px}
+details.fold[open] summary::before{content:"–"}
+.msg{font-size:13px;line-height:1.618;background:var(--soft);border-radius:5px;padding:8px 13px;margin-top:8px;max-width:64ch;white-space:pre-line}
+.msg .subj{font-weight:700;display:block;margin-bottom:5px}
+.life{font-size:13px;color:var(--warn);font-weight:700}
+.approved{font-size:13px;color:var(--ok);font-weight:700}
+
+/* pause points */
+.pp{list-style:none;margin:0;padding:0}
+.pp li{display:grid;grid-template-columns:55px 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--line2);font-size:13px}
+.pp li:first-child{border-top:0}
+.pp li.now{background:var(--accent-soft);margin:0 -16px;padding:8px 13px;border-radius:5px}
+.pp .k{font-weight:700;display:block}
+.pp .t{color:var(--muted)}
+.pp textarea,.pp input{width:100%;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:5px;padding:8px;background:var(--panel);color:var(--ink);margin-top:5px}
+
+/* compose */
+.pickers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:13px}
+.pickers label{display:block;font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+select{width:100%;font:inherit;font-size:13px;padding:8px 8px;min-height:44px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--ink)}
+.seg.wide button{flex:1;min-height:44px}
+.ccols{display:grid;grid-template-columns:minmax(0,1.618fr) minmax(0,1fr);gap:13px}
+.draft{font-size:16.5px;line-height:1.618;max-width:64ch}
+.draft .subj{font-weight:700;margin-bottom:8px}
+.move{position:relative;padding:8px 8px 8px 55px;border-left:2px solid var(--line);margin-bottom:5px;white-space:pre-line}
+.move::before{content:attr(data-move);position:absolute;left:8px;top:8px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700;font-family:var(--mono)}
+.sig{color:var(--muted);font-size:13px;margin-top:8px;white-space:pre-line}
+.smsbox{background:var(--text-soft);border-radius:13px 13px 13px 2px;padding:13px 13px;max-width:48ch;line-height:1.618}
+.count{font-size:13px;color:var(--muted);margin-top:5px}
+.dacts{display:flex;gap:5px;margin-top:13px;flex-wrap:wrap}
+.levers{display:grid;gap:5px;margin:8px 0}
+.lev{display:grid;grid-template-columns:55px 1fr;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.lev .bar{height:5px;background:var(--line2);border-radius:3px;position:relative}
+.lev .bar i{position:absolute;top:-3px;width:13px;height:13px;border-radius:50%;background:var(--accent);margin-left:-6px}
+.lev .ends{display:flex;justify-content:space-between;font-size:10px;margin-top:2px}
+.why dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 8px;font-size:13px}
+.why dt{color:var(--muted);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding-top:2px}
+.why dd{margin:0}
+.checks{list-style:none;margin:8px 0 0;padding:8px 0 0;border-top:1px solid var(--line2);font-size:10px}
+.checks li::before{content:"✓ ";color:var(--ok);font-weight:700}
+.checks li.no::before{content:"■ ";color:var(--bad)}
+.toast{position:fixed;left:50%;bottom:calc(21px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 13px;border-radius:5px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+.toast.on{opacity:1}
+
+/* plans */
+.plan{margin-bottom:13px}
+.plan h3{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.plan h3 small{font-weight:400;color:var(--muted);font-size:13px}
+.tlwrap{overflow-x:auto}
+.tl{position:relative;height:55px;min-width:610px;margin-top:5px}
+.tl .axis{position:absolute;left:0;right:0;top:34px;border-top:1px solid var(--line)}
+.tl .tick{position:absolute;top:34px;font-size:10px;color:var(--muted);font-family:var(--mono);transform:translateX(-50%)}
+.tl .st{position:absolute;top:13px;width:21px;height:21px;transform:translateX(-50%);border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;border:1px solid;cursor:default}
+.tl .st.call{background:var(--call-soft);color:var(--call);border-color:var(--call)}
+.tl .st.email{background:var(--email-soft);color:var(--email);border-color:var(--email)}
+.tl .st.text{background:var(--text-soft);color:var(--text);border-color:var(--text)}
+.tl .st.vm::after{content:"";position:absolute;right:-3px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
+.steps{font-size:13px;color:var(--muted);margin-top:5px;columns:2;column-gap:21px}
+.steps li{break-inside:avoid}
+@media (max-width:987px){.steps{columns:1}}
+
+/* coach */
+.chat{display:grid;gap:8px}
+.bub{max-width:60ch;padding:8px 13px;border-radius:8px;font-size:13px;background:var(--soft)}
+.bub.me{background:var(--accent-soft);justify-self:end}
+.bub small{display:block;font-size:10px;color:var(--muted);margin-bottom:2px}
+.readbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;font-size:13px;margin:5px 0 8px}
+.readbar .bar{height:5px;background:var(--line2);border-radius:3px}.readbar .bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.log{font-size:13px;color:var(--muted);margin-top:8px;border-top:1px solid var(--line2);padding-top:8px}
+
+/* book */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.score{font-family:var(--mono);font-size:13px;padding:2px 8px;border-radius:3px;font-weight:700;background:var(--bad-soft);color:var(--bad)}
+.score.mid{background:var(--warn-soft);color:var(--warn)}.score.low{background:var(--ok-soft);color:var(--ok)}
+.factors{font-size:13px;color:var(--muted);margin:3px 0}
+.factors i{font-style:normal;border:1px solid var(--line);border-radius:3px;padding:0 5px;margin-right:5px}
+.play{font-size:13px;margin-top:5px}.play b{color:var(--accent)}
+.urg{font-size:10px;font-family:var(--mono);padding:1px 5px;border-radius:3px;background:var(--bad-soft);color:var(--bad)}
+.urg.soon{background:var(--warn-soft);color:var(--warn)}.urg.week{background:var(--soft);color:var(--muted)}
+.est{color:var(--ok);font-weight:700}
+.plain{list-style:none;margin:0;padding:0}
+.plain li{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line2);font-size:13px}
+.plain li:first-child{border-top:0}
+
+/* scoreboard */
+.meters{display:grid;gap:8px}
+.meter{display:grid;grid-template-columns:144px 1fr 55px;align-items:center;gap:8px;font-size:13px}
+.meter .bar{height:8px;background:var(--line2);border-radius:5px;overflow:hidden}
+.meter .bar i{display:block;height:100%;background:var(--accent)}
+.meter .v{text-align:right;color:var(--muted)}
+.sq{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.sq i{width:13px;height:13px;border-radius:2px;border:1px solid var(--accent);display:block}
+.sq i.d{background:var(--accent)}
+.wk{display:grid;grid-template-columns:34px 1fr 55px;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:5px}
+.wk .bar{height:8px;background:var(--line2);border-radius:3px;position:relative;overflow:hidden}
+.wk .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent)}
+.wk .bar b{position:absolute;top:0;bottom:0;width:2px;background:var(--bad)}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* why */
+.princ{display:grid;gap:8px}
+.princ div{border-top:1px solid var(--line2);padding-top:8px;font-size:13px}
+.princ div:first-child{border-top:0}
+.princ b{display:block;font-family:var(--display);font-size:13px}
+.refs{font-family:var(--mono);font-size:10px;color:var(--accent);margin-left:5px;white-space:nowrap}
+.evid{font-size:13px;color:var(--muted);margin:0;padding:0;list-style:none}
+.evid li{padding:5px 0;border-top:1px solid var(--line2)}
+.evid li b{font-family:var(--mono);color:var(--accent);margin-right:5px}
+
+.foot{margin-top:34px;font-size:13px;color:var(--muted);display:grid;gap:5px}
+
+@media (max-width:987px){
+  .cols,.ccols,.grid2,.nowline{grid-template-columns:1fr}
+  .strip{grid-template-columns:repeat(14,1fr)}
+  .strip i.gap{margin-left:0}
+  .pickers{grid-template-columns:1fr 1fr}
+  .nowstat b{font-size:34px}
+  .meter{grid-template-columns:89px 1fr 55px}
+}
+</style>
+
+</head>
+<body>
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle" hidden>
+  <div class="gatebox">
+    <div class="gateband">Confidential · Proprietary demonstration · Not for distribution</div>
+    <h1 id="gateTitle">Confidential demonstration</h1>
+    <p>This is a private, proprietary demonstration of the Agency Command Center. It contains unpublished work and trade secrets. By continuing, you agree to the following:</p>
+    <ul>
+      <li>Keep what you see confidential. Do not share this link, screenshots, recordings or descriptions with anyone without Aaron A. Hakobian's written permission.</li>
+      <li>Use it only to evaluate this software.</li>
+      <li>Do not copy, reverse-engineer, or build anything based on what is shown here.</li>
+    </ul>
+    <p class="gatenote">All names, numbers and conversations shown are synthetic. No customer information appears anywhere on this site. This demonstration is not affiliated with, endorsed by, or offered on behalf of any insurance carrier.</p>
+    <button class="btn gate-accept" id="gateAccept">I agree — continue</button>
+    <div class="gatenote">If you do not agree, close this page.</div>
+  </div>
+</div>
+<div class="band"><span>Confidential demonstration · proprietary follow-up process, sequences and word tracks · not for forwarding</span></div>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><span class="mark" id="mark" aria-hidden="true"></span><div><div class="agency" id="agencyName">Sample Agency</div><div class="product">Agency Command Center</div><div class="method">Hakobian Strategic Follow-Up · Hakobian Automated Coach</div></div></div>
+  <div class="ctrls">
+    <div class="demo" id="demo">
+      <button class="demobtn" id="demoBtn" aria-expanded="false" aria-controls="demoPanel"><i aria-hidden="true"></i>Demo</button>
+      <div class="demopanel" id="demoPanel" hidden>
+        <div class="demorow"><span class="lbl">Acting as</span><div class="seg" role="group" aria-label="Viewing as" id="persona"><button class="on" data-p="Maya">Maya · Producer</button><button data-p="Alex">Alex · Principal</button></div></div>
+        <div class="demorow"><span class="lbl">Clock</span><div class="seg" role="group" aria-label="Demo clock" id="clocks"></div></div>
+        <div class="demorow"><span class="lbl">Coaching</span><div class="seg" role="group" aria-label="Coaching" id="coach"><button class="on" data-c="1">On</button><button data-c="0">Off</button></div></div>
+        <div class="demonote">Demonstration controls only. A team member's screen opens on today's plan with none of them.</div>
+      </div>
+    </div>
+  </div>
+</header>
+<nav class="tabs" aria-label="Modules">
+  <a href="#today" data-tab="today" class="on">Today</a>
+  <a href="#compose" data-tab="compose">Compose</a>
+  <a href="#plans" data-tab="plans">Plans</a>
+  <a href="#coach" data-tab="coach">Live Coach</a>
+  <a href="#book" data-tab="book">Book</a>
+  <a href="#scoreboard" data-tab="scoreboard">Scoreboard</a>
+  <a href="#why" data-tab="why">Why it's built this way</a>
+</nav>
+
+<!-- TODAY -->
+<section id="view-today" class="view on">
+  <div class="panel">
+    <div class="nowline">
+      <div>
+        <div class="nowstat" id="nowstat"></div>
+        <div class="nextt" id="nextt"></div>
+        <div class="strip" id="strip" aria-label="28 leads today"></div>
+        <div class="striplegend"><span><i class="sw d"></i>touched</span><span><i class="sw"></i>planned, 20 warm</span><span><i class="sw c"></i>planned, 8 cooler</span><span id="helpcount"></span></div>
+        <div class="look" id="look" role="group" aria-label="Today's look"></div>
+      </div>
+      <div style="min-width:0;width:377px;max-width:100%"><svg class="burn" id="burn" viewBox="0 0 300 185" role="img" aria-label="Burn-up: touches done against the hour-by-hour plan"></svg><div class="tip" style="text-align:center">Done against the plan, hour by hour.</div></div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div style="min-width:0">
+      <div class="lane" id="lane-stop"></div>
+      <div class="lane" id="lane-calls"></div>
+      <div class="lane" id="lane-msgs"></div>
+    </div>
+    <aside class="rail">
+      <div class="panel"><div class="lanehead"><h2>The day's three pause points</h2><span class="rule mono" id="ppclock"></span></div><ol class="pp" id="pp"></ol></div>
+      <div class="panel"><div class="lanehead"><h2>Renewal window</h2><span class="rule">counting back</span></div><ul class="plain" id="renew"></ul></div>
+      <div class="panel"><div class="lanehead"><h2>Compliance check</h2><span class="rule mono" id="compat"></span></div><ul class="checks" id="compl"></ul></div>
+    </aside>
+  </div>
+</section>
+
+<!-- COMPOSE -->
+<section id="view-compose" class="view">
+  <div class="pickers">
+    <div><label for="c-lead">Lead</label><select id="c-lead"></select></div>
+    <div><label for="c-scn">Scenario</label><select id="c-scn"></select></div>
+    <div><label for="c-sty">Style</label><select id="c-sty"></select></div>
+    <div><label>Channel</label><div class="seg wide" id="c-ch"><button class="on" data-ch="email">Email</button><button data-ch="sms">Text</button><button data-ch="call">Call</button></div></div>
+  </div>
+  <div class="ccols">
+    <div class="panel"><div id="draft" class="draft"></div>
+      <div class="dacts"><button class="btn" id="approveBtn">Approve · sends at its hour</button><button class="btn ghost" id="copyBtn">Copy</button></div>
+      <div class="tip" id="approvetip" style="margin-top:8px"></div>
+    </div>
+    <aside class="rail">
+      <div class="panel why"><h3>Why this draft<span class="brandtag">Hakobian strategic coaching</span></h3><p class="sub">Three moves: Match · Fit · Ask.</p><div class="levers" id="levers"></div><dl id="why"></dl><ul class="checks" id="checks"></ul></div>
+    </aside>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section id="view-plans" class="view">
+  <div class="lanehead" style="padding:0 0 5px"><h2>Hakobian Strategic Follow-Up · the plans</h2><span class="rule">one plan per lead type, the same pace for every style</span></div>
+  <p class="sub">Every lead type starts its own clock. Style changes the words, never the pace. C = call, E = email, T = text; a red dot means a voicemail is allowed on that call.</p>
+  <div id="plans"></div>
+</section>
+
+<!-- COACH -->
+<section id="view-coach" class="view">
+  <div class="ccols">
+    <div class="panel"><div class="lanehead"><h2 id="coachTitle"></h2><span class="brandtag">Hakobian coaching</span><span class="rule mono" id="turnN"></span></div><div class="chat" id="chat"></div>
+      <div class="dacts"><button class="btn" id="nextTurn">Next turn</button></div></div>
+    <aside class="rail"><div class="panel" id="coachPanel"></div></aside>
+  </div>
+</section>
+
+<!-- BOOK -->
+<section id="view-book" class="view">
+  <div class="grid2">
+    <div class="panel"><div class="lanehead"><h2>Retention · at-risk households</h2><span class="rule">churn-scored</span></div><div id="risk"></div></div>
+    <div class="panel"><div class="lanehead"><h2>Cross-sell triggers</h2><span class="rule">signals this week</span></div><div id="trig"></div></div>
+    <div class="panel"><div class="lanehead"><h2>Claims advocacy</h2><span class="rule">corporate process · local advocate</span></div><div id="claims"></div></div>
+    <div class="panel"><div class="lanehead"><h2>Referrals</h2><span class="rule" id="refstat"></span></div><div id="refs"></div></div>
+  </div>
+</section>
+
+<!-- SCOREBOARD -->
+<section id="view-scoreboard" class="view">
+  <div class="ccols">
+    <div class="panel"><div class="lanehead"><h2>Team · today</h2><span class="rule">process first, results after</span></div><div class="meters" id="teamm"></div>
+      <div class="note">Results show week to date; a day's count is too small to read. No ranking: everyone sees team totals and their own plan.</div></div>
+    <aside class="rail">
+      <div class="panel"><div class="lanehead"><h2 id="myplanTitle">Your plan</h2><span class="rule mono" id="myplanN"></span></div><div class="sq" id="mysq"></div><div class="meters" id="mym" style="margin-top:10px"></div></div>
+      <div class="panel"><div class="lanehead"><h2>This week · 28 a day</h2><span class="rule mono" id="wkTotal"></span></div><div id="week"></div><div class="note">Bar = done, red line = planned by the clock shown.</div></div>
+    </aside>
+  </div>
+</section>
+
+<!-- WHY -->
+<section id="view-why" class="view">
+  <p class="thesis" id="thesis"><small>Hakobian Strategic Follow-Up · Hakobian Automated Coach</small></p>
+  <div class="ccols">
+    <div class="panel"><div class="lanehead"><h2>The rules this board runs on</h2><span class="rule" id="princN"></span></div><div class="princ" id="princ"></div></div>
+    <aside class="rail"><div class="panel"><div class="lanehead"><h2>Evidence</h2><span class="rule" id="evN"></span></div><ul class="evid" id="evid"></ul></div></aside>
+  </div>
+</section>
+
+<footer class="foot"><span><em id="foottag"></em></span><span>Demonstration data: every person, number and phone is synthetic.</span><span>© 2026. The follow-up sequences, communication styles, word tracks and pause-point method are proprietary and held as trade secrets.</span></footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+/* ======== Aaron's data, lifted verbatim from the live build (v12.2, Oct 23 2026) ======== */
+const DRAFTS = {raw:{story:{email:{subject:"Your quote, and who's taking care of it",body:`Hey Marcus,
+
+It's just __REP__ from your local Sample Agency office here in town. I'm the one taking care of the quote you requested, and I read your note twice before I ran it.
+
+It's attached, with a short note on what it covers and why. Most people skip that part and find out what they bought when something happens; I'd rather you know now, and I'd rather you know who picks up the phone.
+
+Are you opposed to a quick, no-obligation call this week? You pick the time.`},sms:"Hey Marcus, it's just __REP__ from your local Sample Agency office here in town. I'm the one taking care of the quote you requested; it's in your email with a short note on what it covers and who to call. Are you opposed to a quick call this week? You pick the time. (555) 010-0142"},asker:{email:{subject:"$__PROPOSED__/mo, line by line",body:`Hey Marcus,
+
+It's just __REP__ from your local Sample Agency office. You asked for specifics, so here they are: $__PROPOSED__/mo for the coverage you requested, with every discount you qualify for already applied, and the limits and options spelled out line by line in the attachment.
+
+As much as rate is important, the more important question to ask yourself is: how will the insurance company pay me when something happens? I marked the two places where a lower price usually comes from a coverage cut, so you can see it before you decide.
+
+How much are you paying now? If I can beat it, I'll tell you. If I can't, I'll tell you that too.`},sms:"Hey Marcus, it's just __REP__ from your local Sample Agency office. Your quote came in at $__PROPOSED__/mo for the coverage you requested; the limits and options are in your email, line by line. How much are you paying now? If I can beat it, I'll tell you. If I can't, I'll tell you that too."},doer:{email:{subject:"Your quote is done",body:`Hi Marcus,
+
+It's just __REP__ from your local Sample Agency office. I did the work already: your quote is attached, $__PROPOSED__/mo, nothing to fill out.
+
+If you say yes, we handle the paperwork on our end. If anything looks unclear, five minutes on the phone covers it.
+
+AM or PM?`},sms:"Hey Marcus, it's just __REP__ from your local Sample Agency office. I did the work already: your quote is in your email, $__PROPOSED__/mo, nothing to fill out. If you say yes, we handle the paperwork. AM or PM?"},thinker:{email:{subject:"Your quote, no rush",body:`Hey Marcus,
+
+It's just __REP__ from your local Sample Agency office. I'm the one taking care of the quote you requested; it's attached, with the limits spelled out so you can read it on your own time.
+
+No need to decide anything today. The one date that matters is your renewal, because that's the day switching costs you nothing; I'll check back a week before it.
+
+Would it be a terrible idea to take a closer look before then? You decide.`},sms:"Hey Marcus, it's just __REP__ from your local Sample Agency office. Your quote is in your email, with the limits spelled out so you can read it on your own time. No rush; I'll check back a week before your renewal. Would it be a terrible idea to take a closer look before then? You decide."}},current:{story:{email:{subject:"Something strange on your account",body:`Hey Marcus,
+
+I was reviewing your account with us and noticed something kind of… strange. Your home insurance is elsewhere, and I don't see a life policy.
+
+My main focus is always on protecting you and, just as importantly, your income. Most companies overlook that because it isn't required by the government, like car liability, or by the bank, like homeowners insurance; those policies protect their interests, not necessarily yours.
+
+Are you opposed to a quick, no-obligation call this week to look at it together?`},sms:"Hey Marcus, it's __REP__. I was reviewing your account with us and noticed something kind of… strange… your home insurance is elsewhere, and I don't see a life policy. Are you opposed to a quick, no-obligation call this week to look at it together?"},asker:{email:{subject:"Your account, side by side",body:`Hey Marcus,
+
+I was reviewing your account with us and noticed something kind of… strange: your home insurance is elsewhere.
+
+Bundling home + auto brings the total down by 30%, and the discount applies to both policies, so the auto you already have with us gets cheaper too. I put together a side-by-side: your current limits, the bundled option, and what each one changes. To run the exact number I need two things from your current home policy: the dwelling coverage and the deductible.
+
+How much are you paying on the home now? If I can beat it, I'll tell you.`},sms:"Hey Marcus, it's __REP__. Reviewing your account, I noticed your home insurance is elsewhere. Bundling home + auto brings it down by 30%, and the discount applies to both policies. How much are you paying on the home now? If I can beat it, I'll tell you."},doer:{email:{subject:"One thing I can fix for you",body:`Hi Marcus,
+
+I was reviewing your account with us and noticed your home insurance is elsewhere.
+
+I can quote it from what I already have on file. No forms, nothing to fill out; I'll have it ready before we talk, and if it's a yes we handle the switch on our end.
+
+Want the number? Reply YES and I'll send it today.`},sms:"Hey Marcus, it's __REP__. Reviewing your account, I noticed your home insurance is elsewhere. I can quote it from what I already have on file; no forms. Want the number? Reply YES and I'll send it today."},thinker:{email:{subject:"Your account: something to look at when you have a minute",body:`Hey Marcus,
+
+I was reviewing your account with us and noticed your home insurance is elsewhere.
+
+No action needed today. I put the bundled option next to what you have now, line by line, so you can check it against your current policy on your own time; the discount applies to both policies, and your home renewal is the one day switching costs you nothing.
+
+Would it be a terrible idea to take a closer look before then? I'll answer anything you flag, and you decide.`},sms:"Hey Marcus, it's __REP__. Reviewing your account, I noticed your home insurance is elsewhere. No action needed today; I emailed the bundled option next to what you have now, line by line, for your own time. Would it be a terrible idea to take a closer look before your home renewal? You decide."}},winback:{story:{email:{subject:"Exactly one year since you left",body:`Hey Marcus,
+
+It has been exactly one year since you left. We were sad to see you go, and as promised, we will do everything we can to earn your trust and business back.
+
+I prepared a quote for your cars with the same coverage you had, and it's attached. Thank you for giving us a chance to win your trust and business back.
+
+Out of curiosity, why did you switch?`},sms:"Hey Marcus, it's __REP__. It has been exactly one year since you left, and we were sad to see you go. As promised, I prepared a quote for your cars; it's in your email. Out of curiosity, why did you switch?"},asker:{email:{subject:"Your accident-free discount, back: $__PROPOSED__/mo",body:`Hey Marcus,
+
+It has been exactly one year since you left.
+
+Our rates have changed, and I can give you back your accident-free discount on all of your cars: $__PROPOSED__/mo for the same limits you had. The side-by-side is attached, line by line, so you can compare it against what you have now.
+
+Are you still paying $__CURRENT__/mo? If the reason you switched was price, I think I can fix that.`},sms:"Hey Marcus, it's __REP__. It has been exactly one year since you left. Our rates have changed, and I can give you back your accident-free discount on all cars: $__PROPOSED__/mo for the same limits, side by side in your email. Are you still paying $__CURRENT__/mo?"},doer:{email:{subject:"A year later, the quote is done",body:`Hi Marcus,
+
+It's been a year since you left, and I hope you'll give me a chance to win you back.
+
+I prepared the quote already, with the coverage you had and your accident-free discount back; it's attached. Nothing to fill out, and if you say yes we handle the switch on our end.
+
+Is AM or PM better for a quick call?`},sms:"Hey Marcus, it's __REP__. It's been a year since you left, and I hope you'll give me a chance to win you back. I prepared the quote already, with your accident-free discount back; nothing to fill out. Is AM or PM better for a quick call?"},thinker:{email:{subject:"One year on: your quote, whenever you're ready",body:`Hey Marcus,
+
+It has been exactly one year since you left.
+
+I prepared a quote for your cars with the same limits you had, plus the discount you'd get back. It's attached line by line, so you can compare it against what you have now without talking to anyone, and there's no need to decide before your renewal.
+
+Would it be a terrible idea to compare them? You decide, and I'll check back before that date.`},sms:"Hey Marcus, it's __REP__. It has been exactly one year since you left. I prepared a quote for your cars with the same limits you had, plus the discount you'd get back; it's in your email, line by line, no rush. Would it be a terrible idea to compare it against what you have now? You decide."}},xdate:{story:{email:{subject:"Six months, and a new proposal",body:`Hey Marcus,
+
+It's been 6 months since we last quoted you. You better be staying out of trouble! 😉
+
+Your renewal is coming up, so I prepared a custom proposal for you; it's attached. I'd rather you see it before the renewal than after, because that's the one date switching costs you nothing.
+
+Should I walk you through it, or would you rather read it first?`},sms:"Hey Marcus, it's __REP__. It's been 6 months since we last quoted you. You better be staying out of trouble! 😉 Your renewal is coming up, so I prepared a custom proposal; it's in your email. Should I walk you through it, or read it first?"},asker:{email:{subject:"Our rates have changed: $__PROPOSED__/mo",body:`Hey Marcus,
+
+It's been 6 months since we last quoted you.
+
+I know we weren't able to help you then, but our rates have changed: $__PROPOSED__/mo for the same coverage, with every discount you qualify for applied. The proposal is attached next to what we quoted last time, with the options and what each one covers, so you can compare it against your renewal offer line by line.
+
+Are you still paying $__CURRENT__/mo?`},sms:"Hey Marcus, it's __REP__. It's been 6 months since we last quoted you. I know we weren't able to help you then, but our rates have changed: $__PROPOSED__/mo for the same coverage, line by line in your email. Are you still paying $__CURRENT__/mo?"},doer:{email:{subject:"Nothing to do but yes or no",body:`Hi Marcus,
+
+It's been 6 months since we last quoted you. Staying out of trouble? 😉
+
+Your renewal is coming up, and I prepared a new proposal; it's attached. There's nothing for you to do but say yes or no; if it's yes, we handle the switch on our end.
+
+If no longer interested, simply reply NO. If yes, AM or PM?`},sms:"Hey Marcus, it's __REP__. It's been 6 months since we last quoted you. Staying out of trouble? 😉 Your renewal is coming up, and I prepared a new proposal; it's in your email. If no longer interested, simply reply NO. If yes, AM or PM?"},thinker:{email:{subject:"Before you renew: the options, no rush",body:`Hey Marcus,
+
+It's been 6 months since we last quoted you.
+
+Our rates have changed, so I prepared a detailed proposal with the options and what each one covers. It's attached ahead of your renewal, so you can compare it against your renewal offer on your own time; the renewal date is the one day switching costs you nothing, which is why I'm sending it now rather than later.
+
+Would it be a terrible idea to take a closer look before you renew? You decide.`},sms:"Hey Marcus, it's __REP__. It's been 6 months since we last quoted you. Our rates have changed, so I emailed you a detailed proposal with the options and what each one covers, ahead of your renewal. Would it be a terrible idea to take a closer look before you renew? You decide."}},following:{story:{email:{subject:"Should I keep following up?",body:`Hey Marcus,
+
+This is just __REP__ from your local Sample Agency office here in town. I haven't heard back from you in a while regarding the quote you requested.
+
+I'd hate to feel like I'm bothering you.
+
+If you decided to stay with your previous company or went another direction, that's okay. Just let me know, and I'll remove you from my follow-up list.`},sms:"Hey Marcus, this is just __REP__ from your local Sample Agency office. I haven't heard back from you in a while regarding the quote you requested, and I'd hate to feel like I'm bothering you. If you went another direction, that's okay; just let me know and I'll remove you from my follow-up list."},asker:{email:{subject:"Your $__PROPOSED__/mo quote, still open",body:`Hey Marcus,
+
+Did you see my email with the quote at $__PROPOSED__/mo and the limits line by line?
+
+It's still good for now. Rates move, so I can't promise it past your renewal. If you found a better number, I'd want to see it next to ours; if it's close, I can usually find the difference.
+
+Are you still shopping, or did you go another direction? Either answer is fine; just reply with one line.`},sms:"Hey Marcus, it's __REP__. Did you see my email with the quote at $__PROPOSED__/mo, line by line? It's still good for now. If you found a better number, I'd want to see it next to ours. Still shopping, or went another direction? One line is fine."},doer:{email:{subject:"Am I bugging you?",body:`Hi Marcus,
+
+It's __REP__. Did you see my email with the quote?
+
+I'm starting to feel like I'm bugging you.
+
+Should I keep following up? YES or NO is all I need.`},sms:"Hey Marcus, it's __REP__. Did you see my email with the quote? I'm starting to feel like I'm bugging you. Should I keep following up? YES or NO is all I need."},thinker:{email:{subject:"No rush on the quote",body:`Hey Marcus,
+
+I know this is a big decision, and I sent you a lot to read.
+
+Take your time. There's no need to rush, and I'm not going to chase you; the proposal stays where it is until you decide, and I'll check back a week before your renewal.
+
+What would need to be true for this to make sense for you?`},sms:"Hey Marcus, it's __REP__. I know this is a big decision, and I sent you a lot to read. Take your time; there's no need to rush, and I'll check back before your renewal. What would need to be true for this to make sense for you?"}}};
+const STYLES = {story:{label:"Storyteller",why:"You can tell from the first message: it's long and personal, with the family, the backstory, and a question about you. They decide by whether you listened. Match it by answering something they said, and offer a real person to call.",q:"Elicitation",qWhy:"Indirect. Surfaces what they worry about without pressure.",g:"Are you opposed to a quick, no-obligation call this week?",gWhy:"A no-question. Saying no feels safe, and “no, I'm not opposed” is a yes."},asker:{label:"Questioner",why:"You can tell from the first message: it asks for specifics, limits, deductibles, the number next to the number. They decide on the comparison. Match it with figures, line by line, and answer every question they asked before adding anything.",q:"Directional",qWhy:"Moves them to one specific next step.",g:"How much are you paying now? If I can beat it, I'll tell you. If I can't, I'll tell you that too.",gWhy:"One number they can answer in a line, plus candor. It puts their price next to ours."},doer:{label:"Doer",why:"You can tell from the first message: one line, no greeting, “just send me the quote.” They decide on speed and effort. Match it with a short message, the work already done, and one easy choice.",q:"Diagnostic",qWhy:"Soft check on what would help, with no demand attached.",g:"AM or PM? · Simply reply NO.",gWhy:"Two easy choices instead of an open question, and the easiest possible out."},thinker:{label:"Thinker",why:"You can tell from the first reply: slow, careful, or hedged. “Let me think,” “I need to talk to my wife.” They decide on their own schedule. Match it with no pressure, something to think with, and a next touch tied to a date.",q:"Reframe",qWhy:"Turns “let me think” into the one thing they'd need to know to decide.",g:"Would it be a terrible idea to take a closer look? You decide.",gWhy:"A no-question plus explicit control. Nothing is pushed."}};
+const SCEN = {raw:{label:"Raw new",why:"They asked, and now someone fast and real is answering. Move: speed, then one tiny step."},current:{label:"Current customer",why:"A review, not a sale; they already know us. Move: make adding coverage the normal thing a cared-for customer does."},winback:{label:"Win-back",why:"They already decided once; coming back must not feel like admitting a mistake. Move: a new fact, so returning is a fresh decision."},xdate:{label:"X-date · not now",why:"Switching is a chore they keep putting off. Move: do the work for them and put the renewal date in the message."},following:{label:"Following up",why:"They feel guilty for not replying, so they avoid it. Move: remove the social cost of replying."}};
+const NOVELTY = {raw:{label:"“It's just [rep] from your local office”",why:"Honors the request they made. No greeting paragraph, no pitch."},current:{label:"“Noticed something kind of… strange”",why:"Something unexpected, plus proof you looked at their file personally."},winback:{label:"“Exactly one year since you left”",why:"A precise anniversary acknowledges the departure without blame."},xdate:{label:"“Six months… staying out of trouble 😉”",why:"Light humor honors the gap; the work is already done."},following:{label:"“I'd hate to feel like I'm bothering you”",why:"Names the awkwardness. The one place an apology is the point."}};
+const AUTH = {raw:{label:"What we did, what happens next",why:"“I'm the one taking care of the quote you requested.” Said plainly, with no hedge."},current:{label:"The review is the reason",why:"Protecting them and their income; the policies the bank and the state require protect someone else."},winback:{label:"A new fact",why:"Rates changed, or the discount is back. Returning becomes a fresh decision."},xdate:{label:"The renewal date is the reason",why:"The one day switching costs nothing, and the proposal is already done."},following:{label:"Name the silence",why:"Say it costs nothing to answer. Then make the answer one word."}};
+const PLAYS = {"Set payment plan":{pace:"Hey {name}, I was reviewing your account and noticed the last payment didn't go through.",context:"That happens. I'd rather fix it than let the policy lapse, and I can set up a payment plan from what I already have on file; nothing to fill out.",green:"AM or PM for a five-minute call?"},"Service-recovery call":{pace:"Hey {name}, I saw the note about what happened, and I'm sorry it went that way.",context:"It sounds like that's really important to you, and it should be. I'd rather hear it from you than guess, and fix what I can before your renewal.",green:"Are you opposed to a quick call this week? You pick the time."},"Save call · re-quote":{pace:"Hey {name}, I was reviewing your account and noticed something kind of… strange: your renewal is coming up and your rate moved.",context:"I re-ran everything with every discount you qualify for, so you can see the real number next to any quote you've pulled.",green:"How much was the other quote? If I can beat it, I'll tell you. If I can't, I'll tell you that too."},"Pre-renewal call":{pace:"Hey {name}, your renewal is {days} days out, and the rate notice is the part nobody explains.",context:"I'd rather walk you through what moved, and what I can do about it, before the renewal than after. That's the one date staying or switching costs nothing.",green:"Is AM or PM better for a ten-minute call?"},"Re-quote home":{pace:"Hey {name}, I noticed the refinance went through. Congratulations.",context:"The new lender will ask for proof of insurance, and a refi is the one time a home re-quote is worth doing. I already ran it from what I have on file.",green:"Want me to send it, or walk you through it? Either works."},"Post-claim check-in":{pace:"Hey {name}, I know the claim was a lot.",context:"No agenda. I want to hear how it went from your side and make sure nothing is still open.",green:"Would it be a terrible idea to take five minutes this week?"},"Cross-sell outreach":{pace:"Hey {name}, I was reviewing your account with us and noticed something kind of… strange…",context:"{opportunity}. My main focus is protecting you and, just as importantly, your income.",green:"Are you opposed to a quick, no-obligation call to look at it together?"},"Annual review":{pace:"Hey {name}, it's been a year since we last looked at everything together.",context:"Things change in a year: cars, jobs, kids, the house. The review takes fifteen minutes and usually finds a discount or a gap.",green:"Is AM or PM better for you?"}};
+const XQ = [
+  // New today: the first call goes out inside five minutes
+  {
+    id: "Q01",
+    name: "Priya Placeholder",
+    style: "doer",
+    source: "IL",
+    day: 0,
+    done: 0,
+    contacted: false,
+    seen: 2,
+    scenario: "raw",
+    stage: "lead",
+    reason: "Asked for an auto quote",
+    meta: ["98029", "2 cars"],
+    consent: { sms: true, email: true, basis: "Quote form opt-in (calls and texts, incl. automated) \xB7 today" },
+    lines: 1,
+    proposed: 148,
+    phone: "(555) 010-0151"
+  },
+  {
+    id: "Q02",
+    name: "Ben Fixture",
+    style: "thinker",
+    source: "IL",
+    day: 0,
+    done: 0,
+    contacted: false,
+    seen: 9,
+    scenario: "raw",
+    stage: "lead",
+    reason: "Asked for renters + auto",
+    meta: ["98075", "Moving in May"],
+    consent: { sms: true, email: true, basis: "Quote form opt-in (calls and texts, incl. automated) \xB7 today" },
+    lines: 2,
+    proposed: 131,
+    phone: "(555) 010-0152"
+  },
+  {
+    id: "L-002",
+    name: "Anya Example",
+    style: "story",
+    source: "RF",
+    day: 0,
+    done: 1,
+    contacted: false,
+    seen: 32,
+    scenario: "raw",
+    stage: "lead",
+    reason: "Referred by James Roe \xB7 texted us about a home quote",
+    meta: ["98075", "First-time buyer"],
+    consent: { sms: true, email: true, basis: "Texted the office first; replied YES to the consent text \xB7 Oct 21" },
+    lines: 1,
+    phone: "(555) 010-0153",
+    say: ["Hi {first}, it's {rep} from your local office. James Roe asked me to reach out; he said you just bought your first home. Congratulations.", "I'll keep the home quote simple: what it covers, what it costs, and who you call when something happens. That's me.", "Do you have ten minutes now, or is later today better? You pick the time."],
+    msg: { email: { subject: "James Roe asked me to reach out", body: "Hey Marcus,\n\nIt's just __REP__ from your local Sample Agency office. James Roe asked me to reach out; he said you just bought your first home. Congratulations.\n\nI'll keep the home quote simple: what it covers, what it costs, and who picks up the phone when something happens. That's me, and I'd rather you know that now than find out later.\n\nAre you opposed to a quick, no-obligation call this week? You pick the time." } }
+  },
+  // Booked: they picked the time
+  {
+    id: "C-001",
+    name: "James Roe",
+    style: "story",
+    source: "CC",
+    day: 0,
+    done: 0,
+    contacted: true,
+    at: "9:00 AM",
+    scenario: "current",
+    stage: "proposed",
+    reason: "Home renewal review",
+    meta: ["Bring updated valuation"],
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 2019" },
+    lines: 1,
+    proposed: 138,
+    current: 153,
+    phone: "(555) 010-0154",
+    say: ["Hi {first}, it's {rep}. Thanks for making the time. How's everything at the house?", "I brought the updated valuation and put your renewal next to our proposal, so you can see what changes and why.", "Are you opposed to me setting it up today, so it's done before the renewal?"]
+  },
+  {
+    id: "C-002",
+    name: "Marcus Sample",
+    style: "story",
+    source: "QN",
+    day: 3,
+    done: 1,
+    contacted: true,
+    at: "3:30 PM",
+    scenario: "following",
+    stage: "proposed",
+    reason: "Callback \xB7 auto + life walkthrough",
+    meta: ["Quoted $163/mo", "Pays $186/mo now"],
+    consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Oct 20" },
+    lines: 2,
+    proposed: 163,
+    current: 186,
+    phone: "(555) 010-0155",
+    say: ["Hi {first}, it's {rep}. Congratulations again on the baby. How's everyone sleeping?", "I'll walk you through the auto at {proposed} a month next to the {current} you pay now, then a quick look at life coverage for the family.", "Would it be a terrible idea to have the three of us on a ten-minute call this week? AM or PM?"]
+  },
+  {
+    id: "C-003",
+    name: "Diego Mock",
+    style: "doer",
+    source: "IL",
+    day: 2,
+    done: 4,
+    contacted: true,
+    at: "2:00 PM",
+    scenario: "raw",
+    stage: "lead",
+    reason: "Booked by text \xB7 auto + home bundle",
+    meta: ["Bought lead", "Auto + home"],
+    consent: { sms: true, email: true, basis: "E-signed text consent after the intro call \xB7 Oct 21" },
+    lines: 2,
+    proposed: 212,
+    phone: "(555) 010-0156",
+    say: ["Hi {first}, it's {rep}. I have your auto and home numbers ready.", "Bundle total first, then what changes. Nothing for you to fill out.", "Want me to set it up? I'll text you the next step."]
+  },
+  // Follow-ups due: today's step from each plan
+  {
+    id: "Q07",
+    name: "Carla Stub",
+    style: "asker",
+    source: "QN",
+    day: 1,
+    done: 0,
+    contacted: false,
+    scenario: "following",
+    stage: "quoted",
+    reason: "Quoted yesterday by email \xB7 no reply",
+    meta: ["Auto", "Pays $171/mo"],
+    consent: { sms: true, email: true, basis: "Quote form opt-in \xB7 Oct 22" },
+    lines: 1,
+    proposed: 142,
+    current: 171,
+    phone: "(555) 010-0157"
+  },
+  {
+    id: "Q08",
+    name: "Omar Pilot",
+    style: "doer",
+    source: "RI",
+    day: -15,
+    done: 2,
+    contacted: true,
+    scenario: "xdate",
+    stage: "bound",
+    reason: "Customer \xB7 renewal going up $31/mo",
+    meta: ["Home", "Renews in 15 days"],
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Mar 2023" },
+    lines: 1,
+    proposed: 96,
+    current: 127,
+    phone: "(555) 010-0158",
+    say: ["Hi {first}, it's {rep}. Quick one: your home renewal is going up about $31 a month.", "I already re-ran it from your file. There's an option at {proposed} a month with the same coverage, and nothing for you to fill out.", "Want me to switch it before the renewal? Yes or no is all I need."],
+    msg: { sms: "Hey Marcus, it's __REP__. Your home renewal is going up about $31/mo. I already re-ran it from your file: $__PROPOSED__/mo, same coverage, nothing to fill out. Want me to switch it before the renewal? Reply YES or NO.", email: { subject: "Your renewal, already re-run: $__PROPOSED__/mo", body: "Hi Marcus,\n\nYour home renewal is going up about $31/mo.\n\nI already re-ran it from your file: $__PROPOSED__/mo for the same coverage, nothing to fill out. If you say yes, we handle the change on our end.\n\nWant me to switch it before the renewal? YES or NO is all I need." } }
+  },
+  {
+    id: "Q09",
+    name: "Elena Draft",
+    style: "thinker",
+    source: "QN",
+    day: 5,
+    done: 1,
+    contacted: true,
+    scenario: "following",
+    stage: "quoted",
+    reason: "Said \u201Clet me think\u201D on Monday",
+    meta: ["Auto + home"],
+    consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Oct 19" },
+    lines: 2,
+    proposed: 238,
+    phone: "(555) 010-0159"
+  },
+  {
+    id: "Q10",
+    name: "Sam Trial",
+    style: "story",
+    source: "PI",
+    day: 14,
+    done: 5,
+    contacted: true,
+    scenario: "following",
+    stage: "quoted",
+    reason: "Walked in two weeks ago \xB7 quiet since",
+    meta: ["Auto", "Two teen drivers"],
+    consent: { sms: true, email: true, basis: "Signed the consent form at the office \xB7 Oct 9" },
+    lines: 1,
+    proposed: 204,
+    phone: "(555) 010-0160"
+  },
+  {
+    id: "Q11",
+    name: "Rosa Mockup",
+    style: "asker",
+    source: "CC",
+    day: 0,
+    done: 1,
+    contacted: true,
+    scenario: "current",
+    stage: "bound",
+    reason: "Customer \xB7 home is elsewhere",
+    meta: ["Auto with us", "Reviewed this morning"],
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Jun 2021" },
+    lines: 1,
+    proposed: 91,
+    current: 118,
+    phone: "(555) 010-0161"
+  },
+  {
+    id: "Q12",
+    name: "Kai Proto",
+    style: "doer",
+    source: "CC",
+    day: 0,
+    done: 0,
+    contacted: true,
+    scenario: "current",
+    stage: "bound",
+    reason: "Customer \xB7 home is elsewhere",
+    meta: ["Auto with us", "Review day"],
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Jan 2024" },
+    lines: 1,
+    proposed: 87,
+    phone: "(555) 010-0162"
+  },
+  {
+    id: "Q13",
+    name: "Grace Fiction",
+    style: "story",
+    source: "WB",
+    day: 2,
+    done: 2,
+    contacted: true,
+    scenario: "winback",
+    stage: "lapsed",
+    reason: "Left a year ago \xB7 price was the reason",
+    meta: ["Auto", "Quote sent Tuesday"],
+    consent: { sms: true, email: true, basis: "Former customer \xB7 written opt-in renewed by email \xB7 Oct 21" },
+    lines: 1,
+    proposed: 157,
+    current: 181,
+    phone: "(555) 010-0163"
+  },
+  {
+    id: "Q14",
+    name: "Leo Specimen",
+    style: "asker",
+    source: "WB",
+    day: 0,
+    done: 1,
+    contacted: true,
+    scenario: "winback",
+    stage: "lapsed",
+    reason: "Left exactly one year ago today",
+    meta: ["3 cars", "Accident-free"],
+    consent: { sms: true, email: true, basis: "Former customer \xB7 written opt-in renewed by email \xB7 Oct 20" },
+    lines: 1,
+    proposed: 244,
+    current: 276,
+    phone: "(555) 010-0164"
+  },
+  {
+    id: "Q15",
+    name: "Hana Template",
+    style: "thinker",
+    source: "LE",
+    day: 5,
+    done: 2,
+    contacted: true,
+    scenario: "current",
+    stage: "bound",
+    reason: "Customer \xB7 new baby, told us Monday",
+    meta: ["Auto with us", "Life review"],
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Nov 2022" },
+    lines: 1,
+    proposed: 112,
+    phone: "(555) 010-0165",
+    say: ["Hi {first}, it's {rep}. Congratulations again on the baby. How are you all doing?", "No rush on anything. I put the life options in your email, side by side, so you can read them on your own time.", "Would it be a terrible idea to look at them together this week? You decide."],
+    msg: { sms: "Hey Marcus, it's __REP__. Congratulations again on the baby. No rush on anything; I put the life options in your email, side by side, so you can read them on your own time. Would it be a terrible idea to look at them together this week? You decide.", email: { subject: "The life options, whenever you're ready", body: "Hey Marcus,\n\nCongratulations again on the baby. I know there's a lot going on.\n\nNo action needed today. I put the life options side by side, with what each one covers and costs, so you can read them on your own time; the one question that matters is what your family would need if your income stopped.\n\nWould it be a terrible idea to look at them together this week? You decide." } }
+  },
+  // Renewal window: X-dates count back from the renewal
+  {
+    id: "L-101",
+    name: "Sarah Doe",
+    style: "thinker",
+    source: "XD",
+    day: -3,
+    done: 6,
+    contacted: true,
+    scenario: "xdate",
+    stage: "quoted",
+    reason: "Auto renews in 3 days",
+    meta: ["Pays $186/mo", "Quoted $168/mo"],
+    consent: { sms: true, email: true, basis: "Web form opt-in with her renewal date \xB7 Aug 3" },
+    lines: 1,
+    proposed: 168,
+    current: 186,
+    phone: "(555) 010-0166"
+  },
+  {
+    id: "Q17",
+    name: "Victor Dummy",
+    style: "story",
+    source: "XD",
+    day: -6,
+    done: 5,
+    contacted: true,
+    scenario: "xdate",
+    stage: "quoted",
+    reason: "Home renews in 6 days",
+    meta: ["Quoted in the spring"],
+    consent: { sms: true, email: true, basis: "Quote form opt-in \xB7 Apr 14" },
+    lines: 2,
+    proposed: 229,
+    phone: "(555) 010-0167"
+  },
+  {
+    id: "L-103",
+    name: "Linh Demo",
+    style: "asker",
+    source: "XD",
+    day: -14,
+    done: 4,
+    contacted: true,
+    scenario: "xdate",
+    stage: "quoted",
+    reason: "Auto renews in 14 days",
+    meta: ["Pays $211/mo", "Quoted $192/mo"],
+    consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Sep 30" },
+    lines: 1,
+    proposed: 192,
+    current: 211,
+    phone: "(555) 010-0168"
+  },
+  {
+    id: "L-104",
+    name: "Tom Test",
+    style: "doer",
+    source: "XD",
+    day: -5,
+    done: 5,
+    contacted: true,
+    scenario: "xdate",
+    stage: "quoted",
+    reason: "Auto renews in 5 days",
+    meta: ["Pays $174/mo", "Quoted $168/mo"],
+    consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Sep 12" },
+    lines: 1,
+    proposed: 168,
+    current: 174,
+    phone: "(555) 010-0169"
+  },
+  {
+    id: "Q20",
+    name: "Nadia Sandbox",
+    style: "thinker",
+    source: "XD",
+    day: -11,
+    done: 4,
+    contacted: true,
+    scenario: "xdate",
+    stage: "quoted",
+    reason: "Auto renews in 11 days",
+    meta: ["Quoted in May", "Texted STOP 7:42 AM"],
+    consent: { sms: false, email: true, stop: "7:42 AM", basis: "Replied STOP at 7:42 AM today: texts suppressed in 4 seconds \xB7 email opt-in on file (quote form, May 6)" },
+    lines: 1,
+    proposed: 139,
+    phone: "(555) 010-0170"
+  }
+];
+const XCOOL = [
+  {
+    id: "K01",
+    name: "Nina Lorem",
+    style: "asker",
+    source: "IL",
+    stage: "lead",
+    contacted: false,
+    phone: "(555) 010-0171",
+    consent: { sms: false, email: true, basis: "Quote form opt-in (email) \xB7 Sep 22" },
+    why: "Internet lead, day 31: six calls and five emails done, no answer. The 45-day burst is two weeks out.",
+    ch: "email",
+    say: "Nina, one line: the quote I sent still holds through next month. If the timing's wrong, reply 'later' and I'll check back in the spring."
+  },
+  {
+    id: "K02",
+    name: "Felix Ipsum",
+    style: "doer",
+    source: "QN",
+    stage: "proposed",
+    contacted: true,
+    phone: "(555) 010-0172",
+    consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Sep 12" },
+    proposed: 142,
+    why: "Quoted $142/mo in September; said 'after the move.' Forty days on, no decision.",
+    ch: "text",
+    say: "Hi Felix, it's {rep}. Did the move go through? Your auto quote is still {proposed}; two minutes to switch it on."
+  },
+  {
+    id: "K03",
+    name: "Ravi Blank",
+    style: "thinker",
+    source: "XD",
+    stage: "lead",
+    contacted: true,
+    phone: "(555) 010-0173",
+    consent: { sms: true, email: true, basis: "Written opt-in at the first call \xB7 Aug 30" },
+    why: "X-date December 20, 58 days out. The proposal goes at 45 days; a call now is early, but cheap.",
+    ch: "call",
+    say: "Ravi, it's {rep}. Quick one: your renewal is December 20. Want me to run the numbers early, so you have them before the notice lands?"
+  },
+  {
+    id: "K04",
+    name: "Clara Stencil",
+    style: "story",
+    source: "WB",
+    stage: "lapsed",
+    contacted: true,
+    phone: "(555) 010-0174",
+    consent: { sms: false, email: true, basis: "Former customer \xB7 email opt-in on file \xB7 Nov 2025" },
+    why: "Left eleven months ago over price. The anniversary is six weeks out; the win-back plan starts at three.",
+    ch: "email",
+    say: "Clara, no pitch: a year on, the discount you had is back on the table. One line back and I'll send the numbers."
+  },
+  {
+    id: "K05",
+    name: "Jonah Filler",
+    style: "doer",
+    source: "PI",
+    stage: "proposed",
+    contacted: true,
+    phone: "(555) 010-0175",
+    consent: { sms: false, email: true, basis: "Walk-in \xB7 email opt-in on the quote form \xB7 Sep 8" },
+    why: "Walked in for a quote in September; two emails since, no reply. Day 45.",
+    ch: "call",
+    say: "Jonah, it's {rep} from the office you stopped by. Still worth the switch? If not, say so and I'll close the file."
+  },
+  {
+    id: "K06",
+    name: "Aisha Scaffold",
+    style: "asker",
+    source: "RF",
+    stage: "lead",
+    contacted: false,
+    phone: "(555) 010-0176",
+    consent: { sms: false, email: true, basis: "Referral \xB7 email opt-in by reply \xB7 Oct 1" },
+    why: "Referred by Rosa Mockup; six calls, never reached. Day 23: the plan's last email went out yesterday.",
+    ch: "email",
+    say: "Aisha, Rosa Mockup asked me to look after you. I'll stop calling; here's the number in writing, and it holds."
+  },
+  {
+    id: "K07",
+    name: "Marco Proxy",
+    style: "story",
+    source: "RI",
+    stage: "bound",
+    contacted: true,
+    phone: "(555) 010-0177",
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Mar 2023" },
+    proposed: 131,
+    current: 155,
+    why: "Customer: the renewal goes up in 40 days and the notice lands next week. The plan's first call is at 35 days.",
+    ch: "call",
+    say: "Marco, heads up before the letter: your renewal goes up about $24. I've re-run it: same coverage, {proposed}. Ten minutes this week?"
+  },
+  {
+    id: "K08",
+    name: "Ivy Standin",
+    style: "thinker",
+    source: "CC",
+    stage: "bound",
+    contacted: true,
+    phone: "(555) 010-0178",
+    consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Jul 2022" },
+    why: "Customer, auto only; no review in two years and the home is elsewhere.",
+    ch: "text",
+    say: "Hi Ivy, it's {rep}. Two years since we looked at your coverage together. Want a ten-minute review before the holidays? AM or PM?"
+  }
+];
+const XSRC = {
+  IL: { label: "Internet lead", anchor: "the minute the lead arrives", steps: [
+    { n: 1, day: 0, win: "now", ch: ["call"], what: "First call", ref: "T1" },
+    { n: 2, day: 0, win: "m20", ch: ["email"], what: "Email the quote", ref: "T2" },
+    { n: 3, day: 0, win: "m45", ch: ["call"], what: "Second call", ref: "T2", vm: 15 },
+    { n: 4, day: 0, win: "m90", ch: ["call"], what: "Third call", ref: "T2" },
+    { n: 5, day: 1, win: "call", ch: ["call"], what: "Fourth call", ref: "T3" },
+    { n: 6, day: 4, win: "email", ch: ["email"], what: "Second email", ref: "T3" },
+    { n: 7, day: 5, win: "reach", ch: ["call"], what: "Fifth call", ref: "T3" },
+    { n: 8, day: 8, win: "emailpm", ch: ["email"], what: "Third email", ref: "T3" },
+    { n: 9, day: 14, win: "email", ch: ["email"], what: "Fourth email", ref: "T3" },
+    { n: 10, day: 15, win: "reach", ch: ["call"], what: "Sixth and last call", ref: "T3", vm: 30 },
+    { n: 11, day: 22, win: "emailpm", ch: ["email"], what: "Last email: an easy out", ref: "T3" },
+    { n: 12, day: 45, win: "email", ch: ["email", "text"], what: "Nurture: a short burst again", ref: "T15" },
+    { n: 13, day: 180, win: "email", ch: ["email", "text"], what: "Six months: re-quote, or the X-date steps", ref: "T12" }
+  ] },
+  RF: { label: "Referral", anchor: "the day the referral comes in", steps: [
+    { n: 1, day: 0, win: "soon", ch: ["call"], what: "Thank the referrer", ref: "T6", vm: 15 },
+    { n: 2, day: 0, win: "soon", ch: ["call"], what: "Call the referral, naming who sent them", ref: "T6" },
+    { n: 3, day: 0, win: "m20", ch: ["email"], what: "Intro email, naming who sent them", ref: "T2" },
+    { n: 4, day: 0, win: "reach", ch: ["call"], what: "Second call", ref: "T3", vm: 15 },
+    { n: 5, day: 1, win: "call", ch: ["call"], what: "Third call", ref: "T3" },
+    { n: 6, day: 4, win: "email", ch: ["email"], what: "Second email", ref: "T3" },
+    { n: 7, day: 5, win: "reach", ch: ["call"], what: "Fourth call", ref: "T3" },
+    { n: 8, day: 8, win: "emailpm", ch: ["email"], what: "Third email", ref: "T3" },
+    { n: 9, day: 10, win: "call", ch: ["call"], what: "Fifth call", ref: "T3" },
+    { n: 10, day: 14, win: "email", ch: ["email"], what: "Fourth email", ref: "T3" },
+    { n: 11, day: 15, win: "reach", ch: ["call"], what: "Sixth and last call", ref: "T3", vm: 30 },
+    { n: 12, day: 22, win: "emailpm", ch: ["email"], what: "Last email: an easy out", ref: "T3" }
+  ] },
+  XD: { label: "X-date", anchor: "their renewal date, counting back", steps: [
+    { n: 1, day: -60, win: "call", ch: ["call"], what: "Confirm the date and ask to reach out before it", ref: "T12" },
+    { n: 2, day: -45, win: "email", ch: ["email"], what: "Email the proposal", ref: "T12" },
+    { n: 3, day: -30, win: "textpm", ch: ["text", "call"], what: "One small ask", ref: "T12" },
+    { n: 4, day: -21, win: "reach", ch: ["call"], what: "Call: the proposal is ready", ref: "T12", vm: 15 },
+    { n: 5, day: -14, win: "call", ch: ["call"], what: "Their style's question, then the ask", ref: "T12" },
+    { n: 6, day: -7, win: "text", ch: ["text", "email"], what: "One small ask", ref: "T12" },
+    { n: 7, day: -3, win: "reach", ch: ["call"], what: "Last call before they renew", ref: "T12", vm: 30 },
+    { n: 8, day: 1, win: "email", ch: ["text", "email"], what: "No switch: note the next date", ref: "T12" }
+  ] },
+  WB: { label: "Win-back", anchor: "the anniversary of leaving", steps: [
+    { n: 1, day: -21, win: "email", ch: ["email"], what: "Before the anniversary", ref: "T13" },
+    { n: 2, day: 0, win: "email", ch: ["email"], what: "Email the quote: the discount back or a bundle", ref: "T13" },
+    { n: 3, day: 2, win: "textpm", ch: ["text", "call"], what: "One small ask", ref: "T10" },
+    { n: 4, day: 5, win: "reach", ch: ["call"], what: "Ask why they switched", ref: "T13", vm: 15 },
+    { n: 5, day: 10, win: "emailpm", ch: ["text", "email"], what: "Easy out", ref: "T9" },
+    { n: 6, day: 180, win: "email", ch: ["email"], what: "Before their next renewal", ref: "T12" }
+  ] },
+  PI: { label: "Phone-in or walk-in", anchor: "the call or visit", steps: [
+    { n: 1, day: 0, win: "now", ch: ["call"], what: "Quote while they're with you; ask for their OK to text", ref: "T7" },
+    { n: 2, day: 0, win: "m20", ch: ["email"], what: "Email the recap and the quote", ref: "T9" },
+    { n: 3, day: 1, win: "text", ch: ["text", "call"], what: "Did the quote come through?", ref: "T10" },
+    { n: 4, day: 3, win: "reach", ch: ["call"], what: "Call for the decision", ref: "T10", vm: 15 },
+    { n: 5, day: 7, win: "textpm", ch: ["text", "email"], what: "One small ask", ref: "T10" },
+    { n: 6, day: 14, win: "emailpm", ch: ["text", "email"], what: "Easy out", ref: "T3" },
+    { n: 7, day: 90, win: "email", ch: ["email"], what: "Re-quote at three months", ref: "T12" },
+    { n: 8, day: 180, win: "email", ch: ["email", "text"], what: "Six months: re-quote or X-date steps", ref: "T12" }
+  ] },
+  QN: { label: "Quoted, no decision", anchor: "the day the quote went out", steps: [
+    { n: 1, day: 1, win: "textpm", ch: ["text", "call"], what: "Did they see it?", ref: "T10" },
+    { n: 2, day: 3, win: "reach", ch: ["call"], what: "Their style's question, then the ask", ref: "T3", vm: 15 },
+    { n: 3, day: 5, win: "emailpm", ch: ["email"], what: "One reason to look again", ref: "T9" },
+    { n: 4, day: 8, win: "call", ch: ["call"], what: "Find the one concern", ref: "T3" },
+    { n: 5, day: 12, win: "emailpm", ch: ["text", "email"], what: "One small ask", ref: "T9" },
+    { n: 6, day: 15, win: "reach", ch: ["call"], what: "Last call", ref: "T3", vm: 30 },
+    { n: 7, day: 22, win: "email", ch: ["email"], what: "Still shopping?", ref: "T9" },
+    { n: 8, day: 90, win: "email", ch: ["email", "text"], what: "Three months: re-quote", ref: "T12" },
+    { n: 9, day: 180, win: "email", ch: ["email", "text"], what: "Six months: re-quote or X-date steps", ref: "T12" }
+  ] },
+  CC: { label: "Current customer", anchor: "the review date", steps: [
+    { n: 1, day: 0, win: "call", ch: ["call"], what: "What the review showed", ref: "T12" },
+    { n: 2, day: 0, win: "m20", ch: ["email"], what: "Email the proposal", ref: "T2" },
+    { n: 3, day: 4, win: "textpm", ch: ["text", "call"], what: "One small ask", ref: "T10" },
+    { n: 4, day: 10, win: "reach", ch: ["call"], what: "Find the one concern", ref: "T3", vm: 15 },
+    { n: 5, day: 21, win: "emailpm", ch: ["email"], what: "No pressure; the option stays open", ref: "T9" },
+    { n: 6, day: 365, win: "call", ch: ["call"], what: "Next review", ref: "T12" }
+  ] },
+  LE: { label: "Life event", anchor: "the day they told you", steps: [
+    { n: 1, day: 0, win: "soon", ch: ["call"], what: "Congratulate, then ask what changed", ref: "T12" },
+    { n: 2, day: 1, win: "email", ch: ["email"], what: "What changes, and the options", ref: "T9" },
+    { n: 3, day: 4, win: "textpm", ch: ["call", "text"], what: "One small ask, then stop", ref: "T12" }
+  ] },
+  RI: { label: "Renewal, rate up", anchor: "their renewal date, counting back", steps: [
+    { n: 1, day: -35, win: "call", ch: ["call"], what: "Call before the notice lands", ref: "T12" },
+    { n: 2, day: -35, win: "m20", ch: ["email"], what: "Options side by side", ref: "T2" },
+    { n: 3, day: -21, win: "textpm", ch: ["text", "call"], what: "One small ask", ref: "T12" },
+    { n: 4, day: -14, win: "reach", ch: ["call"], what: "Find the one concern", ref: "T12", vm: 15 },
+    { n: 5, day: -7, win: "emailpm", ch: ["text", "email"], what: "Last check", ref: "T12" }
+  ] }
+};
+const XESSENCE = {
+  story: "Answer something they said. Offer a real person to call.",
+  asker: "Figures first, line by line. Answer every question before adding anything.",
+  doer: "Short. The work already done. One easy choice.",
+  thinker: "No pressure. Something to think with. A date for the next touch."
+};
+const XVM = {
+  raw: "Hi {first}, it's {rep} from your local office. I'm the one taking care of the quote you requested. I'll {send} you so you have my number.",
+  current: "Hi {first}, it's {rep} from your office. I was reviewing your account and noticed something worth a quick look. I'll {send} you the details.",
+  winback: "Hi {first}, it's {rep}. It's been a year since you left, and I prepared something for you. I'll {send} you so it's easy to reply.",
+  xdate: "Hi {first}, it's {rep}. Your renewal is coming up and your proposal is ready. I'll {send} it over; reply whenever it works for you.",
+  following: "Hi {first}, it's {rep}. Just making sure you got the quote. No pressure; I'll {send} you so a one-word reply is all it takes."
+};
+const XSMS = {
+  raw: { story: ["it's in your email with a short note", "Are you opposed"], asker: ["the limits and options are in your email", "How much are you paying now?"], doer: ["If you say yes, we handle the paperwork", "AM or PM?"], thinker: ["No rush; I'll check back", "Would it be a terrible idea"] },
+  current: { story: ["your home insurance is elsewhere, and I don't see", "Are you opposed"], asker: ["Bundling home + auto", "How much are you paying on the home now?"], doer: ["I can quote it from what I already have", "Want the number?"], thinker: ["No action needed today", "Would it be a terrible idea"] },
+  winback: { story: ["As promised, I prepared a quote", "Out of curiosity"], asker: ["Our rates have changed", "Are you still paying"], doer: ["I prepared the quote already", "Is AM or PM better"], thinker: ["I prepared a quote for your cars", "Would it be a terrible idea"] },
+  xdate: { story: ["Your renewal is coming up", "Should I walk you through it"], asker: ["I know we weren't able to help you then", "Are you still paying"], doer: ["Your renewal is coming up", "If no longer interested"], thinker: ["Our rates have changed", "Would it be a terrible idea"] },
+  following: { story: ["I'd hate to feel", "If you went another direction"], asker: ["It's still good for now", "Still shopping, or went another direction?"], doer: ["I'm starting to feel like I'm bugging you", "Should I keep following up?"], thinker: ["Take your time", "What would need to be true"] }
+};
+const LEVER_DEFS = [
+  { k: "length", name: "Length", lo: "Short", hi: "Full" },
+  { k: "detail", name: "Detail", lo: "Big picture", hi: "Line by line" },
+  { k: "warmth", name: "Warmth", lo: "Plain", hi: "Personal" },
+  { k: "timing", name: "The ask", lo: "Decide now", hi: "Their time" }
+];
+const LEVER_STYLE = {
+  story: { length: 70, detail: 34, warmth: 92, timing: 55 },
+  asker: { length: 76, detail: 94, warmth: 32, timing: 45 },
+  doer: { length: 14, detail: 20, warmth: 28, timing: 8 },
+  thinker: { length: 60, detail: 72, warmth: 52, timing: 92 }
+};
+const LEVER_SCEN = { raw: {}, current: { warmth: 4, detail: 4 }, winback: { warmth: 6 }, xdate: { timing: 6 }, following: { length: -12, detail: -10 } };
+const GROUPS = [
+  { k: "now", tag: "New lead", title: "Right now", rule: "New leads: call inside a minute, five at most. Referrals: today, naming who sent them." },
+  { k: "booked", tag: "Booked", title: "Booked", rule: "They picked the time. Be early." },
+  { k: "due", tag: "Follow-up", title: "Follow-ups due", rule: "Today's step from each plan, at the hour that works for its channel." },
+  { k: "renew", tag: "Renewal", title: "Renewal window", rule: "Counting back from the renewal: before the notice, then the 30 days after it." }
+];
+const PRINC = [{"k": "1–20–60, then 6-5-3 in 22", "t": "A new internet lead: call inside a minute (five at most), email the quote at 20 minutes, call again at 30–60 minutes and once more by two hours. Then six calls and five emails over about 22 days, and at most three texts, only after they've talked to you and okayed texts. Then a short burst again at about 45 days. A default built from the largest lead datasets, not a proven formula; the test below is how it gets proven.", "ref": ["T1", "T2", "T3", "T15"]}, {"k": "Lead type starts the clock", "t": "Referral: same day, naming who sent them, the same six calls and five emails. X-date: 60 and 45 days out, then through the 30 days after the renewal notice. Rate increase: before the notice lands. Life event: within days, three touches. Win-back: three weeks before the anniversary, then the quote. Quoted, no decision: within 24 hours, then at three and six months.", "ref": ["T6", "T12", "T13"]}, {"k": "Style changes the words, never the pace", "t": "All four styles get the same cadence. Style changes the words, the length, the ask, and which channel carries the substance: a side-by-side email for a Thinker, logistics by text for a Doer once texts are okayed, voice first for a Storyteller, the numbers in writing for a Questioner. A wrong style guess about halves the response, so the style is set on a clear signal: what they said, how and how fast they reply.", "ref": ["T11"]}, {"k": "Speed, then persistence, then the hour", "t": "The best and worst hours differ by about 2.6 contact points; the full six-call sequence is worth about +110%. So the hour is set last and never delays a first call. Later touches fit a 9-to-5 day: emails at 9, calls and texts 10 to noon, lunch off, texts and emails 1–3, calls 3–5. The evidence's 4–6 pm calling window is traded for a day that ends at 5; a new lead still gets its first call inside a minute, lunch or not.", "ref": ["T4", "T5", "T8", "T9"]}, {"k": "Consent and the law set the walls", "t": "Washington: no commercial text without their clear OK in advance, and asking for a quote is not that OK; $100 a text. Texts only after the first conversation. Calls and texts 8 am–8 pm their time; after 8 pm they wait for the morning. A Do Not Call number is not called.", "ref": ["T7", "T10"]}, {"k": "Two voicemails at most", "t": "None on the first call to a new lead. About 15 seconds on the second; one more, under 30 seconds, on a later call. Customers can always get one.", "ref": ["T14"]}, {"k": "Priority sets the order", "t": "New leads inside their first five minutes (freshest first), then booked calls, then X-dates within three days, then today's referrals, then the day's due steps, then renewals and win-backs. The queue is this order; the Now bar is its first line.", "ref": ["T1", "T12"]}, {"k": "One line says what needs you", "t": "The top line of Today is the whole status: done, planned by now, and the next touch with its button. Read it in a glance and act; the 10-second goal is an acceptance test, not a proven threshold.", "ref": ["T22", "T19"]}, {"k": "Normal is quiet; exceptions get their own lane", "t": "Lanes in a fixed order: Needs a decision, Your calls, Messages to check. A lead the system stopped sits at the top with the reason in plain words; everything on plan looks calm.", "ref": ["T22", "T23"]}, {"k": "It stops itself and says why", "t": "No text without consent on file, no call or text after 8 pm, nothing to a Do Not Call number. A locked button says why; the compliance check at the top shows what was checked, how and when, and opens to the 20 consent records.", "ref": ["T23", "T20", "T7", "T37"]}, {"k": "Check the facts, then approve", "t": "Each drafted message shows the facts it was built from (name, quote, consent) with those parts marked. Approve sends it at its hour; at a pause point, one button approves the routine ones, and life-insurance messages are checked one at a time. Every send records who approved it and when.", "ref": ["T24", "T36"]}, {"k": "Like work together, in the system's order", "t": "Calls in one lane, messages in another, both in the order the plan sets. Choosing easy-first lowers output in large field data.", "ref": ["T25"]}, {"k": "Few things open at once", "t": "Each lane shows what's due and the next three; the rest of the day folds away until it's due.", "ref": ["T25", "T32"]}, {"k": "Stuck? One tap", "t": "The help button names the person it goes to and marks the card until they answer, like pulling the andon cord.", "ref": ["T23"]}, {"k": "Process first, results after", "t": "The scoreboard puts the work you control (touches, calls, life talks, referrals asked) ahead of the results (quotes, apps, households). Apps and households show week to date, because a day's count is too small to read.", "ref": ["T28", "T29"]}, {"k": "Done early, left late", "t": "Under halfway, each meter shows what's done; past halfway, what's left. Each person on the list is one square that fills when their touch is done.", "ref": ["T27", "T32"]}, {"k": "Your plan, not a ranking", "t": "Everyone sees team totals and their own plan. No leaderboard; a private ranking cut sales in a randomized trial.", "ref": ["T30"]}, {"k": "Coaching on or off", "t": "Newer team members see the tips and the why on every touch; experienced ones switch them off and keep the same layout and buttons.", "ref": ["T31"]}, {"k": "It starts set up, with no tour", "t": "The plan, the hours and the words are preset; a change is kept and marked “changed by you.” The guidance is in the work, not in a tutorial.", "ref": ["T16", "T17"]}, {"k": "Three pause points", "t": "Start (the huddle), midday, wrap-up: each under 90 seconds. Two if-then commitments for the week; one line on what worked at the end of the day.", "ref": ["T18", "T26", "T35", "T34"]}, {"k": "Counted by a tap, not ticked", "t": "A touch counts when a person sends, approves or logs it. In the live version the call, text and email logs confirm it.", "ref": ["T28", "T18"]}, {"k": "Undo, big targets, words with color", "t": "Anything reversible happens at once, with Undo. Buttons at least 44 px on touch screens; status always in words as well as color.", "ref": ["T21"]}, {"k": "One person at a time", "t": "Roll out to one team member, and move to the next after two weeks of better numbers, with a local champion to ask.", "ref": ["T19"]}, {"k": "Craft", "t": "Type and spacing step by the golden ratio (1.618), motion runs on Fibonacci timings, and the lettering is kerned with true ligatures. A finish choice, not a usability claim.", "ref": []}];
+const EVID = {"T1": "Speed to the first call. Within an hour, a web lead was about 7× likelier to qualify than after an hour, and 60× likelier than after a day (HBR 2011 audit and 1.25M leads). A first call inside one minute: +391% conversion (Velocify, 3.5M leads). Observational: trust the direction, not the multiplier. · Vendor data", "T2": "Day one, minute by minute: email at about 20 minutes, a second call at 30–60 minutes, a third at 1–2 hours. Emailed leads were 16% likelier to be reached by phone (Velocify contact-strategy data; never tested against other schedules). · Vendor data", "T3": "Six calls, five emails. 93% of eventual buyers were reached by the sixth call; calls on days 0, 0, 0, 1, 5 and 15, emails on days 0, 4, 8, 14 and 22. More than five emails before a conversation cut conversion 36% (Velocify, 3.5M leads). · Vendor data", "T4": "The hour matters least: the best and worst calling hours differ by about 2.6 contact points (about +7%), against about +110% from a full six-call sequence (Velocify). · Vendor data", "T5": "Calling windows: 10–11 am and 4–6 pm, with midday (12–3 pm) the weakest; Wednesday best, Friday worst (call-platform data, mostly office lines; MIT/InsideSales, 2007). · Vendor data", "T6": "Referrals: referred customers left about 18% less often and were worth more (Schmitt, Skiera & Van den Bulte, Journal of Marketing, 2011). Same day, naming who sent them. · Peer-reviewed", "T7": "Washington: no commercial text to a Washington cell number without clear, affirmative consent in advance, with no exception for people who asked for a quote; $100 a text since June 11, 2026 (RCW 19.190.060, .070 and .040; HB 2274). Sales calls 8 am–8 pm, name yourself within 30 seconds, honor do-not-call for a year (RCW 80.36.390). · Law", "T8": "Texts: replies peak near noon, with a small 3–4 pm bump in financial services; early-morning texts get fewer replies (35M lead texts, 2025). · Vendor data", "T9": "Email: Tuesday to Thursday 8–10 am, plus a 5–7 pm window for consumers; Saturday worst. Best and worst days differ by about 1.2 open-rate points, and 88.5% of replies arrive within 24 hours (email-platform data). · Vendor data", "T10": "Text after the first conversation, not before. In a 2,010-person randomized trial a live call beat a letter (31.8% vs 23.7%) and a text alone did worse than the letter (16.9%) (Coronado et al., 2018). Texting before phone contact cut reach 39%; texting after contact lifted conversion 112.6% (Velocify). · Peer-reviewed and vendor data", "T11": "Style: adapting to the buyer tracks with sales performance (r = .27 across 268 studies and 79,747 salespeople; Verbeke et al., 2011). Matched messages raised purchases up to 50%; mismatched ones converted at about half the matched rate (Matz et al., 2017, 3.7M people). No study tests pacing by style. · Peer-reviewed", "T12": "Renewals: shoppers tend to renew within 30 days of the renewal notice; 45% of switchers moved for $100 or less; people who quoted but stayed re-shop at about twice the rate within six months (LexisNexis; J.D. Power). The exact windows are inferences. · Industry data", "T13": "Win-back: price leavers came back most often and stayed longest; bundles won the most back but kept them the shortest; service fixes won fewer, longer-staying customers (Kumar, Bhagwat & Zhang, Journal of Marketing, 2015; about 53,000 customers). · Peer-reviewed", "T14": "Voicemail: across 300M calls, one or two voicemails doubled email replies, and three or more pushed replies below leaving none (Gong). None on the first call, about 15 seconds on the second, one more under 30 seconds later. · Vendor data", "T15": "Why structure pays: 70% of marketing leads were never followed up (461 reps at four firms; Sabnis et al., 2013). A 2014 secret shop of 25 insurers found 2.3 days to the first call, 1.45 call attempts, and 39% never called. After six calls and five emails, a short burst again at two weeks to 45 days (InsideSales). · Peer-reviewed and vendor data", "T16": "Defaults: across 58 studies and 73,675 people, defaults moved choices with d = 0.68 (Jachimowicz et al., 2019); automatic 401(k) enrollment took participation from 37% to about 86% (Madrian & Shea, 2001). · Peer-reviewed", "T17": "No tours: in a 70-person test, tutorials left task success unchanged (91% vs 94%) and made the same tasks feel harder (Nielsen Norman Group). Apple's guidance: people should understand an app by using it. · Guidance", "T18": "Pause points: the WHO 19-item checklist, read at three pauses that already existed, was followed by deaths falling from 1.5% to 0.8% in eight hospitals (Haynes et al., 2009). Mandated across 101 Ontario hospitals with self-reported ticks, it changed nothing: count actions, not ticks. · Peer-reviewed", "T19": "Guidance inside the work: suggested replies raised support agents' resolutions per hour 14%, and 34% for novices (5,179 agents; Brynjolfsson, Li & Raymond). Voice-directed picking cut errors 61%. UPS took its routing software to about 55,000 drivers by letting it set the next stop, moving to a new center only after two weeks of better results. · Peer-reviewed", "T20": "Block the error: an interface that blocked error states (the IBM 'training wheels' study) sped learning; the control group spent almost a quarter of its time recovering from errors. · Peer-reviewed", "T21": "Touch and reading: targets at least 44 × 44 px and never under 24; contrast at least 4.5:1; status never shown by color alone; reading lines around 55–70 characters (WCAG 2.2; Apple guidelines; Dyson, 2004). · Standards", "T22": "Standard work: every task specified by content, sequence, timing and outcome, with a built-in test, so a step done late or out of order is 'immediately apparent' (Spear & Bowen, 'Decoding the DNA of the Toyota Production System,' HBR 1999). No study measures a 5- or 10-second rule; treat it as an acceptance test for the screen. · Practitioner", "T23": "Jidoka and the andon cord: the machine stops itself when something is abnormal and a person is called to that one spot; normal work flows without attention (Toyota Production System). People under-report problems, so the system flags them from its own events (Tucker & Spear, 2006). · Company and peer-reviewed", "T24": "Automation bias: a review of 74 studies found reviewers over-trust good automation more under workload and time pressure; showing the facts behind a suggestion and making the reviewer accountable reduced it (Goddard, Roudsari & Wyatt, JAMIA 2012). In a field experiment with 181 recruiters, better AI drew less effort and lower accuracy, mostly from the experienced ones (Dell'Acqua). · Peer-reviewed and working paper", "T25": "Batch like work, in the order the system sets: grouping similar tasks raised productivity in a bank's loan processing (Staats & Gino, Management Science 2012); in 2.4M radiology reads, choosing your own order (easy first) lowered productivity (Ibanez et al., Management Science 2018). · Peer-reviewed", "T26": "Short daily huddles: a review of 24 studies found unit-level huddles positive, though most were uncontrolled before-and-after studies (Franklin et al., BMJ Quality & Safety 2020). Daily review of the numbers was part of the management bundle that raised output in a randomized trial in Indian textile plants (Bloom et al.). · Peer-reviewed", "T27": "Done early, left late: people try harder when they look at whichever is smaller, what's done or what's left. Early in the day show what's done; past halfway, show what's left (Koo & Fishbach, Journal of Consumer Research 2012). · Peer-reviewed", "T28": "Watching progress works: across 138 randomized studies (19,951 people), prompting people to track progress raised goal attainment, d = 0.40, and more when progress was physically recorded or shared (Harkin et al., Psychological Bulletin 2016). So a person's tap counts the touch, not the send. · Peer-reviewed", "T29": "Feedback can backfire: across 607 effects, feedback helped on average (d = .41) but more than a third of interventions lowered performance, mostly when it pointed at the person instead of the task (Kluger & DeNisi, Psychological Bulletin 1996). So every number here points at the next task. · Peer-reviewed", "T30": "No rankings: in a three-year randomized trial with commissioned salespeople, removing a private sales ranking raised sales; the drop came from people who learned they were behind and eased off (Barankay). Team totals and each person against their own plan instead. · Field experiment", "T31": "Help for newer people, less for experienced ones: across 60 studies, novices learned more with more guidance (d = 0.51) and experienced people learned more with less (d = −0.43) (expertise-reversal meta-analysis, 2025). Hence the Coaching switch. AI suggestions lifted novice support agents 34%, experienced ones barely (Brynjolfsson, Li & Raymond). · Peer-reviewed", "T32": "Charts read at a glance: simple bars were read correctly in about a quarter of a second; ring-style radial charts took about 1.5 seconds (Blascheck et al., IEEE 2019). Up to about four items are counted at a glance, so small counts show as squares. · Peer-reviewed", "T33": "Burn-up, not burn-down: when the plan grows or shrinks during the day, a burn-up shows it; a burn-down hides it and can make someone look behind only because the list grew. The plan line follows the hour-by-hour plan, not a straight line (agile and lean practice; Few's bullet graph). · Practitioner", "T34": "One line of reflection: across 10 studies (4,340 people), a few minutes of reflecting on what worked improved later performance, most of all early in the learning curve (Di Stefano, Gino, Pisano & Staats, Harvard Business School). · Working paper", "T36": "Reviewing good automation: people with a reliable aid caught 65% of the problems it missed, against 97% without it; a 'please verify' prompt and a second reviewer didn't help (Skitka et al., NASA studies). Being accountable for the approval did (Mosier et al., 1996). Approve all is for routine template messages; anything about life insurance is checked one at a time. · Peer-reviewed", "T37": "Evidence, not a badge: regulated review records name the reviewer, the item, the date and the action, and 'merely opening a communication is not sufficient review' (FINRA Rule 3110). Sites with a trust seal were more than twice as likely to be untrustworthy (Edelman, 2009), so the check opens to its records. Opt-outs must be honored within 10 business days, with at most one confirmation text (47 CFR 64.1200). · Rules and peer-reviewed", "T35": "If-then plans: across 94 tests, plans written as 'if X happens, then I'll do Y' raised goal attainment with d = .65 (Gollwitzer & Sheeran, Advances in Experimental Social Psychology 2006). · Peer-reviewed"};
+const AGENCY = {name:"Sample Agency", phone:"(555) 010-0142", lic:"WA-OIC #DEMO-000000", producers:{Alex:{full:"Alex Rivera",title:"Agent / Principal",lic:"WA-OIC #DEMO-AR-001"},Maya:{full:"Maya Lindqvist",title:"Licensed Sales Producer",lic:"WA-OIC #DEMO-ML-002"}}};
+const TAGLINE = "An agent's experience and judgment, at every team member's fingertips.";
+const CLOCKS = [["9:00 AM",540],["11:00 AM",660],["2:30 PM",870],["4:30 PM",990]];
+const DAY = {open:540, close:1020, lunch:[720,780]};
+
+/* ======== my schedule for the demo day (slot = planned minute; channel per the plan) ======== */
+const SLOT = {Q01:null,Q02:null,"L-002":null,"C-001":540,"C-003":840,"C-002":930,Q07:610,Q09:790,Q10:670,Q11:700,Q12:910,Q08:800,Q15:820,Q13:780,Q14:560,"L-101":970,"L-104":990,Q17:830,"L-103":1010,Q20:580,
+  K01:850,K02:860,K03:960,K04:900,K05:710,K06:null,K07:920,K08:880};
+const CHAN = {Q08:"text",Q15:"email",Q13:"text",Q14:"email",Q17:"text",Q20:"email","L-002":"call"};
+const PENDING = new Set(["Q09","L-002","Q15","Q20","K06","K04"]);
+const STOPS = {
+  Q20:{why:"Replied STOP at 7:42 AM: texts suppressed in 4 seconds. Today's step was a text; email opt-in is on file (quote form, May 6).",opts:["Switch to email","Skip this step"]},
+  K06:{why:"Six calls, never reached; the plan's last email went out yesterday. Nothing is scheduled next.",opts:["Nurture at day 45","Close the file"]},
+  CLM:{name:"Megan Dataset · claim CLM-2026-03-1742",why:"Inbound complaint 9 days ago: \"Nobody called back. Shop says claim is stuck.\" Last agent touch 22 days ago; estimate $8,420, supplement pending.",opts:["Escalate to adjuster","Call Megan today"],call:true}
+};
+const $ = (s,el)=>(el||document).querySelector(s);
+const esc = s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = m=>{let h=Math.floor(m/60),mm=m%60,ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+String(mm).padStart(2,'0')+' '+ap};
+const first = n=>String(n||'').split(' ')[0];
+const SRCLBL = Object.fromEntries(Object.entries(XSRC).map(([k,v])=>[k,v.label]));
+const state = {clock:870, persona:'Maya', coach:true, done:new Set(), decided:{}, help:{}, log:[], open:null, openAt:null};
+setInterval(()=>{ if(!state.open||!state.openAt) return; const el=document.querySelector(`[data-timer="${state.open}"]`); if(!el) return; const s=Math.floor((Date.now()-state.openAt)/1000); el.innerHTML=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} <small>of 5:00</small>`; el.classList.toggle('over', s>300); }, 1000);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2000)}
+function rep(){return AGENCY.producers[state.persona]}
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+/* ======== lead model ======== */
+const ALL = [...XQ.map(l=>({...l,cool:false})), ...XCOOL.map(l=>({...l,cool:true,day:({K03:-58,K07:-40,K01:31,K02:40,K04:-42,K05:45,K06:23,K08:0})[l.id]||0,scenario:l.scenario||({IL:'raw',RF:'raw',QN:'following',XD:'xdate',WB:'winback',PI:'following',CC:'current',LE:'current',RI:'xdate'}[l.source])}))];
+function stepFor(l){
+  const steps=(XSRC[l.source]||XSRC.IL).steps; let best=steps[0];
+  for(const s of steps){ if(s.day<=l.day) best=s; }
+  const exact=steps.find(s=>s.day===l.day); return exact||best;
+}
+function allowed(ch,l){ if(ch==='text') return !!(l.consent&&l.consent.sms)&&l.contacted; if(ch==='email') return !!(l.consent&&l.consent.email); return true; }
+function channel(l){
+  if(l.cool) return l.ch==='text'&&!allowed('text',l)?'email':l.ch;
+  if(CHAN[l.id]) return CHAN[l.id];
+  if(l.at) return 'call';
+  const st=stepFor(l); for(const c of st.ch){ if(allowed(c,l)) return c==='text'?'text':c; } return 'call';
+}
+function slot(l){ if(l.seen!=null&&l.day===0&&!l.at) return state.clock-l.seen; if(l.at){const [t,ap]=l.at.split(' ');let [h,m]=t.split(':').map(Number);if(ap==='PM'&&h<12)h+=12;return h*60+m;} return SLOT[l.id]; }
+function group(l){
+  if(l.cool) return 'cool';
+  if(l.seen!=null&&l.day===0&&!l.at) return l.source==='RF'?'referral':'now';
+  if(l.at) return 'booked';
+  if(l.source==='XD'&&l.day>=-3) return 'xsoon';
+  if(l.source==='XD'||l.source==='RI') return 'renew';
+  if(l.source==='WB') return 'winback';
+  return 'due';
+}
+const PRI = {now:0,booked:1,xsoon:2,referral:3,due:4,renew:5,winback:6,cool:7};
+function isDone(l){ if(state.done.has(l.id)) return true; if(state.decided[l.id]==='skip') return true; const s=slot(l); if(s==null) return false; if(PENDING.has(l.id)) return false; return s+10<=state.clock; }
+function isStop(l){ return !!STOPS[l.id] && !state.decided[l.id]; }
+function planned(l){ const s=slot(l); return s!=null && s<=state.clock; }
+function late(l){ const s=slot(l); if(s==null||isDone(l)||isStop(l)) return 0; return Math.max(0,state.clock-s-10); }
+function ordered(){ return ALL.slice().sort((a,b)=>{ const fa=group(a)==='now'&&!isDone(a)?-2:late(a)>30?-1:0, fb=group(b)==='now'&&!isDone(b)?-2:late(b)>30?-1:0; if(fa!==fb) return fa-fb; const p=PRI[group(a)]-PRI[group(b)]; if(p) return p; return (slot(a)??9e9)-(slot(b)??9e9); }); }
+
+/* ======== header ======== */
+$('#mark').innerHTML = Array.from({length:28},(_,i)=>`<i class="${i>=20?'c':''}"></i>`).join('');
+$('#thesis').append(TAGLINE); $('#foottag').textContent = TAGLINE;
+$('#clocks').innerHTML = CLOCKS.map(([l,m])=>`<button data-m="${m}" class="${m===state.clock?'on':''}">${l}</button>`).join('');
+$('#demoBtn').addEventListener('click',()=>{const o=$('#demoPanel').hidden; $('#demoPanel').hidden=!o; $('#demoBtn').setAttribute('aria-expanded',String(o));});
+document.addEventListener('pointerdown',e=>{ if(!$('#demoPanel').hidden && !e.target.closest('#demo')){ $('#demoPanel').hidden=true; $('#demoBtn').setAttribute('aria-expanded','false'); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('#demoPanel').hidden){ $('#demoPanel').hidden=true; $('#demoBtn').setAttribute('aria-expanded','false'); } });
+(function gate(){ let ok=false; try{ ok=!!localStorage.getItem('acc.confidential.v2'); }catch(e){} if(!ok){ $('#gate').hidden=false; document.body.classList.add('gated'); $('#gateAccept').focus(); } $('#gateAccept').addEventListener('click',()=>{ try{ localStorage.setItem('acc.confidential.v2', JSON.stringify({at:new Date().toISOString()})); }catch(e){} $('#gate').hidden=true; document.body.classList.remove('gated'); }); })();
+$('#clocks').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.clock=+b.dataset.m;[...$('#clocks').children].forEach(x=>x.classList.toggle('on',x===b));renderAll();});
+$('#persona').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.persona=b.dataset.p;[...$('#persona').children].forEach(x=>x.classList.toggle('on',x===b));renderAll();});
+$('#coach').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.coach=b.dataset.c==='1';document.body.classList.toggle('nocoach',!state.coach);[...$('#coach').children].forEach(x=>x.classList.toggle('on',x===b));});
+
+/* ======== Today ======== */
+function renderNow(){
+  const done=ALL.filter(isDone).length, plan=ALL.filter(planned).length, left=ALL.length-done;
+  const half=state.clock>=780;
+  const next=ordered().find(l=>!isDone(l)&&!isStop(l));
+  const diff=done-plan;
+  $('#nowstat').innerHTML = `<b>${ALL.length}</b><span class="lbl">today's prospects</span><span class="wins">${done} small win${done===1?'':'s'}</span><span class="lbl">· ${left} to go</span>
+    <span class="plan ${diff>=0?'ahead':'behind'}">${done} done · ${plan} planned by ${fmt(state.clock)}</span>`;
+  renderLook();
+  if(next){
+    const ch=channel(next), s=slot(next), lt=late(next), g=group(next);
+    const whenTxt = g==='now'||g==='referral' ? `${next.seen} min ago` : s!=null && s>state.clock ? `at ${fmt(s)}` : lt>0 ? `past due ${lt} min` : 'now';
+    $('#nextt').innerHTML = `<span class="tag">NEXT</span><span class="ch ${ch}">${ch}</span><span class="who">${esc(next.name)}</span><span class="tip">${esc(next.reason||next.why||'')} · ${esc(whenTxt)}</span><button class="btn sm" data-id="${next.id}" data-act="go">${ch==='call'?'Call now':'Open draft'}</button>`;
+  } else $('#nextt').innerHTML = `<span class="tag">NEXT</span><span>Nothing due. Every lead has its next step set.</span>`;
+  $('#strip').innerHTML = ALL.map((l,i)=>`<i class="${isDone(l)?'d':''} ${l.cool?'c':''} ${i===20?'gap':''} ${late(l)>30||isStop(l)?'late':''}" title="${esc(l.name)} · ${isDone(l)?'touched':isStop(l)?'needs a decision':'planned '+(slot(l)!=null?fmt(slot(l)):'')}"></i>`).join('');
+  const h=Object.keys(state.help).length; $('#helpcount').textContent = h?`${h} help asked`:'';
+  renderBurn(done);
+}
+function renderBurn(doneN){
+  const W=300,H=185,px=34,py=13,pb=21,pr=8; const x=m=>px+(m-DAY.open)/(DAY.close-DAY.open)*(W-px-pr), y=n=>H-pb-n/28*(H-py-pb);
+  const slots=ALL.map(slot).filter(s=>s!=null).sort((a,b)=>a-b);
+  const planPts=[[DAY.open,0]]; slots.forEach((s,i)=>planPts.push([Math.max(DAY.open,Math.min(DAY.close,s)),i+1])); planPts.push([DAY.close,slots.length+ (ALL.length-slots.length)]);
+  const doneSlots=ALL.filter(isDone).map(l=>slot(l)??state.clock).sort((a,b)=>a-b);
+  const donePts=[[DAY.open,0]]; doneSlots.forEach((s,i)=>donePts.push([Math.max(DAY.open,Math.min(state.clock,s)),i+1])); donePts.push([state.clock,doneSlots.length]);
+  const path=pts=>pts.map((p,i)=>(i?'L':'M')+x(p[0]).toFixed(1)+' '+y(p[1]).toFixed(1)).join(' ');
+  const ticks=[540,660,780,900,1020];
+  $('#burn').innerHTML = `
+    ${[0,7,14,21,28].map(n=>`<line x1="${px}" x2="${W-pr}" y1="${y(n)}" y2="${y(n)}" stroke="var(--line2)" /><text x="${px-6}" y="${y(n)+4}" font-size="9" text-anchor="end" fill="var(--muted)" font-family="var(--mono)">${n}</text>`).join('')}
+    <rect x="${x(DAY.lunch[0])}" y="${py}" width="${x(DAY.lunch[1])-x(DAY.lunch[0])}" height="${H-py-pb}" fill="var(--soft)" />
+    <path d="${path(planPts)}" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="3 3" />
+    <path d="${path(donePts)} L ${x(state.clock)} ${y(0)} Z" fill="var(--accent-soft)" opacity=".7" />
+    <path d="${path(donePts)}" fill="none" stroke="var(--accent)" stroke-width="2.5" />
+    <circle cx="${x(state.clock)}" cy="${y(doneN)}" r="4" fill="var(--accent)" />
+    <line x1="${x(state.clock)}" x2="${x(state.clock)}" y1="${py}" y2="${H-pb}" stroke="var(--bad)" stroke-width="1.5" />
+    ${ticks.map(t=>`<text x="${x(t)}" y="${H-10}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="var(--mono)">${fmt(t).replace(':00','').replace(' ','')}</text>`).join('')}
+    <text x="${W-pr}" y="${py+2}" font-size="9" text-anchor="end" fill="var(--muted)">plan ····· done ——</text>`;
+}
+function card(l){
+  const ch=channel(l), s=slot(l), lt=late(l), g=group(l), done=isDone(l), st=stepFor(l);
+  const when = done?'done': ch!=='call' ? (s==null?'any time':`sends ${fmt(s)}`) : g==='now'||g==='referral' ? (lt>30?`${lt} min late`:`${l.seen} min`) : s==null?'—': s>state.clock?fmt(s): lt>30?`${lt} min late`:'now';
+  const wcls = done?'':ch!=='call'?'':(lt>30?'late':(g==='now'&&l.seen<=5)||(s!=null&&Math.abs(s-state.clock)<=15)?'now':'');
+  const say = l.say?l.say[0]:(l.cool?l.say:'') ;
+  const sayTxt = (typeof say==='string'?say:'').replace('{rep}',first(rep().full)).replace('{first}',first(l.name)).replace('{proposed}',l.proposed?'$'+l.proposed:'').replace('{current}',l.current?'$'+l.current:'');
+  const vm = ch==='call' && st.vm ? `Voicemail allowed, ${st.vm}s` : ch==='call' ? 'No voicemail on this call' : '';
+  const help = state.help[l.id]?`<span class="helpon">Help asked → Alex</span>`:`<button class="help" data-id="${l.id}" data-act="help">Stuck? One tap</button>`;
+  const outs = ch==='call'?['Talked','Voicemail','No answer']:['Approve','Edit'];
+  const open = state.open===l.id && !done;
+  const script = open ? scriptFor(l, ch) : null;
+  const consent = l.consent||{};
+  const chips = open ? `<div class="chips"><span class="chip ${consent.email?'ok':'no'}">${consent.email?'Email OK':'No email consent'}</span><span class="chip ${consent.sms?'ok':'no'}">${consent.sms?'Text OK':'No text consent'}</span>${l.dnc?'<span class="chip no">Do Not Call</span>':''}<span class="chip src">ECRM · ${esc(SRCLBL[l.source]||l.source)}</span></div>` : '';
+  return `<article class="card ${ch} ${l.cool?'cool':''} ${open?'open':''} ${done?'isdone':''}" data-id="${l.id}">
+    <div class="r1" data-id="${l.id}" data-act="toggle" role="button" tabindex="0" aria-expanded="${open}"><span class="when ${wcls}">${esc(when)}</span><span class="ch ${ch}">${ch}</span><div class="who">${esc(l.name)}<small>${esc(SRCLBL[l.source]||l.source)}${l.cool?' · cooler':''}</small></div><span class="pill">${esc((STYLES[l.style]||{}).label||l.style)}</span>${!done?`<span class="mins">5 min</span>`:''}<span class="caret" aria-hidden="true">${open?'▾':'▸'}</span></div>
+    <div class="r2">${esc(l.reason||l.why||'')}${l.meta?' · '+l.meta.map(esc).join(' · '):''}${l.proposed?` · <span class="fact">$${l.proposed}/mo</span>`:''}${l.current?` vs $${l.current} now`:''}</div>
+    ${open?`<div class="work">
+      <div class="workhead"><span class="tag">${esc(st.what)}</span>${vm?`<span class="tag">${esc(vm)}</span>`:''}<span class="timer mono" data-timer="${l.id}">0:00 <small>of 5:00</small></span></div>
+      ${script}
+      ${chips}
+      ${state.coach?`<div class="tip">${esc(XESSENCE[l.style]||'')}</div>`:''}
+    </div>`:(!done&&sayTxt&&state.coach?`<div class="say quiet">${esc(sayTxt)}</div>`:'')}
+    <div class="r3"><div class="acts">${done?`<span class="approved">✓ ${state.log.find(x=>x.id===l.id)?esc(state.log.find(x=>x.id===l.id).t):'done'}</span>`:open?outs.map(o=>`<button class="btn sm ${o==='Edit'||o==='No answer'||o==='Voicemail'?'quiet':''}" data-id="${l.id}" data-act="${o}">${o}</button>`).join(''):`<button class="btn sm ghost" data-id="${l.id}" data-act="toggle">${ch==='call'?'Open the call':'Check the draft'}</button>`}</div>${done||!open?'':help}</div>
+  </article>`;
+}
+// the three moves for this lead on this channel, built the same way Compose builds them
+function scriptFor(l, ch){
+  const scn=l.scenario||'raw', sty=l.style, d=(DRAFTS[scn]||DRAFTS.raw)[sty]; if(!d) return '';
+  const moves=['Match','Fit','Ask'];
+  if(ch==='call'){
+    const say = l.say ? l.say : fillTokens(d.email.body,l).split(/\n\s*\n/).slice(1);
+    return `<div class="script">${say.slice(0,3).map((t,i)=>`<div class="move" data-move="${moves[i]}">${esc(fillTokens(t,l))}</div>`).join('')}<div class="sig">If voicemail (${stepFor(l).vm?stepFor(l).vm+'s allowed':'none on this call'}): ${esc(fillTokens(XVM[scn]||XVM.raw,l))}</div></div>`;
+  }
+  if(ch==='text'){ const txt=fillTokens(d.sms,l)+' Reply STOP to opt out.'; return `<div class="script"><div class="smsbox">${markPhrases(esc(txt),scn,sty,l)}</div></div>`; }
+  const body=fillTokens(d.email.body,l).split(/\n\s*\n/); const greet=body.shift();
+  return `<div class="script"><div class="subj">Subject: ${markPhrases(esc(fillTokens(d.email.subject,l)),scn,sty,l)}</div><div>${esc(greet)}</div>${body.map((par,i)=>`<div class="move" data-move="${moves[i]||'More'}">${markPhrases(esc(par),scn,sty,l)}</div>`).join('')}</div>`;
+}
+function lane(id,title,rule,items,showN){
+  const warm=items.filter(l=>!l.cool), cool=items.filter(l=>l.cool);
+  const open=warm.filter(l=>!isDone(l)), done=warm.filter(isDone);
+  const vis=open.slice(0,showN), rest=open.slice(showN);
+  const coolOpen=cool.filter(l=>!isDone(l)), coolDone=cool.filter(isDone);
+  $(id).innerHTML = `<div class="lanehead"><h2>${title}</h2><span class="rule">${esc(rule)}</span></div>
+    ${vis.length?vis.map(card).join(''):`<p class="sub">Nothing due. Everything on plan looks calm.</p>`}
+    ${rest.length?`<details class="fold"><summary>${rest.length} more later today</summary>${rest.map(card).join('')}</details>`:''}
+    ${cool.length?`<details class="fold cool"><summary>Cooler leads · any open minute · ${coolOpen.length}${coolDone.length?` · ${coolDone.length} done`:''}</summary><p class="sub">Not hot and not due by their plan. Five minutes each, one tap when done.</p>${coolOpen.concat(coolDone).map(card).join('')}</details>`:''}
+    ${done.length?`<details class="fold"><summary>Done (${done.length})</summary>${done.map(card).join('')}</details>`:''}`;
+}
+function stopCard(id,st,l){
+  const name=l?l.name:st.name, dec=state.decided[id];
+  return `<article class="card stop" data-id="${id}"><div class="r1"><span class="when late">stopped</span><div class="who">${esc(name)}</div>${l?`<span class="pill">${esc(STYLES[l.style].label)}</span>`:''}</div>
+    <div class="r2">${esc(st.why)}</div>
+    <div class="r3"><div class="acts">${dec?`<span class="approved">✓ ${esc(dec)} · ${esc(rep().full)}, ${fmt(state.clock)}</span>`:st.opts.map(o=>`<button class="btn sm ${o.startsWith('Close')||o.startsWith('Skip')?'quiet':''}" data-id="${id}" data-act="decide" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div></div></article>`;
+}
+function renderLanes(){
+  const o=ordered();
+  const stops=[...o.filter(isStop).map(l=>stopCard(l.id,STOPS[l.id],l)), ...(state.decided.CLM?[]:[stopCard('CLM',STOPS.CLM,null)])];
+  $('#lane-stop').innerHTML = `<div class="lanehead"><h2>Needs a decision</h2><span class="rule">the system stopped itself and says why</span></div>${stops.length?stops.join(''):'<p class="sub">Nothing stopped.</p>'}`;
+  const mine = l=>true;
+  lane('#lane-calls','Your calls · at their hour','calls happen at their hour, where the contact rate is; freshest lead first', o.filter(l=>!isStop(l)&&channel(l)==='call'&&mine(l)), 4);
+  lane('#lane-msgs','Messages · work any time','check and approve whenever you have a minute; each sends by itself at its set hour', o.filter(l=>!isStop(l)&&channel(l)!=='call'&&mine(l)).sort((a,b)=>(slot(a)||0)-(slot(b)||0)), 99);
+}
+document.addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&e.target.matches('.r1[data-act="toggle"]')){ e.preventDefault(); e.target.click(); } });
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-act],[role=button][data-act]'); if(!b) return;
+  const id=b.dataset.id, act=b.dataset.act, l=ALL.find(x=>x.id===id);
+  if(act==='help'){ state.help[id]=rep().full; toast('Help asked: Alex is notified; the card stays marked until he answers'); renderAll(); return; }
+  if(act==='decide'){ state.decided[id]=b.dataset.opt; if(b.dataset.opt==='Skip this step') state.decided[id]='skip'; toast(`${b.dataset.opt} · recorded, ${rep().full} ${fmt(state.clock)}`); renderAll(); return; }
+  if(act==='toggle'){ state.open = state.open===id?null:id; state.openAt = Date.now(); renderAll(); const el=document.querySelector(`.card[data-id="${id}"]`); if(el&&state.open===id) el.scrollIntoView({block:'nearest',behavior:'smooth'}); return; }
+  if(act==='go'){ state.open=id; state.openAt=Date.now(); go('today'); renderAll(); const el=document.querySelector(`.card[data-id="${id}"]`); if(el) el.scrollIntoView({block:'center',behavior:'smooth'}); return; }
+  if(act==='Edit'){ selectLead(id); go('compose'); return; }
+  if(['Talked','Voicemail','No answer','Approve'].includes(act)){ if(act!=='No answer'&&act!=='Voicemail'){ state.done.add(id); } state.log.push({id,t:`${act} · ${rep().full}, ${fmt(state.clock)}`}); if(act==='No answer'||act==='Voicemail'){ state.done.add(id); } toast(`${act} · ${l?l.name:''} · next step is set · logged to ECRM ${fmt(state.clock)}`); const nxt=ordered().find(x=>!isDone(x)&&!isStop(x)&&x.id!==id&&channel(x)===channel(l)&&!x.cool); state.open=nxt?nxt.id:null; state.openAt=Date.now(); renderAll(); return; }
+});
+// Today's look: four compartments read in five seconds; a name opens its card
+function renderLook(){
+  const o=ordered();
+  const firsts=o.filter(l=>group(l)==='now'&&!isDone(l)&&!isStop(l));
+  const calls=o.filter(l=>!isDone(l)&&!isStop(l)&&channel(l)==='call'&&!l.cool&&!firsts.includes(l));
+  const callsDone=ALL.filter(l=>isDone(l)&&channel(l)==='call'&&!l.cool).length;
+  const msgs=o.filter(l=>!isDone(l)&&!isStop(l)&&channel(l)!=='call'&&!l.cool);
+  const wins=ALL.filter(isDone).slice().sort((a,b)=>state.log.findIndex(x=>x.id===b.id)-state.log.findIndex(x=>x.id===a.id));
+  const whenOf=l=>{ const s=slot(l); return group(l)==='now'?`${l.seen} min`: s==null?'': s>state.clock?fmt(s): 'due now'; };
+  const q=[
+    {k:'first',t:'Needs first touch',n:firsts.length,of:null,sub:firsts.length?`oldest ${Math.max(...firsts.map(l=>l.seen||0))} min`:'none waiting',rows:firsts.slice(0,3).map(l=>[l,`${l.seen} min`]),tone:firsts.some(l=>(l.seen||0)>5)?'late':firsts.length?'now':'quiet',empty:'Every new lead has had its first call.'},
+    {k:'calls',t:'Calls today',n:callsDone,of:callsDone+calls.length,sub:calls.length?`next: ${whenOf(calls[0])}`:'all done',rows:calls.slice(0,3).map(l=>[l,whenOf(l)]),tone:calls.some(l=>late(l)>0||slot(l)<=state.clock)?'now':'quiet',empty:'No calls left today.'},
+    {k:'msgs',t:'Messages to check',n:msgs.length,of:null,sub:msgs.length?`${msgs.filter(l=>channel(l)==='text').length} texts · ${msgs.filter(l=>channel(l)==='email').length} emails · work any time`:'all sent',rows:msgs.slice(0,3).map(l=>[l,channel(l)]),tone:msgs.length?'now':'quiet',empty:'Every message is checked.'},
+    {k:'wins',t:'Small wins',n:wins.length,of:ALL.length,sub:`every touch for today done`,rows:wins.slice(0,3).map(l=>[l,(state.log.find(x=>x.id===l.id)||{t:'done'}).t.split(' · ')[0].toLowerCase()]),tone:wins.length?'win':'quiet',empty:'The first one comes with the first call.'},
+  ];
+  $('#look').innerHTML = q.map(c=>`<div class="lookq is-${c.tone}"><div class="lookhead"><span class="looktitle">${c.t}</span><span class="lookn"><b>${c.n}</b>${c.of!=null?`<small>/${c.of}</small>`:''}</span></div><div class="looksub">${esc(c.sub)}</div>${c.rows.length?`<ul class="looklist">${c.rows.map(([l,w])=>`<li><button class="lookname" data-id="${l.id}" data-act="${isDone(l)?'none':'go'}">${esc(l.name)}</button><span class="lookwhen">${esc(w)}</span></li>`).join('')}</ul>`:`<div class="lookempty">${esc(c.empty)}</div>`}</div>`).join('');
+}
+function renderPause(){
+  const open=ALL.filter(l=>!isDone(l)).length, done=ALL.length-open, over=ALL.filter(l=>late(l)>30).length;
+  const pts=[{at:540,k:'Start · huddle',t:`28 touches planned, the first at 9:00; 3 new leads, 3 booked calls. Read your two commitments. Nothing to sort or set up.`,ref:['T26','T35']},
+    {at:720,k:'Midday check',t:over?`${over} lead${over===1?'':'s'} past due by more than 30 minutes. They are at the top of the queue.`:'Nothing past due. Lunch is off; messages at 1, calls from 3.',ref:['T18']},
+    {at:1020,k:'Wrap-up',t:`${done} of 28 touched${open?`, ${open} still ahead`:''}. Every lead already has its next step set.`,ref:['T34']}];
+  const cur = state.clock>=1020?2:state.clock>=720?1:0;
+  const commits = ls('acc2.commit')||'';
+  $('#ppclock').textContent = fmt(state.clock);
+  $('#pp').innerHTML = pts.map((p,i)=>`<li class="${i===cur?'now':''}"><span class="mono">${fmt(p.at)}</span><div><span class="k">${p.k} <span class="refs">${p.ref.join(' ')}</span></span><span class="t">${esc(p.t)}</span>
+    ${i===0?`<input id="commit" placeholder="If a Thinker says 'let me think', then I…" value="${esc(commits)}" aria-label="If-then commitment">`:''}
+    ${i===2?`<textarea id="reflect" rows="2" placeholder="One line: what worked today?" aria-label="Reflection">${esc(ls('acc2.reflect')||'')}</textarea>`:''}</div></li>`).join('');
+  const c=$('#commit'); if(c) c.addEventListener('change',()=>{ls('acc2.commit',c.value);toast('Commitment kept for the week')});
+  const r=$('#reflect'); if(r) r.addEventListener('change',()=>{ls('acc2.reflect',r.value);toast('Saved')});
+}
+function renderRail(){
+  $('#renew').innerHTML = ALL.filter(l=>l.source==='XD'||l.source==='RI').sort((a,b)=>b.day-a.day).map(l=>`<li><span>${esc(l.name)} <span class="tip">· ${esc(l.meta?l.meta[0]:'')}</span></span><span class="mono">${-l.day} d</span></li>`).join('');
+  $('#compat').textContent = '7:55 AM';
+  $('#compl').innerHTML = [`20 consent records checked, 1 STOP honored (7:42 AM)`,`No text before a first conversation`,`Calls and texts 8 AM–8 PM only`,`Do Not Call list matched: 0 hits`,`Every send records who approved it and when`].map(c=>`<li>${c}</li>`).join('');
+}
+
+/* ======== Compose ======== */
+let channelSel='email';
+function fillLeadPicker(keep){
+  const sel=$('#c-lead'), cur=keep||sel.value;
+  sel.innerHTML = ordered().map(l=>`<option value="${l.id}">${esc(l.name)} · ${esc(SRCLBL[l.source]||l.source)}${l.cool?' (cooler)':''}</option>`).join('');
+  if(ALL.some(l=>l.id===cur)) sel.value=cur;
+}
+$('#c-scn').innerHTML = Object.entries(SCEN).map(([k,v])=>`<option value="${k}">${esc(v.label)}</option>`).join('');
+$('#c-sty').innerHTML = Object.entries(STYLES).map(([k,v])=>`<option value="${k}">${esc(v.label)}</option>`).join('');
+function selectLead(id){ fillLeadPicker(id); const l=ALL.find(x=>x.id===id); if(l){ $('#c-scn').value=l.scenario||'raw'; $('#c-sty').value=l.style; channelSel = channel(l)==='text'?'sms':channel(l); [...$('#c-ch').children].forEach(x=>x.classList.toggle('on',x.dataset.ch===channelSel)); } renderDraft(); }
+function fillTokens(t,l){ return String(t).replace(/__REP__/g,first(rep().full)).replace(/__PROPOSED__/g,l.proposed!=null?String(l.proposed):'___').replace(/__CURRENT__/g,l.current!=null?String(l.current):'___').replace(/\bMarcus\b/g,first(l.name)).replace(/\{first\}/g,first(l.name)).replace(/\{rep\}/g,first(rep().full)).replace(/\{proposed\}/g,l.proposed?'$'+l.proposed:'the quote').replace(/\{current\}/g,l.current?'$'+l.current:'what you pay now').replace(/\{send\}/g,allowed('text',l)?'text':'email'); }
+function markPhrases(html,scn,sty,l){
+  let out=html; (XSMS[scn]&&XSMS[scn][sty]||[]).forEach(p=>{ const i=out.indexOf(esc(p)); if(i>=0) out=out.slice(0,i)+'<mark>'+esc(p)+'</mark>'+out.slice(i+esc(p).length); });
+  if(l.proposed!=null) out=out.replace(new RegExp('\\$'+l.proposed+'(/mo)?'),m=>`<span class="fact">${m}</span>`);
+  out=out.replace(new RegExp('\\b'+esc(first(l.name))+'\\b'),m=>`<span class="fact">${m}</span>`);
+  return out;
+}
+function segments(txt){ const uni=/[^\x00-\x7F]/.test(txt), n=[...txt].length; return uni?{enc:'UCS-2',len:n,seg:n<=70?1:Math.ceil(n/67)}:{enc:'GSM-7',len:n,seg:n<=160?1:Math.ceil(n/153)}; }
+function renderDraft(){
+  const l=ALL.find(x=>x.id===$('#c-lead').value); if(!l) return;
+  const scn=$('#c-scn').value, sty=$('#c-sty').value, d=(DRAFTS[scn]||DRAFTS.raw)[sty], p=rep();
+  const okText=allowed('text',l), okEmail=allowed('email',l);
+  if(channelSel==='email'){
+    const body=fillTokens(d.email.body,l).split(/\n\s*\n/); const greet=body.shift(); const moves=['Match','Fit','Ask'];
+    $('#draft').innerHTML = `<div class="subj">Subject: ${markPhrases(esc(fillTokens(d.email.subject,l)),scn,sty,l)}</div><div>${esc(greet)}</div>
+      ${body.map((par,i)=>`<div class="move" data-move="${moves[i]||'More'}">${markPhrases(esc(par),scn,sty,l)}</div>`).join('')}
+      <div class="sig">${esc(p.full)} · ${esc(p.title)}\n${esc(AGENCY.name)} · ${AGENCY.phone} · ${esc(p.lic)}\nTo stop these emails, reply unsubscribe.</div>`;
+  } else if(channelSel==='sms'){
+    const txt=fillTokens(d.sms,l)+' Reply STOP to opt out.'; const sg=segments(txt);
+    $('#draft').innerHTML = `<div class="smsbox">${markPhrases(esc(txt),scn,sty,l)}</div><div class="count mono">${sg.len} chars · ${sg.seg} segment${sg.seg===1?'':'s'} · ${sg.enc}</div>${!okText?`<div class="checks"><li class="no">Locked: ${l.contacted?'no SMS consent on file':'no text before a first conversation'} (${esc(l.consent?l.consent.basis:'')}). Email or call carries this step.</li></div>`:''}`;
+  } else {
+    const say = l.say ? l.say : fillTokens(d.email.body,l).split(/\n\s*\n/).slice(1);
+    const moves=['Match','Fit','Ask'];
+    $('#draft').innerHTML = `<div class="subj">Call script · ${esc(STYLES[sty].label)}</div>${say.slice(0,3).map((s,i)=>`<div class="move" data-move="${moves[i]}">${esc(fillTokens(s,l))}</div>`).join('')}
+      <div class="sig">If voicemail (${stepFor(l).vm?stepFor(l).vm+'s allowed':'none on this call'}): ${esc(fillTokens(XVM[scn]||XVM.raw,l))}</div>`;
+  }
+  const base=LEVER_STYLE[sty]||LEVER_STYLE.story, adj=LEVER_SCEN[scn]||{}, chAdj={email:{},sms:{length:-18,detail:-12},call:{length:-8,warmth:6}}[channelSel];
+  $('#levers').innerHTML = LEVER_DEFS.map(dd=>{const v=Math.max(4,Math.min(96,base[dd.k]+(adj[dd.k]||0)+(chAdj[dd.k]||0)));return `<div class="lev"><span>${dd.name}</span><div><div class="bar"><i style="left:${v}%"></i></div><div class="ends"><span>${dd.lo}</span><span>${dd.hi}</span></div></div></div>`}).join('');
+  const S=STYLES[sty], N=NOVELTY[scn], A=AUTH[scn];
+  $('#why').innerHTML = `<dt>Person</dt><dd><b>${esc(S.label)}</b> · ${esc(S.why)}</dd>
+    <dt>Room</dt><dd><b>${esc(SCEN[scn].label)}</b> · ${esc(SCEN[scn].why)}</dd>
+    <dt>Novelty</dt><dd>${esc(N.label)} <span class="tip">${esc(N.why)}</span></dd>
+    <dt>Authority</dt><dd>${esc(A.label)} <span class="tip">${esc(A.why)}</span></dd>
+    <dt>Question</dt><dd><b>${esc(S.q)}</b> · ${esc(S.qWhy)}</dd>
+    <dt>The ask</dt><dd>“${esc(S.g)}” <span class="tip">${esc(S.gWhy)}</span></dd>
+    <dt>Timing</dt><dd>${esc(stepFor(l).what)} · ${l.cool?'cooler lead, next window':channel(l)} · plan: ${esc(SRCLBL[l.source]||l.source)}</dd>`;
+  $('#checks').innerHTML = [[okEmail||channelSel!=='email','Consent on file: '+(l.consent?l.consent.basis:'none')],[true,'Producer license line appended ('+p.lic+')'],[l.proposed!=null,l.proposed!=null?'Premium pulled from quote: $'+l.proposed+'/mo':'No quote on file: the number is a blank, not a guess'],[true,channelSel==='sms'?'STOP line present · sends 8 AM–8 PM only':channelSel==='email'?'Unsubscribe line present':'Call window 8 AM–8 PM · Do Not Call checked'],[!/life/i.test((l.reason||'')+(l.meta||[]).join()),/life/i.test((l.reason||'')+(l.meta||[]).join())?'Life insurance: checked one at a time, never batch-approved':'Routine: can be batch-approved at a pause point']].map(([ok,t])=>`<li class="${ok?'':'no'}">${esc(t)}</li>`).join('');
+  $('#approvetip').textContent = channelSel==='call' ? `Log the outcome here or on Today; it is recorded to ECRM with ${p.full} and ${fmt(state.clock)}.` : `Approve records ${p.full} and ${fmt(state.clock)}; the message goes at ${channelSel==='email'?'the next email window':channelSel==='sms'?'the next text window (1–3 PM)':'the next call window'}.`;
+  $('#approveBtn').textContent = channelSel==='call' ? 'Talked · log it' : 'Approve · sends at its hour';
+}
+['#c-scn','#c-sty'].forEach(s=>$(s).addEventListener('change',renderDraft));
+$('#c-lead').addEventListener('change',()=>selectLead($('#c-lead').value));
+$('#c-ch').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;channelSel=b.dataset.ch;[...$('#c-ch').children].forEach(x=>x.classList.toggle('on',x===b));renderDraft();});
+$('#approveBtn').addEventListener('click',()=>{const l=ALL.find(x=>x.id===$('#c-lead').value);if(!l)return;const act=channelSel==='call'?'Talked':'Approved';state.done.add(l.id);state.log.push({id:l.id,t:`${act} · ${rep().full}, ${fmt(state.clock)}`});toast(act==='Talked'?'Talked · logged to ECRM '+fmt(state.clock)+' · next step is set':'Approved: sends at its hour · recorded '+rep().full);renderAll();});
+$('#copyBtn').addEventListener('click',()=>{const txt=$('#draft').innerText;const fb=()=>{const r=document.createRange();r.selectNodeContents($('#draft'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Draft selected, press copy')};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast('Draft copied')).catch(fb)}else fb();});
+
+/* ======== Plans ======== */
+function renderPlans(){
+  const L={call:'C',email:'E',text:'T'};
+  $('#plans').innerHTML = Object.entries(XSRC).map(([k,p])=>{
+    const days=p.steps.map(s=>s.day), lo=Math.min(...days,0), hi=Math.min(Math.max(...days),30);
+    const far=p.steps.filter(s=>s.day>30);
+    const x=d=>((Math.min(d,30)-lo)/(hi-lo||1)*100).toFixed(1);
+    const ticks=[]; for(let d=lo;d<=hi;d+= (hi-lo)>20?5:(hi-lo)>8?2:1) ticks.push(d);
+    return `<div class="panel plan"><h3>${esc(p.label)} <small>clock starts ${esc(p.anchor)} · ${p.steps.length} steps${far.length?` · then day ${far.map(s=>s.day).join(', ')}`:''}</small></h3>
+      <div class="tlwrap"><div class="tl"><div class="axis"></div>${ticks.map(d=>`<span class="tick" style="left:${x(d)}%">${d>0?'+':''}${d}</span>`).join('')}
+      ${p.steps.filter(s=>s.day<=30).map((s,i)=>{const c=s.ch[0]==='text'?'text':s.ch[0];return `<span class="st ${c} ${s.vm?'vm':''}" style="left:${x(s.day)}%;top:${(i%2)?2:14}px" title="Day ${s.day}: ${esc(s.what)}">${L[c]}</span>`}).join('')}</div></div>
+      <ol class="steps">${p.steps.map(s=>`<li>Day ${s.day}: ${esc(s.what)} <span class="refs">${s.ref}</span></li>`).join('')}</ol></div>`;
+  }).join('');
+}
+
+/* ======== Live Coach (Marcus Sample, booked 3:30, QN · Storyteller) ======== */
+const CL = ALL.find(l=>l.id==='C-002');
+const TURNS = [
+  {them:'Hey, yeah. Thanks for the card. Honestly the baby has us upside down, but we got the quote.',goal:'Answer something he said before anything about the quote.',obj:'“Can we do this later?”',ans:'Of course. Would it be a terrible idea to pick a ten-minute slot now so it is off your list? You decide.'},
+  {them:'What is the difference on the life side? I do not want to overbuy.',goal:'Put the two numbers side by side, then the one question that matters.',obj:'“That is more than I expected.”',ans:'Then the first line of the page is what you pay now, what you would pay, and what changed. Nothing else until you have read it.'},
+  {them:'Okay. A call with both of us works.',goal:'One easy choice, then silence. He has said yes; the next word is his.',obj:'“I will text you.”',ans:'Perfect. AM or PM? One word is all I need.'}
+];
+let turn=0, coachLog=[];
+function renderCoach(){
+  $('#coachTitle').textContent = `Live call · ${CL.name} · ${CL.at}`; $('#turnN').textContent=`turn ${turn+1} of 3`;
+  const say=CL.say.map(s=>fillTokens(s,CL));
+  $('#chat').innerHTML = TURNS.slice(0,turn+1).map((t,i)=>`<div class="bub"><small>${esc(first(CL.name))}</small>${esc(t.them)}</div>${i<turn?`<div class="bub me"><small>${esc(first(rep().full))}</small>${esc(say[i+1]||'')}</div>`:''}`).join('');
+  const t=TURNS[turn], S=STYLES[CL.style], conf=[84,89,93][turn];
+  $('#coachPanel').innerHTML = `<h3>This turn · ${['Match','Fit','Ask'][turn]}</h3>
+    <div class="readbar"><span>Read: <b>${esc(S.label)}</b></span><div class="bar"><i style="width:${conf}%"></i></div><span class="mono">${conf}%</span></div>
+    <div class="tip">${esc(XESSENCE[CL.style])}</div><div class="sub">Goal: ${esc(t.goal)}</div>
+    <div class="say">${esc(say[turn])}</div>
+    <div class="tip">Question type: <b>${esc(S.q)}</b> · ${esc(S.qWhy)}</div>
+    <div class="r2" style="margin-top:8px">If he says <b>${esc(t.obj)}</b><br>${esc(t.ans)}</div>
+    <div class="dacts"><button class="btn sm ghost" data-r="Worked">Worked</button><button class="btn sm quiet" data-r="Missed">Missed</button></div>
+    <div class="log">${coachLog.length?coachLog.map(esc).join('<br>'):'Worked / Missed points at the next task, never at the person.'}</div>`;
+}
+$('#coachPanel').addEventListener('click',e=>{const b=e.target.closest('button[data-r]');if(!b)return;coachLog.push(`Turn ${turn+1} · ${b.dataset.r} · ${STYLES[CL.style].label}`);renderCoach();});
+$('#nextTurn').addEventListener('click',()=>{turn=(turn+1)%3;if(turn===0)coachLog=[];renderCoach();});
+
+/* ======== Book (retention, triggers, claims, referrals: his demo records) ======== */
+const RISK=[{h:'Test household',p:'Tom Test',s:84,prem:2088,lines:['auto'],f:['Payment NSF last cycle','Rate increase notice mailed','Last touch 134 d','Renews in 9 d'],play:'Set payment plan'},
+  {h:'Doe household',p:'Sarah Doe',s:78,prem:2232,lines:['auto'],f:['Rate increase notice mailed','Competitor quote pulled','Last touch 92 d','Renews in 21 d'],play:'Save call · re-quote',opp:'Bundle home (currently with Carrier E): locks in the loyalty discount'},
+  {h:'Mock household',p:'Diego & Elena Mock',s:32,prem:4120,lines:['auto','home','articles'],f:['Tenure 7 y','Persistency 100%'],opp:'Life term-20 quote: second child on the way'},
+  {h:'Roe household',p:'James & Mina Roe',s:18,prem:6480,lines:['auto','home','life','umbrella'],f:['Tenure 11 y','Renews in 12 d'],play:'Pre-renewal call',opp:'Personal articles floater for new jewelry'}];
+$('#risk').innerHTML = RISK.map(r=>{const pl=r.play&&PLAYS[r.play];return `<div class="card" style="border-left-color:${r.s>=70?'var(--bad)':r.s>=40?'var(--warn)':'var(--line)'}"><div class="r1"><span class="score ${r.s>=70?'':r.s>=40?'mid':'low'}">${r.s}</span><div class="who">${esc(r.h)}<small>${esc(r.p)} · ${r.lines.join(' + ')}</small></div><span class="mono tip">$${r.prem.toLocaleString()}/yr</span></div>
+  <div class="factors">${r.f.map(x=>`<i>${esc(x)}</i>`).join('')}</div>${r.opp?`<div class="play"><b>Open:</b> ${esc(r.opp)}</div>`:''}${pl?`<div class="play"><b>${esc(r.play)}:</b></div><div class="say">${esc(pl.pace.replace('{name}',first(r.p)).replace('{days}',r.f.find(x=>x.startsWith('Renews'))?r.f.find(x=>x.startsWith('Renews')).replace(/\D/g,''):'12'))} ${esc(pl.context)} <b>${esc(pl.green)}</b></div>`:''}</div>`}).join('');
+const TRIG=[{h:'Marcus Sample',k:'Mortgage refi',src:'County records',sig:'New deed of trust filed in King County: refi closed.',has:'auto',opp:'Re-quote home',est:1820,u:['call within 48h','soon']},
+  {h:'Sarah Doe',k:'Teen driver',src:'MVR pull',sig:'Permit-to-license conversion for a 16-year-old in the household.',has:'auto',opp:'Teen safe-driver + good-student discounts',est:1240,u:['this week','week']},
+  {h:'James & Mina Roe',k:'New vehicle',src:'LexisNexis enrichment',sig:'New 2026 Rivian R1S registered to the household, not yet on the policy.',has:'auto + home + life + umbrella',opp:'Add vehicle today',est:2140,u:['call today','now']}];
+$('#trig').innerHTML = TRIG.map(t=>`<div class="card" style="border-left-color:var(--ok)"><div class="r1"><span class="urg ${t.u[1]}">${t.u[0]}</span><div class="who">${esc(t.h)}<small>${esc(t.k)} · ${esc(t.src)}</small></div><span class="est mono">+$${t.est.toLocaleString()}/yr</span></div><div class="r2">${esc(t.sig)} Has ${esc(t.has)} → <b>${esc(t.opp)}</b></div></div>`).join('');
+const CLAIMS=[{n:'Megan Dataset',c:'CLM-2026-03-1742',k:'Auto collision',stage:'Estimate',d:38,adj:'Raymond Cole',last:22,est:8420,nps:'high',sent:'frustrated',note:'Inbound complaint: “Nobody called back. Shop says claim is stuck.”'},
+  {n:'James Roe',c:'CLM-2026-04-0211',k:'Home water',stage:'Estimate',d:11,adj:'—',last:2,est:18750,nps:'medium',sent:'neutral',note:'Mitigation done; contents list in progress.'},
+  {n:'Marcus Sample',c:'CLM-2026-04-0298',k:'Auto collision',stage:'Investigation',d:3,adj:'Diane Whitfield',last:1,est:null,nps:'low',sent:'neutral',note:'Check-in text sent; rental in place, all set.'}];
+$('#claims').innerHTML = CLAIMS.map(c=>`<div class="card" style="border-left-color:${c.nps==='high'?'var(--bad)':c.nps==='medium'?'var(--warn)':'var(--line)'}"><div class="r1"><span class="urg ${c.nps==='high'?'':c.nps==='medium'?'soon':'week'}">${c.nps==='high'?'needs attention':c.nps==='medium'?'watch':'on track'}</span><div class="who">${esc(c.n)}<small>${esc(c.k)} · ${c.c}</small></div><span class="mono tip">${c.stage} · ${c.d} d</span></div>
+  <div class="r2">Adjuster ${esc(c.adj)} · last agent touch ${c.last} d${c.est?` · estimate $${c.est.toLocaleString()}`:''} · sentiment ${c.sent}</div><div class="r2">${esc(c.note)}</div>
+  <div class="r3"><div class="acts"><button class="btn sm ghost">Reach out</button><button class="btn sm quiet">Escalate to adjuster</button></div></div></div>`).join('');
+const REFS=[{p:'Hannah Roe',by:'James & Mina Roe',k:'Family',q:'Auto',st:'New',ty:false,est:1680,n:'Daughter, just graduated UW. First car policy.'},
+  {p:'David Nobody',by:'Patrick & Mary Placeholder',k:'Neighbor',q:'Bundle',st:'Contacted',ty:true,est:4200,n:'Same cul-de-sac; just bought a new home.'},
+  {p:'Priscilla Notreal',by:'Anya & Pavel Example',k:'Friend',q:'Home',st:'Quoted',ty:true,est:2240,n:'Home only; auto stays at Carrier D.'},
+  {p:'Owen Synthetic',by:'Diego & Elena Mock',k:'Coworker',q:'Auto',st:'Bound',ty:true,est:1560,n:'Bound last week.'}];
+$('#refstat').textContent = `${REFS.filter(r=>!r.ty).length} thank-you outstanding · 1 of 4 bound`;
+$('#refs').innerHTML = REFS.map(r=>`<div class="card" style="border-left-color:var(--accent)"><div class="r1"><span class="pill">${r.st}</span><div class="who">${esc(r.p)}<small>${r.k} of ${esc(r.by)} · ${r.q}</small></div><span class="est mono">$${r.est.toLocaleString()}/yr</span></div><div class="r2">${esc(r.n)}${r.ty?'':' · <b>Thank the referrer today</b>'}</div></div>`).join('');
+
+/* ======== Scoreboard ======== */
+function meter(l,v,t,half){ const w=Math.round(Math.min(1,v/t)*100); return `<div class="meter"><span>${l}</span><div class="bar"><i style="width:${w}%"></i></div><span class="v mono">${half?`${t-v} left`:`${v} / ${t}`}</span></div>`; }
+function renderScore(){
+  const done=ALL.filter(isDone).length, half=state.clock>=780, calls=ALL.filter(l=>isDone(l)&&channel(l)==='call').length;
+  $('#teamm').innerHTML = `<div class="tip">Process (today)</div>${meter('Touches',done,28,half)}${meter('Calls',calls,17,half)}${meter('Life talks',done>=10?1:0,2,half)}${meter('Referrals asked',done>=8?2:0,4,half)}
+    <div class="tip" style="margin-top:8px">Results (week to date)</div>${meter('Quality quotes',23,35)}${meter('Apps',7,10)}${meter('Households',6,10)}`;
+  const mine=ALL.filter((l,i)=>state.persona==='Maya'?i%2===0:i%2===1);
+  $('#myplanTitle').textContent = `${state.persona}'s plan`; $('#myplanN').textContent = `${mine.filter(isDone).length} / ${mine.length}`;
+  $('#mysq').innerHTML = mine.map(l=>`<i class="${isDone(l)?'d':''}" title="${esc(l.name)}"></i>`).join('');
+  $('#mym').innerHTML = meter('Touches',mine.filter(isDone).length,mine.length,half)+meter('Calls',mine.filter(l=>isDone(l)&&channel(l)==='call').length,Math.round(mine.length*.6),half);
+  const days=[['Mon',28,28],['Tue',26,28],['Wed',28,28],['Thu',24,28],['Fri',done,ALL.filter(planned).length]];
+  $('#week').innerHTML = days.map(([d,v,p])=>`<div class="wk"><span>${d}</span><div class="bar"><i style="width:${v/28*100}%"></i><b style="left:${p/28*100}%"></b></div><span class="mono">${v} / 28</span></div>`).join('');
+  $('#wkTotal').textContent = `${days.reduce((a,x)=>a+x[1],0)} / 140`;
+}
+
+/* ======== Why ======== */
+$('#princN').textContent = PRINC.length+' principles'; $('#princ').innerHTML = PRINC.map(p=>`<div><b>${esc(p.k)}</b>${esc(p.t)} <span class="refs">${(p.ref||[]).join(' ')}</span></div>`).join('');
+const evKeys=Object.keys(EVID).sort((a,b)=>+a.slice(1)-+b.slice(1));
+$('#evN').textContent = `${evKeys.length} sources`;
+$('#evid').innerHTML = evKeys.map(k=>`<li><b>${k}</b>${esc(EVID[k])}</li>`).join('');
+
+/* ======== routing ======== */
+function go(tab){ history.replaceState(null,'','#'+tab); route(); }
+function route(){ let tab=(location.hash||'#today').slice(1); if(!$('#view-'+tab)) tab='today'; document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='view-'+tab)); document.querySelectorAll('.tabs a').forEach(a=>a.classList.toggle('on',a.dataset.tab===tab)); }
+document.querySelectorAll('.tabs a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();go(a.dataset.tab);}));
+window.addEventListener('hashchange',route);
+function renderAll(){ renderNow(); renderLanes(); renderPause(); renderRail(); fillLeadPicker(); renderDraft(); renderScore(); renderCoach(); }
+fillLeadPicker('Q01'); selectLead('Q01'); renderPlans(); renderAll(); route();
+// the first due call opens by itself: the day starts on its first five minutes
+(function(){ const o=ordered(); const f=o.find(x=>!isDone(x)&&!isStop(x)&&channel(x)==='call'&&!x.cool); if(f){ state.open=f.id; state.openAt=Date.now(); renderAll(); } })();
+})();
+</script>
+
+</body>
+</html>
