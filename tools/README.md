@@ -15,7 +15,7 @@ holds the built files (`index.html`, `assets/`) plus everything needed to rebuil
 | `tools/patch/patch.py` | Rebuilds `index.html` + `assets/` from the v6 base commit and `src/`. |
 | `tools/patch/src/*.jsx`, `ext.css` | The injected components: engine (sequencing), timebox (the time box and the marks), today (leads), queue (Action queue), compose, compare, compliance, charts, protime (open time + cooler leads), daystrip, plan, nowbar, classic, workflow (the default Today view since v17), evidence (rules and tags), moves. |
 | `tools/patch/harness.mjs` | Headless run of the day builder: `node harness.mjs [clockMinutes] [--fresh] [--list]`. |
-| `tools/tests/*.mjs` | Playwright suites: `workflow-v17` (the Workflow view), `v11-check` (seeded 11 AM state, open time, cooler leads), `v9-check` (fresh day, lanes, compliance, Compose corner), `v6-check`, `v5-check`, `demo-test`, `v8-mobile`, `v12-look` (screenshots). |
+| `tools/tests/*.mjs` | Playwright suites: `workflow-v17` (the Workflow view), `v11-check` (seeded 11 AM state, open time, cooler leads), `v9-check` (fresh day, lanes, compliance, Compose corner), `v6-check`, `v5-check`, `demo-test`, `v8-mobile`, `v12-look` (screenshots), `workflow-v17` (the Workflow view), `v18-coach` (the style read and Life & health), `v2-workflow-v17` and `v2-v18-coach` (v2). |
 
 ## Rebuild
 

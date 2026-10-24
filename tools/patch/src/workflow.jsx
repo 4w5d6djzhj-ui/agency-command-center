@@ -215,12 +215,22 @@ function XWFMsgCard({ v, now, persona, onAct }) {
     </div>
   );
 }
+// the Life & health lozenge at the top of a work card; it opens the panel in place, beneath it
+function XWFLife({ v }) {
+  const [open, setOpen] = I.useState(false);
+  return (
+    <>
+      <div className="x-wf-lh"><XLifeChip lead={v.lead} v={v} open={open} onToggle={() => setOpen(!open)} /></div>
+      {open && <XLeadLife lead={v.lead} v={v} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
 function XWFCard({ v, info, now, persona, onAct, onUndo }) {
   if (info.mode === "approved") {
     const d = XS.done[info.t.id];
     return (
       <div className="x-wf-card">
-        <div className="x-wf-note"><span className="x-check">✓</span> Approved{d.by ? ` by ${d.by}` : ""} at {xFmt(d.when != null ? d.when : now)}. It sends by itself at {xFmt(d.t)}, and the send records who approved it.</div>
+        <div className="x-wf-note"><Lozenge appearance="success">Approved</Lozenge>{d.by ? ` by ${d.by}` : ""} at {xFmt(d.when != null ? d.when : now)}. It sends by itself at {xFmt(d.t)}, and the send records who approved it.</div>
         <XWFTimeline v={v} now={now} />
         <div className="x-wf-acts"><button className="btn" onClick={onUndo}>Undo the approval</button></div>
       </div>
@@ -228,8 +238,8 @@ function XWFCard({ v, info, now, persona, onAct, onUndo }) {
   }
   if (!v.current) return null;
   return v.current.ch === "call"
-    ? <div className="x-wf-card x-wf-callcard"><XWFTimeline v={v} now={now} /><XDo v={v} persona={persona} onAct={onAct} /></div>
-    : <div className="x-wf-card x-wf-msgcard"><XWFMsgCard key={v.current.id} v={v} now={now} persona={persona} onAct={onAct} /></div>;
+    ? <div className="x-wf-card x-wf-callcard"><XWFLife v={v} /><XWFTimeline v={v} now={now} /><XDo v={v} persona={persona} onAct={onAct} /></div>
+    : <div className="x-wf-card x-wf-msgcard"><XWFLife v={v} /><XWFMsgCard key={v.current.id} v={v} now={now} persona={persona} onAct={onAct} /></div>;
 }
 function XWFCoolCard({ l, ch, onDone, onClose }) {
   return (
@@ -255,7 +265,7 @@ function XWFRowLine({ lead, v, info, isOpen, onToggle, onUndo }) {
   return (
     <div className="x-wf-row" onClick={clickable ? onToggle : undefined}>
       <XTimeBox h={21} ch={info.ch} label={info.label} sub={info.sub} frac={info.frac} state={info.state} title={info.title} badge={info.badge} />
-      <div className="x-wf-who"><span className="x-name">{lead.name}</span><span className={`style-pill ${lead.style}`} title="Communication style">{rf[lead.style] ? rf[lead.style].label : lead.style}</span></div>
+      <div className="x-wf-who"><span className="x-name">{lead.name}</span><XStyleLz style={lead.style} /></div>
       <div className={"x-wf-step" + (info.due ? " is-due" : "")} title={info.stepTitle || info.title}>{info.step}</div>
       <XMarks lead={lead} v={v} />
       {btn}
@@ -277,6 +287,7 @@ function xWFGo(id) { xSet({ open: id, wfLast: null, wfScroll: id }); }
 // ---- Box 2: the one lead to work now ------------------------------------------------------------------
 function XWFNow({ v, now, last }) {
   const lastV = last ? (XQ.find((l) => l.id === last.id) || null) : null;
+  const [lhFor, setLhFor] = I.useState(null);
   if (!v) {
     return (
       <div className="card x-wf-now">
@@ -294,12 +305,13 @@ function XWFNow({ v, now, last }) {
         <XTimeBox h={55} ch={info.ch} label={info.label} sub={info.sub} frac={info.frac} state={info.state} title={info.title} />
         <div className="x-wf-hero-text">
           <div className="x-wf-hero-name">{v.lead.name}</div>
-          <div className="x-wf-hero-chips"><span className={`style-pill ${v.lead.style}`} title="Communication style">{rf[v.lead.style].label}</span>{g && <span className="x-tag">{g.tag}</span>}</div>
+          <div className="x-wf-hero-chips"><XStyleLz style={v.lead.style} />{g && <span className="x-tag">{g.tag}</span>}<XLifeChip lead={v.lead} v={v} open={lhFor === v.lead.id} onToggle={() => setLhFor(lhFor === v.lead.id ? null : v.lead.id)} /></div>
           <div className="x-wf-hero-step">{info.step}</div>
           <div className="x-wf-hero-why">{xWFWhy(t)}</div>
           <button className={"btn primary x-wf-hero-btn" + (lastV ? " is-next" : "")} onClick={() => xWFGo(v.lead.id)}>{lastV ? "Next →" : info.btn}</button>
         </div>
       </div>
+      {lhFor === v.lead.id && <XLeadLife lead={v.lead} v={v} onClose={() => setLhFor(null)} />}
     </div>
   );
 }

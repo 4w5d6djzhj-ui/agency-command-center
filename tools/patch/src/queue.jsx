@@ -91,6 +91,7 @@ function xPeek(body, lead) {
 }
 function XMsgRow({ v, now, isOpen, persona, onToggle, onAct, onUndo }) {
   const lead = v.lead, t = v.current;
+  const [lh, setLh] = I.useState(false);
   const msg = t ? xMessage(lead, t.ch, persona) : null;
   const later = t && !t.tomorrow && t.slot > now;
   return (
@@ -99,11 +100,12 @@ function XMsgRow({ v, now, isOpen, persona, onToggle, onAct, onUndo }) {
         <div className="x-row-text">
           <div className="x-row-line1">
             <span className="x-name">{lead.name}</span>
-            <span className={`style-pill ${lead.style}`} title="Communication style">{rf[lead.style].label}</span>
+            <XStyleLz style={lead.style} />
             <span className={`x-chip x-chip-${t.ch}`}>{XCH[t.ch]}</span>
             <span className="x-tag">{XQ_GROUPS.find((g) => g.k === v.group).tag}</span>
             <span className="x-mins" title="Check the marked facts and approve: about two minutes">2 min</span>
             {!xBatchOk(v) && <span className="x-alone" title="Life-insurance messages are approved one at a time">Check by itself</span>}
+            {isOpen && t && <XLifeChip lead={lead} v={v} open={lh} onToggle={() => setLh(!lh)} />}
           </div>
           <div className="x-row-step">{`Step ${t.step.n} of ${v.p.N} · ${xDayLabel(lead)} · ${t.step.what}`}</div>
           {msg && <div className="x-msg-peek">{t.ch === "email" && <b>{/[.?!…]$/.test(msg.subject) ? msg.subject : msg.subject + "."} </b>}{xPeek(msg.body, lead)}</div>}
@@ -114,6 +116,7 @@ function XMsgRow({ v, now, isOpen, persona, onToggle, onAct, onUndo }) {
           <button className="btn primary x-approve" onClick={(e) => { e.stopPropagation(); onAct(later ? "scheduled" : "sent"); }}>{later ? "Approve" : "Send"}</button>
         </div>
       </div>
+      {isOpen && t && lh && <XLeadLife lead={lead} v={v} onClose={() => setLh(false)} />}
       {isOpen && <XDo v={v} persona={persona} onAct={onAct} />}
     </div>
   );
@@ -258,7 +261,7 @@ function XToday({ persona }) {
             <span className="count">{handled.length} handled · {XQ.length - handled.length} to go</span>
           </div>
           {blocked.length > 0 && (
-            <XLane title="Needs a decision" n={blocked.length} rule="The system stopped these; each says why.">
+            <XLane title={<Lozenge appearance="warning">Needs a decision</Lozenge>} n={blocked.length} rule="The system stopped these; each says why.">
               {blocked.map(row)}
             </XLane>
           )}
@@ -284,7 +287,7 @@ function XToday({ persona }) {
           {(sched.length > 0 || handled.length > 0) && (
             <details className="x-lane x-lane-done">
               <summary className="x-group-head"><span className="x-group-title">Handled today</span><span className="x-group-n">{handled.length}</span><span className="x-group-rule">{sched.length ? `${sched.length} approved message${sched.length === 1 ? "" : "s"} will send on time` : "Tap to see them"}</span></summary>
-              {sched.map((t) => <div key={t.id} className="x-done-row"><span className="mono">{xFmt(t.slot)}</span><span className={`x-chip x-chip-${t.ch}`}>{XCH[t.ch]}</span><span>{t.lead.name}</span><span className="x-done-what">{t.step.what} · approved, sends on time</span></div>)}
+              {sched.map((t) => <div key={t.id} className="x-done-row"><span className="mono">{xFmt(t.slot)}</span><span className={`x-chip x-chip-${t.ch}`}>{XCH[t.ch]}</span><span>{t.lead.name}</span><span className="x-done-what">{t.step.what} · <Lozenge appearance="success">Approved</Lozenge> sends on time</span></div>)}
               {handled.map((v) => <div key={v.lead.id} className="x-done-row"><span className="x-check">✓</span><span>{v.lead.name}</span><span className="x-done-what">{xOutcomeText(v)}</span><button className="x-undo" onClick={() => xUndo(v)}>Undo</button></div>)}
             </details>
           )}

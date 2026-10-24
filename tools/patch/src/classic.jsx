@@ -11,7 +11,7 @@ function XClassicExtras({ name }) {
   if (!lead) return null;
   return (
     <>
-      {lead.consent && lead.consent.stop && <span className="x-chip x-chip-stop" title={lead.consent.basis}>Texted STOP {lead.consent.stop}</span>}
+      {lead.consent && lead.consent.stop && <span className="lz lz-danger x-lz-stop" title={lead.consent.basis}>Texted STOP {lead.consent.stop}</span>}
       <span className="x-tag x-src-tag" title="Where this person comes from in the agency's system">{xSource(lead)}</span>
     </>
   );

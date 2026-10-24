@@ -5,6 +5,7 @@ test calculator, demo clock, Now bar on every screen, Compose best-now corner, b
 v9: lean Today (andon line, process before results, calls vs messages to check, small wins), compliance
 check, plan-vs-done and strategy charts, warm leads with consent on file.
 v17: Workflow is the default Today view (one status line, four boxes, a time box on every task).
+v18: the style read that moves (Live Coach), Life & health readiness, the semantic token layer and lozenges.
 Usage: python3 -I patch.py REPO_DIR
 Writes a plain index.html + assets/ at the repo root; when the root page is the encrypted one, the plain
 page is rebuilt from tools/dist/index.html (or the v6 base page). tools/protect.py locks it afterwards."""
@@ -66,7 +67,7 @@ def match_end(s, i):
 
 
 # 0. compile the components (JSX -> React.createElement on the bundle's React, `I`)
-src_files = ["moves.jsx", "compose.jsx", "engine.jsx", "compare.jsx", "timebox.jsx", "today.jsx", "queue.jsx", "compliance.jsx", "charts.jsx", "protime.jsx", "daystrip.jsx", "plan.jsx", "nowbar.jsx", "demo.jsx", "classic.jsx", "workflow.jsx", "look.jsx", "evidence.jsx"]
+src_files = ["moves.jsx", "compose.jsx", "engine.jsx", "compare.jsx", "timebox.jsx", "ads.jsx", "lifehealth.jsx", "styleread.jsx", "today.jsx", "queue.jsx", "compliance.jsx", "charts.jsx", "protime.jsx", "daystrip.jsx", "plan.jsx", "nowbar.jsx", "demo.jsx", "classic.jsx", "workflow.jsx", "look.jsx", "evidence.jsx"]
 src = "\n".join(open(os.path.join(HERE, "src", f), encoding="utf-8").read() for f in src_files)
 os.makedirs(os.path.join(HERE, "build"), exist_ok=True)
 open(os.path.join(HERE, "build", "ext.jsx"), "w", encoding="utf-8").write(src)
@@ -77,10 +78,27 @@ ext = open(os.path.join(HERE, "build", "ext.js"), encoding="utf-8").read()
 assert "import " not in ext and "export " not in ext and "require(" not in ext
 names = set(re.findall(r"^(?:const|function|let|var)\s+([A-Za-z_$][\w$]*)", ext, re.M))
 clash = [n for n in names if re.search(r"(?<![\w$.])" + re.escape(n) + r"(?![\w$])", orig)]
+# a word that appears in the bundle only inside string literals (e.g. "readiness" in a label) is not a clash
+_code = re.sub(r'"(?:[^"\\\n]|\\.)*"', '""', orig)
+clash = [n for n in clash if re.search(r"(?<![\w$.\-])" + re.escape(n) + r"(?![\w$\-])", _code)]
 assert not clash, f"name clash: {clash}"
-for g in ["I", "rf", "nf", "tf", "$n", "zl", "Bl", "cf", "df", "Zm", "Pp", "Rp", "Uf", "Gm", "Ef"]:
+for g in ["I", "rf", "nf", "tf", "$n", "zl", "Bl", "cf", "df", "Zm", "Pp", "Rp", "Uf", "Gm", "Ef", "Kt", "Yl"]:
     assert re.search(r"(?:^|[;,{}\s])(?:const |var |let |function )?" + re.escape(g) + r"\s*[=(]", orig), g
 
+# v18 Live Coach: the style read (fixed order, moving bars, the delta, the ghost, READING/LOCKED/TIE) replaces
+# the body of the bundle's Cf; the coach (If) passes its turn index (r) and the turns so far (We = Kt.slice(0,r+1))
+js, _n = re.subn(r"function Cf\(\{dimensions:e,dominant:t\}\)\{if\(!e\)return null;.*?\}(?=function _f\(\{ids:e\}\))",
+                 lambda m: "function Cf(p){return o.jsx(XStyleRead,p)}", js, count=2, flags=re.S)
+assert _n == 1, f"Cf: expected 1 replacement, made {_n}"
+rep('o.jsx(Cf,{dimensions:y.dimensions,dominant:_})', 'o.jsx(Cf,{dimensions:y.dimensions,dominant:_,turn:r,transcript:We,signal:y.signal})')
+# the read as a lozenge in the coach's header, so the words it picks are tied to the read
+rep('o.jsxs("div",{className:"coach-head",children:[o.jsx("div",{className:"title",children:"Coach · current turn"}),o.jsx("div",{className:"sub",children:y.stamp})]})',
+    'o.jsxs("div",{className:"coach-head x-coach-head",children:[o.jsxs("div",{children:[o.jsx("div",{className:"title",children:"Coach · current turn"}),o.jsx("div",{className:"sub",children:y.stamp})]}),o.jsx(XReadLozenge,{turn:r,transcript:We})]})')
+# the heard line under the bars now names the words that moved the read; the coach's signal label becomes its
+# tooltip (one line instead of two). Life & health readiness sits directly under the read; the Ask waits
+# behind open suitability items (Yl, checks x)
+rep('o.jsxs("div",{className:"signal-tag",children:["Signal: ",y.signal]})]}),',
+    'null]}),o.jsx(XCoachLife,{turn:r,transcript:We,dominant:_,gate:y.lifeSignal?Yl.filter(q=>q.blocker&&!x[q.id]).length:0}),')
 # 1. AI wording -> plain wording (v7)
 rep('"Compose (AI-drafted email and SMS in your voice)"', '"Compose (email and text drafts in your voice)"')
 rep('title:"Has corporate published any specific guidance on AI in client communications?"',

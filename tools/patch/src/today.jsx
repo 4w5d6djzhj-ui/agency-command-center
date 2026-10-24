@@ -212,6 +212,7 @@ function XPath({ v, now }) {
 }
 function XWhen({ t, now }) {
   const s = xStatusOf(t, now);
+  if (s.cls === "x-when-due") return <span className="x-when lz lz-information">{s.text}</span>;
   return <span className={"x-when " + s.cls}>{s.text}</span>;
 }
 
@@ -296,18 +297,20 @@ function XDo({ v, persona, onAct, big }) {
 }
 
 function XRow({ v, now, isOpen, persona, onToggle, onAct, onUndo }) {
-  const lead = v.lead, st = rf[lead.style], t = v.current;
+  const lead = v.lead, t = v.current;
+  const [lh, setLh] = I.useState(false);
   return (
     <div className={`x-row x-st-${lead.style}${isOpen && t ? " is-open" : ""}${v.complete && v.doneTs.length ? " is-done" : ""}`}>
       <div className="x-row-main" onClick={() => t && onToggle()}>
         <div className="x-row-text">
           <div className="x-row-line1">
             <span className="x-name">{lead.name}</span>
-            <span className={`style-pill ${lead.style}`} title="Communication style">{st ? st.label : lead.style}</span>
+            <XStyleLz style={lead.style} />
             <Pp stage={lead.stage} />
             <span className="x-tag">{XQ_GROUPS.find((g) => g.k === v.group).tag}{lead.at ? ` ${lead.at}` : ""}</span>
             {t && <span className="x-mins" title="Five minutes: the call, the outcome, the next step is already set">5 min</span>}
-            {lead.consent && lead.consent.stop && <span className="x-chip x-chip-stop" title={lead.consent.basis}>Texted STOP {lead.consent.stop}{t ? ` · now by ${XCH[t.ch].toLowerCase()}` : ""}</span>}
+            {lead.consent && lead.consent.stop && <span className="lz lz-danger x-lz-stop" title={lead.consent.basis}>Texted STOP {lead.consent.stop}{t ? ` · now by ${XCH[t.ch].toLowerCase()}` : ""}</span>}
+            {isOpen && t && <XLifeChip lead={lead} v={v} open={lh} onToggle={() => setLh(!lh)} />}
           </div>
           <div className="x-row-line2"><span>{lead.reason}</span>{lead.meta.map((m, i) => <span key={i} className="dot">{m}</span>)}<span className="dot x-src" title="Where this person comes from in the agency's system">{xSource(lead)}</span></div>
           <div className="x-row-step">
@@ -321,6 +324,7 @@ function XRow({ v, now, isOpen, persona, onToggle, onAct, onUndo }) {
             : <button className={"btn x-act x-act-" + t.ch + (isOpen ? " primary" : "")} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); onToggle(true); }}>{XCH[t.ch]}</button>}
         </div>
       </div>
+      {isOpen && t && lh && <XLeadLife lead={lead} v={v} onClose={() => setLh(false)} />}
       {isOpen && t && <XDo v={v} persona={persona} onAct={onAct} />}
     </div>
   );
@@ -331,7 +335,7 @@ function XHowTo({ lead, ch }) {
   const cell = XMOVES[lead.scenario][lead.style], st = rf[lead.style];
   return (
     <div className="card x-howto">
-      <div className="card-head"><span className="title">How to talk to {xFirst(lead.name)}</span><span className={`style-pill ${lead.style}`}>{st.label}</span></div>
+      <div className="card-head"><span className="title">How to talk to {xFirst(lead.name)}</span><XStyleLz style={lead.style} /></div>
       <div className="x-howto-body">
         <div className="x-howto-essence" key={"e" + lead.id}>{XESSENCE[lead.style]}</div>
         <ol className="x-howto-moves">
@@ -377,7 +381,7 @@ function XFocus({ v, now, persona, score, total, onAct, onClose }) {
               <div>
                 <div className="x-focus-group">{g ? g.title : ""}{xIsDue(v.current, now) ? "" : " · coming up"}</div>
                 <h2 className="x-focus-name">{v.lead.name}</h2>
-                <div className="x-row-line1"><span className={`style-pill ${v.lead.style}`}>{rf[v.lead.style].label}</span><Pp stage={v.lead.stage} /></div>
+                <div className="x-row-line1"><XStyleLz style={v.lead.style} /><Pp stage={v.lead.stage} /></div>
                 <div className="x-row-line2"><span>{v.lead.reason}</span>{v.lead.meta.map((m, i) => <span key={i} className="dot">{m}</span>)}</div>
                 <div className="x-row-step">{v.current.booked ? `Booked call · ${v.lead.at}` : `Step ${v.current.step.n} of ${v.p.N} · ${xDayLabel(v.lead)} · ${v.current.step.what}`}</div>
                 <XPath v={v} now={now} />

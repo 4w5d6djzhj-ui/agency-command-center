@@ -20,7 +20,8 @@
   --bg:#F4F5F1; --panel:#FFFFFF; --ink:#1A2330; --muted:#5D6772; --line:#D8DCD4; --line2:#EAECE6; --soft:#F0F2EC;
   --accent:#0F3D5C; --accent-ink:#FFFFFF; --accent-soft:#DCE8F0;
   --call:#1F6FD1; --call-soft:#E1ECFB; --email:#B8640F; --email-soft:#FBEBD9; --text:#178A5B; --text-soft:#DFF3E8;
-  --ok:#2E7D4F; --warn:#B8640F; --bad:#8C2F39; --bad-soft:#F6E3E5; --warn-soft:#FBEBD9; --ok-soft:#DFF3E8;
+  /* v2.6 · status colors resolve from the token layer (ads.css): same values in light; dark follows the tokens' dark values */
+  --ok:var(--color-bg-success-bold); --warn:var(--color-bg-warning-bold); --bad:var(--color-bg-danger-bold); --bad-soft:var(--color-bg-danger); --warn-soft:var(--color-bg-warning); --ok-soft:var(--color-bg-success);
   --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
   --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
@@ -29,14 +30,133 @@
   --bg:#10151B; --panel:#171E26; --ink:#E6EAEE; --muted:#97A2AE; --line:#2C3640; --line2:#222B34; --soft:#1C242D;
   --accent:#7FB6E0; --accent-ink:#10151B; --accent-soft:#1B3042;
   --call:#6EA6F0; --call-soft:#17293F; --email:#E4A050; --email-soft:#3A2814; --text:#5BC78F; --text-soft:#15311F;
-  --ok:#5BC78F; --warn:#E4A050; --bad:#E57B86; --bad-soft:#3F1F24; --warn-soft:#3A2814; --ok-soft:#15311F;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#10151B; --panel:#171E26; --ink:#E6EAEE; --muted:#97A2AE; --line:#2C3640; --line2:#222B34; --soft:#1C242D;
   --accent:#7FB6E0; --accent-ink:#10151B; --accent-soft:#1B3042;
   --call:#6EA6F0; --call-soft:#17293F; --email:#E4A050; --email-soft:#3A2814; --text:#5BC78F; --text-soft:#15311F;
-  --ok:#5BC78F; --warn:#E4A050; --bad:#E57B86; --bad-soft:#3F1F24; --warn-soft:#3A2814; --ok-soft:#15311F;
   color-scheme:dark}
+
+/* ======== v2.6 · the shared token layer (ads.css, verbatim; same file in v1 and Next Step) ======== */
+/* Semantic token layer and the four status components (lozenge, progress tracker, section message, empty state).
+   Naming follows the Atlassian Design System's foundation.property.modifier idea; the scales are ours (φ type, Fibonacci px).
+   Same file in v1 (appended to ext.css), v2 and the Next Step tool. Map existing variables onto these; do not invent new hues. */
+:root {
+  --color-text: var(--ink, #1A2330);
+  --color-text-subtle: var(--muted, #5D6772);
+  --color-text-subtlest: #7C8792;
+  --color-text-inverse: #FFFFFF;
+  --color-link: var(--accent, #0F3D5C);
+  --color-border: var(--line, #D8DCD4);
+  --color-border-bold: #9AA3AC;
+  --color-bg-neutral: var(--soft, #F0F2EC);
+  --color-bg-neutral-bold: #3A4653;
+  --color-bg-information: #E1ECFB;  --color-bg-information-bold: #1F6FD1;  --color-text-information: #174F93;
+  --color-bg-success: #DFF3E8;      --color-bg-success-bold: #2E7D4F;      --color-text-success: #225C3B;
+  --color-bg-warning: #FBEBD9;      --color-bg-warning-bold: #B8640F;      --color-text-warning: #8A4A0B;
+  --color-bg-danger: #F6E3E5;       --color-bg-danger-bold: #8C2F39;       --color-text-danger: #66222A;
+  --color-bg-discovery: #ECE6F7;    --color-bg-discovery-bold: #5B3FA6;    --color-text-discovery: #42307A;
+  --elevation-surface: var(--panel, #FFFFFF);
+  --elevation-surface-raised: 0 1px 3px rgba(26,35,48,.08), 0 1px 1px rgba(26,35,48,.04);
+  --elevation-surface-overlay: 0 8px 21px rgba(26,35,48,.16), 0 2px 5px rgba(26,35,48,.08);
+  --space-50: 3px; --space-100: 5px; --space-150: 8px; --space-200: 13px; --space-300: 21px; --space-400: 34px; --space-500: 55px; --space-600: 89px;
+  --font-size-50: 10px; --font-size-100: 13px; --font-size-200: 16.5px; --font-size-300: 21px; --font-size-400: 34px; --font-size-500: 43px;
+  --radius-100: 3px; --radius-200: 5px; --radius-300: 8px; --radius-400: 13px;
+  --motion-fast: 233ms; --motion-medium: 377ms; --motion-slow: 610ms;
+  /* the four communication styles · validated for colorblind separation (light and dark) */
+  --style-story: #C2416A; --style-asker: #0F8FA0; --style-doer: #4A3FC9; --style-thinker: #9A7A00;
+  --style-story-soft: #F8E4EA; --style-asker-soft: #DDF1F4; --style-doer-soft: #E6E3F9; --style-thinker-soft: #F5EFD6;
+  --style-story-text: #8E2A4E; --style-asker-text: #0B5E6B; --style-doer-text: #3A2FA0; --style-thinker-text: #5E4A00;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --color-text-inverse: #10151B;
+  --style-story-text: #F0A3BD; --style-asker-text: #7FD3DE; --style-doer-text: #B9B0F5; --style-thinker-text: #E2C45A;
+  --color-text-subtlest: #8E99A4; --color-border-bold: #4A5560; --color-bg-neutral-bold: #C9D1D9;
+  --color-bg-information: #17293F; --color-bg-information-bold: #6EA6F0; --color-text-information: #BFD7F7;
+  --color-bg-success: #163626;     --color-bg-success-bold: #5BC78F;     --color-text-success: #BDEBD1;
+  --color-bg-warning: #3A2814;     --color-bg-warning-bold: #E4A050;     --color-text-warning: #F3D4AE;
+  --color-bg-danger: #3D1C21;      --color-bg-danger-bold: #E07A86;      --color-text-danger: #F5C7CD;
+  --color-bg-discovery: #2A2342;   --color-bg-discovery-bold: #A98BEF;   --color-text-discovery: #DCD1F7;
+  --style-story: #D45C84; --style-asker: #27A6B6; --style-doer: #7F72E0; --style-thinker: #B8961F;
+  --style-story-soft: #3E2230; --style-asker-soft: #15353A; --style-doer-soft: #27244A; --style-thinker-soft: #3A3113;
+} }
+:root[data-theme="dark"] {
+  --color-text-inverse: #10151B;
+  --style-story-text: #F0A3BD; --style-asker-text: #7FD3DE; --style-doer-text: #B9B0F5; --style-thinker-text: #E2C45A;
+  --color-text-subtlest: #8E99A4; --color-border-bold: #4A5560; --color-bg-neutral-bold: #C9D1D9;
+  --color-bg-information: #17293F; --color-bg-information-bold: #6EA6F0; --color-text-information: #BFD7F7;
+  --color-bg-success: #163626;     --color-bg-success-bold: #5BC78F;     --color-text-success: #BDEBD1;
+  --color-bg-warning: #3A2814;     --color-bg-warning-bold: #E4A050;     --color-text-warning: #F3D4AE;
+  --color-bg-danger: #3D1C21;      --color-bg-danger-bold: #E07A86;      --color-text-danger: #F5C7CD;
+  --color-bg-discovery: #2A2342;   --color-bg-discovery-bold: #A98BEF;   --color-text-discovery: #DCD1F7;
+  --style-story: #D45C84; --style-asker: #27A6B6; --style-doer: #7F72E0; --style-thinker: #B8961F;
+  --style-story-soft: #3E2230; --style-asker-soft: #15353A; --style-doer-soft: #27244A; --style-thinker-soft: #3A3113;
+}
+
+/* Lozenge: a status word. appearance: default · information · success · warning · danger · discovery; .bold fills */
+.lz { display: inline-flex; align-items: center; gap: 4px; height: 18px; padding: 0 var(--space-100); border-radius: var(--radius-100);
+  font: 700 11px/1 var(--mono, ui-monospace, monospace); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; vertical-align: middle;
+  background: var(--color-bg-neutral); color: var(--color-text-subtle); }
+.lz-information { background: var(--color-bg-information); color: var(--color-text-information); }
+.lz-success { background: var(--color-bg-success); color: var(--color-text-success); }
+.lz-warning { background: var(--color-bg-warning); color: var(--color-text-warning); }
+.lz-danger { background: var(--color-bg-danger); color: var(--color-text-danger); }
+.lz-discovery { background: var(--color-bg-discovery); color: var(--color-text-discovery); }
+.lz.bold { color: var(--color-text-inverse); background: var(--color-bg-neutral-bold); }
+.lz-information.bold { background: var(--color-bg-information-bold); } .lz-success.bold { background: var(--color-bg-success-bold); }
+.lz-warning.bold { background: var(--color-text-warning); } .lz-danger.bold { background: var(--color-bg-danger-bold); } .lz-discovery.bold { background: var(--color-bg-discovery-bold); }
+.lz-story { background: var(--style-story-soft); color: var(--style-story-text); } .lz-asker { background: var(--style-asker-soft); color: var(--style-asker-text); }
+.lz-doer { background: var(--style-doer-soft); color: var(--style-doer-text); } .lz-thinker { background: var(--style-thinker-soft); color: var(--style-thinker-text); }
+.lz-story.bold { background: var(--style-story-text); color: var(--color-text-inverse); } .lz-asker.bold { background: var(--style-asker-text); color: var(--color-text-inverse); }
+.lz-doer.bold { background: var(--style-doer-text); color: var(--color-text-inverse); } .lz-thinker.bold { background: var(--style-thinker-text); color: var(--color-text-inverse); }
+
+/* Progress tracker: steps in a row, one current at a time */
+.pt { display: flex; align-items: flex-start; gap: 0; list-style: none; margin: 0; padding: 0; }
+.pt li { flex: 1; position: relative; text-align: center; font: 500 var(--font-size-100)/1.272 var(--body, system-ui); color: var(--color-text-subtlest); padding-top: 21px; }
+.pt li::before { content: ""; position: absolute; left: 50%; top: 5px; width: 13px; height: 13px; margin-left: -6.5px; border-radius: 50%; background: var(--color-bg-neutral); border: 2px solid var(--color-border-bold); box-sizing: border-box; }
+.pt li::after { content: ""; position: absolute; top: 11px; left: calc(50% + 8px); right: calc(-50% + 8px); height: 2px; background: var(--color-border); }
+.pt li:last-child::after { display: none; }
+.pt li.visited { color: var(--color-text-subtle); } .pt li.visited::before { background: var(--color-bg-success-bold); border-color: var(--color-bg-success-bold); }
+.pt li.visited::after { background: var(--color-bg-success-bold); }
+.pt li.current { color: var(--color-text); font-weight: 700; } .pt li.current::before { background: var(--color-bg-discovery-bold); border-color: var(--color-bg-discovery-bold); box-shadow: 0 0 0 3px var(--color-bg-discovery); }
+
+/* Section message: title, one line, one action */
+.sm { display: grid; grid-template-columns: 21px 1fr; gap: var(--space-150); padding: var(--space-200); border-radius: var(--radius-300); background: var(--color-bg-information); color: var(--color-text); }
+.sm-discovery { background: var(--color-bg-discovery); } .sm-warning { background: var(--color-bg-warning); } .sm-danger { background: var(--color-bg-danger); } .sm-success { background: var(--color-bg-success); }
+.sm .sm-icon { width: 21px; height: 21px; border-radius: 50%; display: grid; place-items: center; font: 700 13px/1 var(--mono, monospace); color: #fff; background: var(--color-bg-information-bold); }
+.sm-discovery .sm-icon { background: var(--color-bg-discovery-bold); } .sm-warning .sm-icon { background: var(--color-bg-warning-bold); } .sm-danger .sm-icon { background: var(--color-bg-danger-bold); } .sm-success .sm-icon { background: var(--color-bg-success-bold); }
+.sm .sm-title { font: 700 var(--font-size-100)/1.272 var(--body, system-ui); margin-bottom: 3px; }
+.sm .sm-body { font: 400 var(--font-size-100)/1.618 var(--body, system-ui); color: var(--color-text-subtle); }
+.sm .sm-action { margin-top: var(--space-100); font: 700 var(--font-size-100)/1.272 var(--body, system-ui); color: var(--color-link); background: none; border: 0; padding: 0; cursor: pointer; }
+
+/* Empty state: one line and one action, never a blank box */
+.es { padding: var(--space-300); text-align: center; color: var(--color-text-subtle); font: 400 var(--font-size-100)/1.618 var(--body, system-ui); }
+.es .es-action { display: inline-block; margin-top: var(--space-100); color: var(--color-link); font-weight: 700; }
+
+/* Style read chart (Live Coach): four bars that move */
+.sr { display: grid; gap: var(--space-150); }
+.sr-row { display: grid; grid-template-columns: 89px 1fr 55px; align-items: center; gap: var(--space-150); font: 500 var(--font-size-100)/1.272 var(--body, system-ui); color: var(--color-text-subtle); }
+.sr-row.lead { color: var(--color-text); font-weight: 700; }
+.sr-track { position: relative; height: 13px; border-radius: var(--radius-200); background: var(--color-bg-neutral); overflow: visible; }
+.sr-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--radius-200); background: var(--sr-color); opacity: .38; transition: width var(--motion-slow) cubic-bezier(.2,.8,.2,1), opacity var(--motion-medium) ease; }
+.sr-row.lead .sr-fill { opacity: 1; }
+.sr-ghost { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--color-border-bold); opacity: .8; transition: left var(--motion-slow) ease, opacity var(--motion-slow) ease; }
+.sr-pct { text-align: right; font-family: var(--mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; }
+.sr-delta { position: absolute; right: -2px; top: -22px; animation: sr-delta 1618ms ease forwards; }
+@keyframes sr-delta { 0% { opacity: 0; transform: translateY(4px); } 15% { opacity: 1; transform: translateY(0); } 70% { opacity: 1; } 100% { opacity: 0; } }
+.sr-row.moved .sr-track { animation: sr-pulse var(--motion-fast) ease 1; }
+@keyframes sr-pulse { 50% { transform: scaleY(1.25); } }
+.sr-heard { font: 400 var(--font-size-100)/1.618 var(--body, system-ui); color: var(--color-text-subtle); }
+.sr-heard mark { background: var(--color-bg-discovery); color: var(--color-text-discovery); padding: 0 2px; border-radius: 2px; }
+
+/* Readiness meter (Life & health) */
+.rm { position: relative; height: 8px; border-radius: 4px; background: var(--color-bg-neutral); overflow: hidden; }
+.rm-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; transition: width var(--motion-slow) cubic-bezier(.2,.8,.2,1); background: var(--color-bg-neutral-bold); }
+.rm-fill.seed { background: var(--color-bg-discovery-bold); } .rm-fill.ready { background: var(--color-bg-success-bold); }
+.rm-ticks { position: absolute; inset: 0; background: linear-gradient(to right, transparent 39.5%, var(--elevation-surface) 39.5%, var(--elevation-surface) 40.5%, transparent 40.5%, transparent 69.5%, var(--elevation-surface) 69.5%, var(--elevation-surface) 70.5%, transparent 70.5%); }
+
+@media (prefers-reduced-motion: reduce) { .sr-fill, .sr-ghost, .rm-fill { transition: none; } .sr-delta, .sr-row.moved .sr-track { animation: none; } }
+/* ======== end ads.css ======== */
 
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -444,6 +564,56 @@ body.nocoach .wwhy{display:none}
   .wn-l{display:none}.wn-s{display:inline}
   .wtl{grid-template-columns:minmax(0,1fr)}
 }
+
+/* v2.6 · lozenges on rows, cards and the Now box; the style read; Life & health. Tokens only (ads.css). */
+.wrow-who .lz,.wnow-name .lz,.r1 .lz,.coachhead .lz{flex:none}
+.lz-raised{background:var(--elevation-surface);box-shadow:inset 0 0 0 1px var(--color-border)}
+.chips{align-items:center}
+button.lz{border:0;cursor:pointer;min-height:0}
+button.lz:hover{box-shadow:inset 0 0 0 1px var(--color-border-bold)}
+.lh-lz[aria-expanded="true"]{box-shadow:0 0 0 2px var(--color-bg-neutral),0 0 0 3px var(--color-border-bold)}
+@media (pointer:coarse){.lh-lz{position:relative}.lh-lz::after{content:"";position:absolute;inset:-13px -3px}}
+.wnow-lz{margin-top:var(--space-50)}
+/* Life & health · one panel everywhere: the status line, the meter, the cues, then one line at a time */
+.lh{display:grid;gap:var(--space-150);min-width:0}
+.lh-in{min-width:0}
+.lh-in .lh{background:var(--elevation-surface);border:1px solid var(--color-border);border-radius:var(--radius-300);padding:var(--space-200)}
+#wfnow .lh-in{margin-top:var(--space-200)}
+.lh-head{display:flex;align-items:center;gap:var(--space-100) var(--space-150);flex-wrap:wrap;font-size:var(--font-size-100);line-height:1.272;color:var(--color-text-subtle)}
+.lh-why{color:var(--color-text);font-weight:700}
+.lh-conf b{color:var(--color-text)}
+.lh-cues{display:flex;align-items:center;gap:var(--space-100);flex-wrap:wrap;font-size:var(--font-size-100);color:var(--color-text-subtle)}
+.lh-step{margin:0;font-size:var(--font-size-100);color:var(--color-text-subtle)}
+.lh-step b{color:var(--color-text)}
+.lh-line{margin:0;padding:var(--space-150) var(--space-200);border-left:3px solid var(--color-border-bold);border-radius:0 var(--radius-200) var(--radius-200) 0;background:var(--color-bg-neutral);font-size:var(--font-size-100);line-height:1.618;color:var(--color-text);max-width:68ch}
+.lh-ready .lh-line{border-left-color:var(--color-bg-success-bold)}
+.lh-seed .lh-line{border-left-color:var(--color-bg-discovery-bold)}
+.lh-in .lh-line{background:var(--color-bg-neutral)}
+.lh .pt{max-width:377px}
+.lh-acts{display:flex;gap:var(--space-150);flex-wrap:wrap}
+.lh-note{margin:0;font-size:var(--font-size-100);line-height:1.272;color:var(--color-text-subtlest)}
+.lh .es{padding:var(--space-200);border-radius:var(--radius-200);background:var(--color-bg-neutral)}
+.lh-btn{display:inline-flex;align-items:center;gap:var(--space-100);min-height:34px;padding:var(--space-100) var(--space-200);border:1px solid var(--color-border);border-radius:var(--radius-200);background:var(--elevation-surface);color:var(--color-link);font-size:var(--font-size-100);font-weight:700;white-space:nowrap}
+.lh-btn:hover{border-color:var(--color-link)}
+.lh-btn.lh-go{border-color:var(--color-link)}
+.lh-btn[disabled]{opacity:.45;cursor:not-allowed;border-color:var(--color-border)}
+@media (pointer:coarse){.lh-btn{min-height:44px}}
+/* Live Coach: the conversation and this turn's line on the left; two calm blocks on the right */
+.coachmain{display:flex;flex-direction:column;gap:var(--space-200);min-width:0}
+#view-coach .chat{max-height:296px;overflow-y:auto;overscroll-behavior:contain;padding-right:var(--space-100)}
+#view-coach .chat.is-scrolled{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--space-400));mask-image:linear-gradient(to bottom,transparent 0,#000 var(--space-400))}
+.coachrail{gap:var(--space-200)}
+.coachhead{display:flex;align-items:center;gap:var(--space-100) var(--space-150);flex-wrap:wrap}
+.v2-sr .sr{gap:var(--space-300);margin:var(--space-300) 0 var(--space-200)}
+.v2-sr .sr-row{grid-template-columns:89px minmax(0,1fr) 42px 68px}
+.v2-sr .sr-delta{top:-20px}
+.v2-sr .sr-state{display:flex;min-width:0}
+.sr-heard{margin:0 0 var(--space-150);min-height:calc(2 * 1.618em)}
+.sr-acts{display:flex;gap:var(--space-150);flex-wrap:wrap}
+#srWhyMsg{margin-top:var(--space-200)}
+.lhcoach .lh{margin-top:var(--space-100)}
+@media (max-width:987px){#view-coach .chat{max-height:none;overflow:visible}}
+@media (max-width:420px){.v2-sr .sr-row{grid-template-columns:72px minmax(0,1fr) 34px 64px;gap:var(--space-100)}}
 </style>
 
 </head>
@@ -564,9 +734,21 @@ body.nocoach .wwhy{display:none}
 <!-- COACH -->
 <section id="view-coach" class="view">
   <div class="ccols">
-    <div class="panel"><div class="lanehead"><h2 id="coachTitle"></h2><span class="brandtag">Hakobian coaching</span><span class="rule mono" id="turnN"></span></div><div class="chat" id="chat"></div>
-      <div class="dacts"><button class="btn" id="nextTurn">Next turn</button></div></div>
-    <aside class="rail"><div class="panel" id="coachPanel"></div></aside>
+    <div class="coachmain">
+      <div class="panel"><div class="lanehead"><h2 id="coachTitle"></h2><span class="brandtag">Hakobian coaching</span><span class="rule mono" id="turnN"></span></div><div class="chat" id="chat"></div>
+        <div class="dacts"><button class="btn" id="nextTurn">Next turn</button></div></div>
+      <div class="panel" id="coachPanel"></div>
+    </div>
+    <aside class="rail coachrail">
+      <section class="panel v2-sr" aria-labelledby="srTitle">
+        <div class="lanehead"><h2 id="srTitle">Communication style · read from the conversation</h2></div>
+        <div class="sr" id="sr" role="list" aria-label="The four styles, in a fixed order"></div>
+        <p class="sr-heard" id="srHeard" aria-live="polite"></p>
+        <div class="sr-acts"><button type="button" class="lh-btn" id="srWhy" aria-expanded="false" aria-controls="srWhyMsg">Why</button><button type="button" class="lh-btn" id="srReplay">▶ Replay the read</button></div>
+        <div id="srWhyMsg" hidden></div>
+      </section>
+      <section class="panel lhcoach" id="lhCoach" aria-labelledby="lhTitle"></section>
+    </aside>
   </div>
 </section>
 
@@ -748,6 +930,7 @@ const XQ = [
     scenario: "raw",
     stage: "lead",
     reason: "Asked for an auto quote",
+    words: "just send me the quote",  // their own words on file (first message)
     meta: ["98029", "2 cars"],
     consent: { sms: true, email: true, basis: "Quote form opt-in (calls and texts, incl. automated) \xB7 today" },
     lines: 1,
@@ -766,6 +949,7 @@ const XQ = [
     scenario: "raw",
     stage: "lead",
     reason: "Asked for renters + auto",
+    words: "We're moving in May. Renters and the car, but I want to look it over with my fianc\u00E9 first.",  // their own words on file (first message)
     meta: ["98075", "Moving in May"],
     consent: { sms: true, email: true, basis: "Quote form opt-in (calls and texts, incl. automated) \xB7 today" },
     lines: 2,
@@ -784,6 +968,7 @@ const XQ = [
     scenario: "raw",
     stage: "lead",
     reason: "Referred by James Roe \xB7 texted us about a home quote",
+    words: "James said you'd look after us. We just bought a house, our first, and I don't want to get this wrong.",  // their own words on file (first message)
     meta: ["98075", "First-time buyer"],
     consent: { sms: true, email: true, basis: "Texted the office first; replied YES to the consent text \xB7 Oct 21" },
     lines: 1,
@@ -824,6 +1009,7 @@ const XQ = [
     scenario: "following",
     stage: "proposed",
     reason: "Callback \xB7 auto + life walkthrough",
+    words: "Thanks for the card. The baby has us upside down, but we got the quote. Walk us both through it?",  // their own words on file (first message)
     meta: ["Quoted $163/mo", "Pays $186/mo now"],
     consent: { sms: true, email: true, basis: "E-signed text consent after the first call \xB7 Oct 20" },
     lines: 2,
@@ -844,6 +1030,7 @@ const XQ = [
     scenario: "raw",
     stage: "lead",
     reason: "Booked by text \xB7 auto + home bundle",
+    words: "Second baby on the way and we just bought a house. Bundle it. Keep it short.",  // their own words on file (first message)
     meta: ["Bought lead", "Auto + home"],
     consent: { sms: true, email: true, basis: "E-signed text consent after the intro call \xB7 Oct 21" },
     lines: 2,
@@ -918,6 +1105,7 @@ const XQ = [
     scenario: "following",
     stage: "quoted",
     reason: "Walked in two weeks ago \xB7 quiet since",
+    words: "Two teen drivers now, and my daughter starts college next fall. Just want everyone covered.",  // their own words on file (first message)
     meta: ["Auto", "Two teen drivers"],
     consent: { sms: true, email: true, basis: "Signed the consent form at the office \xB7 Oct 9" },
     lines: 1,
@@ -970,6 +1158,7 @@ const XQ = [
     scenario: "winback",
     stage: "lapsed",
     reason: "Left a year ago \xB7 price was the reason",
+    words: "Honestly it was the price. If the number is right, I'd come back.",  // their own words on file (first message)
     meta: ["Auto", "Quote sent Tuesday"],
     consent: { sms: true, email: true, basis: "Former customer \xB7 written opt-in renewed by email \xB7 Oct 21" },
     lines: 1,
@@ -1006,6 +1195,7 @@ const XQ = [
     scenario: "current",
     stage: "bound",
     reason: "Customer \xB7 new baby, told us Monday",
+    words: "We just had the baby. I keep thinking about how we protect the family, but send me the options and I'll read them first.",  // their own words on file (first message)
     meta: ["Auto with us", "Life review"],
     consent: { sms: true, email: true, basis: "Customer \xB7 written opt-in \xB7 Nov 2022" },
     lines: 1,
@@ -1462,9 +1652,11 @@ function card(l){
   const open = state.open===l.id && !done;
   const script = open ? scriptFor(l, ch) : null;
   const consent = l.consent||{};
-  const chips = open ? `<div class="chips"><span class="chip ${consent.email?'ok':'no'}">${consent.email?'Email OK':'No email consent'}</span><span class="chip ${consent.sms?'ok':'no'}">${consent.sms?'Text OK':'No text consent'}</span>${l.dnc?'<span class="chip no">Do Not Call</span>':''}<span class="chip src">ECRM · ${esc(SRCLBL[l.source]||l.source)}</span></div>` : '';
+  const chips = open ? chipsLz(l,'lane:'+l.id) : '';
+  // v2.6: the status chip is a lozenge with the same words (due now · late · done · a time)
+  const wlz = done?'lz-success':wcls==='late'?'lz-danger':wcls==='now'?'lz-information':'';
   return `<article class="card ${ch} ${l.cool?'cool':''} ${open?'open':''} ${done?'isdone':''}" data-id="${l.id}">
-    <div class="r1" data-id="${l.id}" data-act="toggle" role="button" tabindex="0" aria-expanded="${open}"><span class="when ${wcls}">${esc(when)}</span><span class="ch ${ch}">${ch}</span><div class="who">${esc(l.name)}<small>${esc(SRCLBL[l.source]||l.source)}${l.cool?' · cooler':''}</small></div><span class="pill">${esc((STYLES[l.style]||{}).label||l.style)}</span>${!done?`<span class="mins">5 min</span>`:''}<span class="caret" aria-hidden="true">${open?'▾':'▸'}</span></div>
+    <div class="r1" data-id="${l.id}" data-act="toggle" role="button" tabindex="0" aria-expanded="${open}"><span class="lz ${wlz} when-lz">${esc(when)}</span><span class="ch ${ch}">${ch}</span><div class="who">${esc(l.name)}<small>${esc(SRCLBL[l.source]||l.source)}${l.cool?' · cooler':''}</small></div>${styleLz(l.style)}${!done?`<span class="mins">5 min</span>`:''}<span class="caret" aria-hidden="true">${open?'▾':'▸'}</span></div>
     <div class="r2">${esc(l.reason||l.why||'')}${l.meta?' · '+l.meta.map(esc).join(' · '):''}${l.proposed?` · <span class="fact">$${l.proposed}/mo</span>`:''}${l.current?` vs $${l.current} now`:''}</div>
     ${open?`<div class="work">
       <div class="workhead"><span class="tag">${esc(st.what)}</span>${vm?`<span class="tag">${esc(vm)}</span>`:''}<span class="timer mono" data-timer="${l.id}">0:00 <small>of 5:00</small></span></div>
@@ -1500,7 +1692,7 @@ function lane(id,title,rule,items,showN){
 }
 function stopCard(id,st,l){
   const name=l?l.name:st.name, dec=state.decided[id];
-  return `<article class="card stop" data-id="${id}"><div class="r1"><span class="when late">stopped</span><div class="who">${esc(name)}</div>${l?`<span class="pill">${esc(STYLES[l.style].label)}</span>`:''}</div>
+  return `<article class="card stop" data-id="${id}"><div class="r1"><span class="lz lz-danger bold when-lz">stopped</span><div class="who">${esc(name)}</div>${l?styleLz(l.style):''}</div>
     <div class="r2">${esc(st.why)}</div>
     <div class="r3"><div class="acts">${dec?`<span class="approved">✓ ${esc(dec)} · ${esc(rep().full)}, ${fmt(state.clock)}</span>`:st.opts.map(o=>`<button class="btn sm ${o.startsWith('Close')||o.startsWith('Skip')?'quiet':''}" data-id="${id}" data-act="decide" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div></div></article>`;
 }
@@ -1632,30 +1824,262 @@ function renderPlans(){
   }).join('');
 }
 
+/* ======== v2.6 · Life & health readiness (lifehealth.js, verbatim minus module.exports; same file in v1 and Next Step) ======== */
+// Life & health readiness · one model and one set of lines for v1, v2 and Next Step. Keep the copies identical.
+// readiness({ text, style, greenLight, pushback, talked }) -> { score, level, levelWord, levelWhy, confidence, cues, event }
+//   text: what the person said so far (transcript lines or the pasted message), style: story|asker|doer|thinker,
+//   greenLight: they said yes / booked / bound, pushback: objection in the latest turn, talked: a conversation happened.
+const LH_EVENTS = [
+  ["baby", "the baby"], ["pregnant", "the baby"], ["expecting", "the baby"], ["newborn", "the baby"],
+  ["married", "the wedding"], ["engaged", "the engagement"], ["wedding", "the wedding"], ["fiancé", "the engagement"], ["fiance", "the engagement"],
+  ["bought a house", "the new house"], ["new home", "the new house"], ["new house", "the new house"], ["closing", "the new house"], ["mortgage", "the mortgage"], ["refinance", "the refinance"], ["refinanced", "the refinance"], ["refinancing", "the refinance"], ["refi", "the refinance"],
+  ["new business", "the new business"], ["llc", "the new business"], ["started a company", "the new business"], ["self-employed", "the business"], ["self employed", "the business"],
+  ["kids", "the kids"], ["daughter", "your daughter"], ["son", "your son"], ["college", "college"], ["tuition", "college"],
+  ["retire", "retirement"], ["retired", "retirement"], ["retiring", "retirement"], ["retirement", "retirement"], ["aging parent", "your parents"], ["my mom", "your mom"], ["my dad", "your dad"], ["moving in with us", "your parents"],
+  ["new job", "the new job"], ["raise", "the raise"], ["promotion", "the promotion"], ["promoted", "the promotion"], ["children", "the kids"], ["kid", "the kids"], ["pregnancy", "the baby"], ["twins", "the babies"],
+];
+const LH_PROTECT = ["protect", "protected", "protecting", "protection", "family", "income", "if something happened", "if something happens", "depends on me", "breadwinner", "provide for", "payments", "payment", "loan", "loans", "who would pay", "who pays"];
+const LH_COVER = ["life insurance", "term policy", "term life", "through work", "group life", "disability", "health plan", "medical bills", "out of work", "surgery", "hospital", "long-term care", "long term care"];
+const LH_PUSH = ["not interested", "too expensive", "stop", "busy", "call me later", "don't need", "do not need", "no thanks", "not right now", "not now", "maybe later"];
+const LH_STYLE_MOD = { story: (hasEvent) => (hasEvent ? 10 : 0), asker: () => 0, doer: (_, green) => (green ? 0 : -10), thinker: () => -10 };
+
+// whole words only ("son" never matches "person"; "stop" never matches "stopped"); accents and hyphens kept
+function lhFind(text, list) {
+  const t = (text || "").toLowerCase();
+  const hits = [];
+  for (const item of list) {
+    const w = Array.isArray(item) ? item[0] : item;
+    const re = new RegExp("(^|[^a-z0-9\u00C0-\u017F])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?=$|[^a-z0-9\u00C0-\u017F])", "i");
+    if (re.test(t)) hits.push(Array.isArray(item) ? { w, label: item[1] } : { w, label: null });
+  }
+  return hits;
+}
+function readiness(o) {
+  const events0 = lhFind(o.text, LH_EVENTS), seen = new Set();
+  const events = events0.filter((h) => (seen.has(h.label) ? false : (seen.add(h.label), true)));   // one hit per life event
+  const protect = lhFind(o.text, LH_PROTECT), cover = lhFind(o.text, LH_COVER);
+  const push = o.pushback || lhFind((o.latest != null ? o.latest : o.text), LH_PUSH).length > 0;
+  let score = Math.min(60, events.length * 30) + Math.min(30, protect.length * 15) + (cover.length ? 10 : 0);
+  if (o.greenLight) score += 25; else if (o.talked) score += 10;
+  if (push) score -= 30;
+  const mod = LH_STYLE_MOD[o.style] || LH_STYLE_MOD.story;
+  score += mod(events.length > 0, !!o.greenLight);
+  // the door opens only after the main ask for Questioners and Thinkers, and only with a yes for Doers
+  if (!o.greenLight && (o.style === "asker" || o.style === "thinker" || o.style === "doer")) score = Math.min(score, 69);
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  const level = score >= 70 ? "ready" : score >= 40 ? "seed" : "notyet";
+  const levelWord = { ready: "READY", seed: "SEED", notyet: "NOT YET" }[level];
+  const levelWhy = { ready: "ask now", seed: "one sentence, no ask", notyet: "finish the main ask first" }[level];
+  const distinct = events.length + protect.length + cover.length + (o.greenLight ? 1 : 0);
+  const confidence = distinct >= 3 ? "Clear" : distinct === 2 ? "Likely" : "Your call";
+  const cues = [...events, ...protect, ...cover].map((h) => h.w);
+  if (o.greenLight) cues.push("said yes");
+  if (push) cues.push("pushback");
+  return { score, level, levelWord, levelWhy, confidence, cues, event: events.length ? events[0].label : null, pushback: push };
+}
+// The three lines, one at a time: Open · Gap · Ask. {event} = the life event in their words, {day} = two business days out.
+const LH_LINES = {
+  open: {
+    story: "Can I ask you one thing about {event}? Auto protects the car and home protects the house. Life protects the payments.",
+    asker: "One more line for the page: who pays the mortgage and the car if the income stops? I can put a number next to it.",
+    doer: "One more thing, thirty seconds. Life protects the payments. Want the number on the same page?",
+    thinker: "No decision today. I'll add one line to the page: who pays the payments if the income stops, so you can read it before your renewal.",
+  },
+  gap: {
+    story: "Left is what you have, middle is the gap, right is one move now and one later. The gap is the payments: car loan, mortgage, income.",
+    asker: "Left is what you have, middle is the gap, right is one move now and one later. Future income that can be claimed: income × 25% × 20 years. The gap is the payments.",
+    doer: "What you have, the gap, one move now and one later. The gap is the payments: car loan, mortgage, income.",
+    thinker: "Left is what you have, middle is the gap, right is one move now and one later. The gap is the payments; nothing to decide today.",
+  },
+  ask: {
+    story: "Which gap would you want handled first? You pick the day.",
+    asker: "Which gap first? I'll put the exact number next to it today, ready to sign by {day}.",
+    doer: "Life or disability first? Ready to sign by {day}.",
+    thinker: "Would it be a terrible idea to fix the first gap before your renewal? You decide.",
+  },
+};
+const LH_STEPS = [["open", "Open"], ["gap", "Gap"], ["ask", "Ask"]];
+const LH_NOTE = "Illustration only, not a policy or quote, subject to underwriting.";
+const LH_WHAT_OPENS = "What would open it: a life event in their words, or a yes on the quote.";
+function lhDay(from) {
+  const d = new Date(from || Date.now()); let n = 0;
+  while (n < 2) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6) n++; }
+  return d.toLocaleDateString("en-US", { weekday: "long" });
+}
+function lhLine(step, style, r, from) {
+  const s = LH_LINES[step][style] || LH_LINES[step].story;
+  return s.replace("{event}", r && r.event ? r.event : "what you mentioned").replace("{day}", lhDay(from));
+}
+/* ======== end lifehealth.js ======== */
+
+/* ======== v2.6 · Life & health: one panel for Live Coach, the work card and the Now box ======== */
+// level → lozenge appearance: NOT YET neutral · SEED discovery · READY success bold (the word always carries the status)
+const LH_LZ = { ready:'lz-success bold', seed:'lz-discovery', notyet:'' };
+const lh = { open:{}, step:{}, lvl:{}, anim:{} };
+const lhId = k=>'lh-'+String(k).replace(/[^A-Za-z0-9_-]/g,'-');
+const styleLz = s=>`<span class="lz lz-${esc(s)}">${esc((STYLES[s]||{}).label||s)}</span>`;
+// a lead: their own words on file (the first message), else the office's notes; a booked call is the yes
+function lhForLead(l){
+  const notes=[l.reason,...(l.meta||[]),l.why].filter(Boolean).join(' · '), text=l.words||notes;
+  const logs=state.log.filter(x=>x.id===l.id);
+  const talked=!!l.contacted||logs.some(x=>/^Talked/.test(x.t)), greenLight=!!l.at||logs.some(x=>/^(Booked|Said yes)/.test(x.t));
+  return readiness({ text, latest:text, style:l.style, greenLight, talked });
+}
+function lhLz(l,k){
+  const r=lhForLead(l), open=!!lh.open[k];
+  return `<button type="button" class="lz ${LH_LZ[r.level]} lh-lz" data-act="lh-toggle" data-k="${esc(k)}" aria-expanded="${open}" aria-controls="${lhId(k)}" title="${esc(`Life & health readiness: ${r.levelWord.toLowerCase()}, ${r.levelWhy} · confidence: ${r.confidence.toLowerCase()}`)}">Life &amp; health · ${r.levelWord}</button>`;
+}
+function lhSlot(l,k){
+  if(!lh.open[k]) return '';
+  const from=lh.anim[k]?0:null; delete lh.anim[k];
+  return `<div class="lh-in">${lhPanel(lhForLead(l),l.style,k,{from})}</div>`;
+}
+// the panel: lozenge, the why in words and the confidence, the meter, the cues in their words, then one line at a time
+function lhPanel(r,style,k,o){
+  o=o||{}; if(lh.lvl[k]!==r.level){ lh.lvl[k]=r.level; lh.step[k]=0; }
+  const s=Math.max(0,Math.min(2,lh.step[k]||0)), from=o.from!=null?o.from:r.score;
+  const cues=r.cues.length?`<div class="lh-cues"><span>because:</span>${r.cues.map(c=>`<span class="lz ${c==='said yes'?'lz-success':c==='pushback'?'lz-warning':'lz-raised'}">${esc(c)}</span>`).join('')}</div>`:'';
+  let body='';
+  if(r.level==='notyet') body=`<div class="es">${esc(LH_WHAT_OPENS)}</div>`;
+  else if(r.level==='seed') body=`<p class="lh-step"><b>Open</b> · the one line for now</p><p class="lh-line">“${esc(lhLine('open',style,r))}”</p><p class="lh-note">${esc(LH_NOTE)}</p>`;
+  else body=`<ol class="pt" aria-label="Open, Gap, Ask: line ${s+1} of 3">${LH_STEPS.map(([,lab],j)=>`<li class="${j<s?'visited':j===s?'current':''}"${j===s?' aria-current="step"':''}>${lab}</li>`).join('')}</ol>
+    <p class="lh-line" aria-live="polite">“${esc(lhLine(LH_STEPS[s][0],style,r))}”</p>
+    <div class="lh-acts"><button type="button" class="lh-btn" data-act="lh-back" data-k="${esc(k)}"${s===0?' disabled':''}>← Back</button><button type="button" class="lh-btn lh-go" data-act="lh-next" data-k="${esc(k)}"${s===2?' disabled':''}>Next line →</button></div>
+    <p class="lh-note">${esc(LH_NOTE)}</p>`;
+  return `<div class="lh lh-${r.level}" id="${lhId(k)}" data-k="${esc(k)}">
+    <div class="lh-head"><span class="lz ${LH_LZ[r.level]}">${r.levelWord}</span><span class="lh-why">${esc(r.levelWhy)}</span><span class="lh-conf">· confidence: <b>${esc(r.confidence)}</b></span></div>
+    <div class="rm" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${r.score}" aria-label="Readiness ${r.score} of 100, ${r.levelWord.toLowerCase()}; seed from 40, ready from 70" title="Seed from 40, ready from 70"><i class="rm-fill ${r.level}" style="width:${from}%" data-to="${r.score}"></i><i class="rm-ticks"></i></div>
+    ${cues}${body}</div>`;
+}
+// the meter moves: rendered at the previous value, then set to the new one on the next frame (the CSS transition does the rest)
+function lhPlay(root){ const f=[...(root||document).querySelectorAll('.rm-fill[data-to]')].filter(x=>x.style.width!==x.dataset.to+'%'); if(!f.length) return; requestAnimationFrame(()=>requestAnimationFrame(()=>f.forEach(x=>{ x.style.width=x.dataset.to+'%'; }))); }
+function lhRerender(k){ if(k==='coach') lhCoachRender(false); else if(/^lane:/.test(k)) renderLanes(); else renderWorkflow(); lhPlay(); }
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act^="lh-"]'); if(!b||b.disabled) return;
+  const k=b.dataset.k, act=b.dataset.act;
+  if(act==='lh-toggle'){ lh.open[k]=!lh.open[k]; if(lh.open[k]) lh.anim[k]=true; }
+  else if(act==='lh-next') lh.step[k]=Math.min(2,(lh.step[k]||0)+1);
+  else if(act==='lh-back') lh.step[k]=Math.max(0,(lh.step[k]||0)-1);
+  else return;
+  lhRerender(k);
+  const sel=s=>document.querySelector(`[data-act="${s}"][data-k="${CSS.escape(k)}"]`);
+  const f=[sel(act),act==='lh-next'?sel('lh-back'):act==='lh-back'?sel('lh-next'):null].find(x=>x&&!x.disabled); if(f) f.focus({preventScroll:true});
+});
+
 /* ======== Live Coach (Marcus Sample, booked 3:30, QN · Storyteller) ======== */
 const CL = ALL.find(l=>l.id==='C-002');
+// v2.6 · five turns. v2's own three lines are turns 1, 2 and 5 (unchanged); between them, the pushback turn 2 already
+// anticipates ("That is more than I expected") and the life story. read = the four style values per turn, derived from
+// v2's single read (84 → 93 on the last two turns): near even first, a wobble, then converging on the Storyteller.
 const TURNS = [
-  {them:'Hey, yeah. Thanks for the card. Honestly the baby has us upside down, but we got the quote.',goal:'Answer something he said before anything about the quote.',obj:'“Can we do this later?”',ans:'Of course. Would it be a terrible idea to pick a ten-minute slot now so it is off your list? You decide.'},
-  {them:'What is the difference on the life side? I do not want to overbuy.',goal:'Put the two numbers side by side, then the one question that matters.',obj:'“That is more than I expected.”',ans:'Then the first line of the page is what you pay now, what you would pay, and what changed. Nothing else until you have read it.'},
-  {them:'Okay. A call with both of us works.',goal:'One easy choice, then silence. He has said yes; the next word is his.',obj:'“I will text you.”',ans:'Perfect. AM or PM? One word is all I need.'}
+  {them:'Hey, yeah. Thanks for the card. Honestly the baby has us upside down, but we got the quote.',move:'Match',say:0,goal:'Answer something he said before anything about the quote.',obj:'“Can we do this later?”',ans:'Of course. Would it be a terrible idea to pick a ten-minute slot now so it is off your list? You decide.',read:{story:38,asker:31,doer:22,thinker:27}},
+  {them:'What is the difference on the life side? I do not want to overbuy.',move:'Fit',say:1,goal:'Put the two numbers side by side, then the one question that matters.',obj:'“That is more than I expected.”',ans:'Then the first line of the page is what you pay now, what you would pay, and what changed. Nothing else until you have read it.',read:{story:41,asker:56,doer:18,thinker:29}},
+  {them:'That is more than I expected. Honestly, not right now.',move:'Fit, again',push:true,say:'Then the first line of the page is what you pay now, what you would pay, and what changed. Nothing else until you have read it.',goal:'Concede first. Make the page smaller, not the ask bigger.',obj:'“Just email it to me.”',ans:'Done. One page, the two numbers on top. Would it be a terrible idea to pick a time to read it together? You decide.',read:{story:36,asker:49,doer:20,thinker:58}},
+  {them:'It is just, if something happened to me, my wife would be stuck with the car and the payments.',move:'Match, again',say:'That is the part that matters, and it is why I want you both on the call: the car, the house and the payments on one page.',goal:'He just told you what is true for him. Say it back in his words before anything else.',obj:'“I need to talk to my wife first.”',ans:'Of course. That is why the call is the three of us. You pick the time.',read:{story:84,asker:40,doer:14,thinker:33}},
+  {them:'Okay. A call with both of us works.',move:'Ask',yes:true,say:2,goal:'One easy choice, then silence. He has said yes; the next word is his.',obj:'“I will text you.”',ans:'Perfect. AM or PM? One word is all I need.',read:{story:93,asker:35,doer:20,thinker:26}}
 ];
 let turn=0, coachLog=[];
+const sayOf = t=>fillTokens(typeof t.say==='number'?CL.say[t.say]:t.say, CL);
+/* the style read: four rows in a fixed order (never re-sorted), widths move 610 ms, the row that moved most pulses once
+   and carries a delta lozenge for 1.6 s, a ghost tick holds the previous value, the leading row carries its state */
+const SR_ORDER = [['story','Storyteller'],['asker','Questioner'],['doer','Doer'],['thinker','Thinker']];
+const SR_LBL = Object.fromEntries(SR_ORDER);
+// the words in the prospect's line that the read heard, per style (marked in the heard line)
+const SR_CUES = { story:['thanks for the card','the baby has us upside down','if something happened to me','my wife','both of us'], asker:['what is the difference','the life side','overbuy'], doer:['okay','works','just'], thinker:['more than I expected','honestly','not right now'] };
+const sr = { shown:null, replay:null, why:false, lead:null, timers:[] };
+function srRead(i){
+  const v=TURNS[i].read, ks=SR_ORDER.map(r=>r[0]).sort((a,b)=>v[b]-v[a]), lead=ks[0], gap=v[ks[0]]-v[ks[1]];
+  let state='READING';
+  if(gap<=10) state='TIE';
+  else if(v[lead]>=75&&i>0&&srRead(i-1).lead===lead) state='LOCKED';
+  return { v, lead, second:ks[1], state };
+}
+function srStateLz(R){ return R.state==='TIE'?'<span class="lz">Tie</span>':`<span class="lz lz-${R.lead}${R.state==='LOCKED'?' bold':''}">${R.state==='LOCKED'?'Locked':'Reading'}</span>`; }
+function srHeadLz(R){ const L=SR_LBL[R.lead]; return `<span class="lz ${R.state==='TIE'?'':'lz-'+R.lead}${R.state==='LOCKED'?' bold':''}" title="${esc(`The read: ${L}, ${R.state.toLowerCase()}`)}">${L} · ${R.state}</span>`; }
+function srMark(text,cues){
+  const re=new RegExp('\\b('+cues.slice().sort((a,b)=>b.length-a.length).map(c=>c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')\\b','gi');
+  return esc(text).replace(re,m=>`<mark>${m}</mark>`);
+}
+function srBuild(){
+  const box=$('#sr'); if(box.childElementCount) return;
+  box.innerHTML=SR_ORDER.map(([k,l])=>`<div class="sr-row" role="listitem" data-style="${k}" style="--sr-color:var(--style-${k})"><span class="sr-name">${l}</span><span class="sr-track" aria-hidden="true"><i class="sr-fill" style="width:0%"></i><i class="sr-ghost" style="left:0%;opacity:0"></i></span><span class="sr-pct">0%</span><span class="sr-state"></span></div>`).join('');
+}
+function srClear(){ sr.timers.forEach(clearTimeout); sr.timers=[]; document.querySelectorAll('#sr .sr-delta').forEach(x=>x.remove()); document.querySelectorAll('#sr .sr-row.moved').forEach(x=>x.classList.remove('moved')); }
+function srShow(i,o){
+  o=o||{}; srBuild();
+  const R=srRead(i), P=i>0?TURNS[i-1].read:null, fresh=!!o.fresh;
+  let mk=null, md=0; if(P) for(const [k] of SR_ORDER){ const d=R.v[k]-P[k]; if(Math.abs(d)>Math.abs(md)){ md=d; mk=k; } }
+  if(fresh) srClear();
+  document.querySelectorAll('#sr .sr-row').forEach(row=>{
+    const k=row.dataset.style, v=R.v[k], lead=k===R.lead, g=row.querySelector('.sr-ghost');
+    row.classList.toggle('lead',lead);
+    row.querySelector('.sr-fill').style.width=v+'%';
+    row.querySelector('.sr-pct').textContent=v+'%';
+    if(P){ g.style.left=P[k]+'%'; g.style.opacity=''; } else g.style.opacity='0';
+    row.querySelector('.sr-state').innerHTML=lead?srStateLz(R):'';
+    row.setAttribute('aria-label',`${SR_LBL[k]} ${v}%${P?`, ${v>=P[k]?'up':'down'} ${Math.abs(v-P[k])} from ${P[k]}`:''}${lead?`, leading, ${R.state.toLowerCase()}`:''}`);
+    if(fresh&&k===mk&&md){
+      void row.offsetWidth; row.classList.add('moved');
+      const d=document.createElement('span'); d.className=`lz lz-${k} sr-delta`; d.textContent=(md>0?'+':'−')+Math.abs(md);
+      row.querySelector('.sr-track').append(d);
+      sr.timers.push(setTimeout(()=>row.classList.remove('moved'),233), setTimeout(()=>d.remove(),1618));
+    }
+  });
+  // the heard line names the turn, the row that moved (or the lead on the first turn) and the words it heard
+  const hk=mk&&md>0?mk:R.lead, how=mk&&md>0?`${SR_LBL[hk]} up ${md}`:P?`${SR_LBL[hk]} at ${R.v[hk]}`:`first read, ${SR_LBL[hk]} ${R.v[hk]}`;
+  $('#srHeard').innerHTML=`${o.replay?'<span class="lz lz-information">Replay</span> ':''}Turn ${i+1} · ${how} · heard: “${srMark(TURNS[i].them,SR_CUES[hk])}”`;
+  sr.lead=R.lead; sr.shown=i; srWhyRender();
+}
+function srWhyRender(){
+  const box=$('#srWhyMsg'), L=sr.lead&&SR_LBL[sr.lead]; $('#srWhy').setAttribute('aria-expanded',String(sr.why));
+  if(!sr.why||!L){ box.hidden=true; box.innerHTML=''; return; }
+  box.hidden=false;
+  box.innerHTML=`<div class="sm sm-discovery" role="note"><span class="sm-icon" aria-hidden="true">i</span><div><div class="sm-title">Why the read says ${esc(L)}</div><div class="sm-body">${esc(STYLES[sr.lead].why)}</div><button type="button" class="sm-action" data-sr="hide">Hide</button></div></div>`;
+}
+function srStop(){ if(sr.replay){ clearTimeout(sr.replay); sr.replay=null; } const b=$('#srReplay'); b.disabled=false; b.textContent='▶ Replay the read'; }
+// Replay: back to zero, then turns 1…now at one turn per 1.618 s; reduced motion: the values jump (no transition)
+function srReplay(){
+  srStop(); srClear(); const end=turn, btn=$('#srReplay'); btn.disabled=true; btn.textContent='Replaying…';
+  document.querySelectorAll('#sr .sr-row').forEach(r=>{ r.classList.remove('lead'); r.querySelector('.sr-fill').style.width='0%'; r.querySelector('.sr-pct').textContent='0%'; r.querySelector('.sr-ghost').style.opacity='0'; r.querySelector('.sr-state').innerHTML=''; });
+  $('#srHeard').innerHTML='<span class="lz lz-information">Replay</span> from the first turn';
+  let i=0;
+  const step=()=>{ srShow(i,{fresh:true,replay:true}); if(i<end){ i++; sr.replay=setTimeout(step,1618); } else sr.replay=setTimeout(()=>{ sr.replay=null; srStop(); srShow(turn,{}); },1618); };
+  sr.replay=setTimeout(step,wfReduced()?0:610);
+}
+// Life & health in the call: the prospect's lines so far, the latest line, the yes from the turn he agrees, the leading read
+const lhc = { shown:null, score:null };
+function lhCoachRead(i){
+  const so=TURNS.slice(0,i+1);
+  return readiness({ text:so.map(t=>t.them).join(' '), latest:TURNS[i].them, style:srRead(i).lead, greenLight:so.some(t=>t.yes), pushback:!!TURNS[i].push, talked:true });
+}
+function lhCoachRender(fresh){
+  const r=lhCoachRead(turn), R=srRead(turn), from=fresh&&lhc.score!=null?lhc.score:r.score;
+  $('#lhCoach').innerHTML=`<div class="lanehead"><h2 id="lhTitle">Life &amp; health · readiness</h2><span class="rule">from his words so far</span></div>${lhPanel(r,R.lead,'coach',{from})}`;
+  lhPlay($('#lhCoach')); lhc.shown=turn; lhc.score=r.score;
+}
 function renderCoach(){
-  $('#coachTitle').textContent = `Live call · ${CL.name} · ${CL.at}`; $('#turnN').textContent=`turn ${turn+1} of 3`;
-  const say=CL.say.map(s=>fillTokens(s,CL));
-  $('#chat').innerHTML = TURNS.slice(0,turn+1).map((t,i)=>`<div class="bub"><small>${esc(first(CL.name))}</small>${esc(t.them)}</div>${i<turn?`<div class="bub me"><small>${esc(first(rep().full))}</small>${esc(say[i+1]||'')}</div>`:''}`).join('');
-  const t=TURNS[turn], S=STYLES[CL.style], conf=[84,89,93][turn];
-  $('#coachPanel').innerHTML = `<h3>This turn · ${['Match','Fit','Ask'][turn]}</h3>
-    <div class="readbar"><span>Read: <b>${esc(S.label)}</b></span><div class="bar"><i style="width:${conf}%"></i></div><span class="mono">${conf}%</span></div>
-    <div class="tip">${esc(XESSENCE[CL.style])}</div><div class="sub">Goal: ${esc(t.goal)}</div>
-    <div class="say">${esc(say[turn])}</div>
+  const t=TURNS[turn], fresh=sr.shown!=null&&sr.shown!==turn;
+  $('#coachTitle').textContent = `Live call · ${CL.name} · ${CL.at}`; $('#turnN').textContent=`turn ${turn+1} of ${TURNS.length}`;
+  const chat=$('#chat');
+  chat.innerHTML = TURNS.slice(0,turn+1).map((x,i)=>`<div class="bub"><small>${esc(first(CL.name))}</small>${esc(x.them)}</div>${i<turn?`<div class="bub me"><small>${esc(first(rep().full))}</small>${esc(sayOf(x))}</div>`:''}`).join('');
+  chat.scrollTop=chat.scrollHeight; chat.classList.toggle('is-scrolled',chat.scrollTop>0);
+  if(!sr.replay) srShow(turn,{fresh});
+  const R=srRead(turn), S=STYLES[R.lead];
+  $('#coachPanel').innerHTML = `<h3 class="coachhead">This turn · ${esc(t.move)} ${srHeadLz(R)}${t.push?'<span class="lz lz-warning">Pushback</span>':''}</h3>
+    <div class="tip">${esc(XESSENCE[R.lead])}</div><div class="sub">Goal: ${esc(t.goal)}</div>
+    <div class="say">${esc(sayOf(t))}</div>
     <div class="tip">Question type: <b>${esc(S.q)}</b> · ${esc(S.qWhy)}</div>
     <div class="r2" style="margin-top:8px">If he says <b>${esc(t.obj)}</b><br>${esc(t.ans)}</div>
     <div class="dacts"><button class="btn sm ghost" data-r="Worked">Worked</button><button class="btn sm quiet" data-r="Missed">Missed</button></div>
     <div class="log">${coachLog.length?coachLog.map(esc).join('<br>'):'Worked / Missed points at the next task, never at the person.'}</div>`;
+  if(fresh||lhc.shown!==turn||!$('#lhCoach').childElementCount) lhCoachRender(fresh);
 }
-$('#coachPanel').addEventListener('click',e=>{const b=e.target.closest('button[data-r]');if(!b)return;coachLog.push(`Turn ${turn+1} · ${b.dataset.r} · ${STYLES[CL.style].label}`);renderCoach();});
-$('#nextTurn').addEventListener('click',()=>{turn=(turn+1)%3;if(turn===0)coachLog=[];renderCoach();});
+$('#coachPanel').addEventListener('click',e=>{const b=e.target.closest('button[data-r]');if(!b)return;coachLog.push(`Turn ${turn+1} · ${b.dataset.r} · ${SR_LBL[srRead(turn).lead]}`);renderCoach();});
+$('#nextTurn').addEventListener('click',()=>{srStop();turn=(turn+1)%TURNS.length;if(turn===0)coachLog=[];renderCoach();});
+$('#srReplay').addEventListener('click',srReplay);
+$('#chat').addEventListener('scroll',e=>e.currentTarget.classList.toggle('is-scrolled',e.currentTarget.scrollTop>0),{passive:true});
+$('#srWhy').addEventListener('click',()=>{sr.why=!sr.why;srWhyRender();});
+$('#srWhyMsg').addEventListener('click',e=>{ if(e.target.closest('[data-sr="hide"]')){ sr.why=false; srWhyRender(); $('#srWhy').focus(); } });
 
 /* ======== Book (retention, triggers, claims, referrals: his demo records) ======== */
 const RISK=[{h:'Test household',p:'Tom Test',s:84,prem:2088,lines:['auto'],f:['Payment NSF last cycle','Rate increase notice mailed','Last touch 134 d','Renews in 9 d'],play:'Set payment plan'},
@@ -1667,11 +2091,11 @@ $('#risk').innerHTML = RISK.map(r=>{const pl=r.play&&PLAYS[r.play];return `<div 
 const TRIG=[{h:'Marcus Sample',k:'Mortgage refi',src:'County records',sig:'New deed of trust filed in King County: refi closed.',has:'auto',opp:'Re-quote home',est:1820,u:['call within 48h','soon']},
   {h:'Sarah Doe',k:'Teen driver',src:'MVR pull',sig:'Permit-to-license conversion for a 16-year-old in the household.',has:'auto',opp:'Teen safe-driver + good-student discounts',est:1240,u:['this week','week']},
   {h:'James & Mina Roe',k:'New vehicle',src:'LexisNexis enrichment',sig:'New 2026 Rivian R1S registered to the household, not yet on the policy.',has:'auto + home + life + umbrella',opp:'Add vehicle today',est:2140,u:['call today','now']}];
-$('#trig').innerHTML = TRIG.map(t=>`<div class="card" style="border-left-color:var(--ok)"><div class="r1"><span class="urg ${t.u[1]}">${t.u[0]}</span><div class="who">${esc(t.h)}<small>${esc(t.k)} · ${esc(t.src)}</small></div><span class="est mono">+$${t.est.toLocaleString()}/yr</span></div><div class="r2">${esc(t.sig)} Has ${esc(t.has)} → <b>${esc(t.opp)}</b></div></div>`).join('');
+$('#trig').innerHTML = TRIG.map(t=>`<div class="card" style="border-left-color:var(--ok)"><div class="r1"><span class="lz ${t.u[1]==='soon'?'lz-warning':t.u[1]==='week'?'':'lz-danger'}">${t.u[0]}</span><div class="who">${esc(t.h)}<small>${esc(t.k)} · ${esc(t.src)}</small></div><span class="est mono">+$${t.est.toLocaleString()}/yr</span></div><div class="r2">${esc(t.sig)} Has ${esc(t.has)} → <b>${esc(t.opp)}</b></div></div>`).join('');
 const CLAIMS=[{n:'Megan Dataset',c:'CLM-2026-03-1742',k:'Auto collision',stage:'Estimate',d:38,adj:'Raymond Cole',last:22,est:8420,nps:'high',sent:'frustrated',note:'Inbound complaint: “Nobody called back. Shop says claim is stuck.”'},
   {n:'James Roe',c:'CLM-2026-04-0211',k:'Home water',stage:'Estimate',d:11,adj:'—',last:2,est:18750,nps:'medium',sent:'neutral',note:'Mitigation done; contents list in progress.'},
   {n:'Marcus Sample',c:'CLM-2026-04-0298',k:'Auto collision',stage:'Investigation',d:3,adj:'Diane Whitfield',last:1,est:null,nps:'low',sent:'neutral',note:'Check-in text sent; rental in place, all set.'}];
-$('#claims').innerHTML = CLAIMS.map(c=>`<div class="card" style="border-left-color:${c.nps==='high'?'var(--bad)':c.nps==='medium'?'var(--warn)':'var(--line)'}"><div class="r1"><span class="urg ${c.nps==='high'?'':c.nps==='medium'?'soon':'week'}">${c.nps==='high'?'needs attention':c.nps==='medium'?'watch':'on track'}</span><div class="who">${esc(c.n)}<small>${esc(c.k)} · ${c.c}</small></div><span class="mono tip">${c.stage} · ${c.d} d</span></div>
+$('#claims').innerHTML = CLAIMS.map(c=>`<div class="card" style="border-left-color:${c.nps==='high'?'var(--bad)':c.nps==='medium'?'var(--warn)':'var(--line)'}"><div class="r1"><span class="lz ${c.nps==='high'?'lz-danger':c.nps==='medium'?'lz-warning':''}">${c.nps==='high'?'needs attention':c.nps==='medium'?'watch':'on track'}</span><div class="who">${esc(c.n)}<small>${esc(c.k)} · ${c.c}</small></div><span class="mono tip">${c.stage} · ${c.d} d</span></div>
   <div class="r2">Adjuster ${esc(c.adj)} · last agent touch ${c.last} d${c.est?` · estimate $${c.est.toLocaleString()}`:''} · sentiment ${c.sent}</div><div class="r2">${esc(c.note)}</div>
   <div class="r3"><div class="acts"><button class="btn sm ghost">Reach out</button><button class="btn sm quiet">Escalate to adjuster</button></div></div></div>`).join('');
 const REFS=[{p:'Hannah Roe',by:'James & Mina Roe',k:'Family',q:'Auto',st:'New',ty:false,est:1680,n:'Daughter, just graduated UW. First car policy.'},
@@ -1679,7 +2103,7 @@ const REFS=[{p:'Hannah Roe',by:'James & Mina Roe',k:'Family',q:'Auto',st:'New',t
   {p:'Priscilla Notreal',by:'Anya & Pavel Example',k:'Friend',q:'Home',st:'Quoted',ty:true,est:2240,n:'Home only; auto stays at Carrier D.'},
   {p:'Owen Synthetic',by:'Diego & Elena Mock',k:'Coworker',q:'Auto',st:'Bound',ty:true,est:1560,n:'Bound last week.'}];
 $('#refstat').textContent = `${REFS.filter(r=>!r.ty).length} thank-you outstanding · 1 of 4 bound`;
-$('#refs').innerHTML = REFS.map(r=>`<div class="card" style="border-left-color:var(--accent)"><div class="r1"><span class="pill">${r.st}</span><div class="who">${esc(r.p)}<small>${r.k} of ${esc(r.by)} · ${r.q}</small></div><span class="est mono">$${r.est.toLocaleString()}/yr</span></div><div class="r2">${esc(r.n)}${r.ty?'':' · <b>Thank the referrer today</b>'}</div></div>`).join('');
+$('#refs').innerHTML = REFS.map(r=>`<div class="card" style="border-left-color:var(--accent)"><div class="r1"><span class="lz ${r.st==='Bound'?'lz-success':''}">${r.st}</span><div class="who">${esc(r.p)}<small>${r.k} of ${esc(r.by)} · ${r.q}</small></div><span class="est mono">$${r.est.toLocaleString()}/yr</span></div><div class="r2">${esc(r.n)}${r.ty?'':' · <b>Thank the referrer today</b>'}</div></div>`).join('');
 
 /* ======== Scoreboard ======== */
 function meter(l,v,t,half){ const w=Math.round(Math.min(1,v/t)*100); return `<div class="meter"><span>${l}</span><div class="bar"><i style="width:${w}%"></i></div><span class="v mono">${half?`${t-v} left`:`${v} / ${t}`}</span></div>`; }
@@ -1875,7 +2299,9 @@ function wfTimeline(l){
   if(next) items.push(['Next',timeBoxSVG({h:21,ch:chOf(next),label:WF_WINLBL[next.win]||'',state:'planned',title:esc(`Next · ${next.what} · ${ahead(next.day-l.day)}`)}),`${next.what} · ${ahead(next.day-l.day)}`]);
   return `<ol class="wtl" aria-label="This lead's plan: done, now, next">${items.map(([k,b,t])=>`<li><span class="wtl-box">${b}</span><span><span class="wtl-k">${k}</span><span class="wtl-t">${esc(t)}</span></span></li>`).join('')}</ol>`;
 }
-function wfChips(l){ const c=l.consent||{}; return `<div class="chips"><span class="chip ${c.email?'ok':'no'}">${c.email?'Email OK':'No email consent'}</span><span class="chip ${c.sms?'ok':'no'}">${c.sms?'Text OK':'No text consent'}</span>${l.dnc?'<span class="chip no">Do Not Call</span>':''}<span class="chip src">ECRM · ${esc(SRCLBL[l.source]||l.source)}</span></div>`; }
+// v2.6: the chips are lozenges (same words); Life & health closes the row and opens its panel in place
+function chipsLz(l,k){ const c=l.consent||{}; return `<div class="chips"><span class="lz ${c.email?'lz-success':'lz-danger'}">${c.email?'Email OK':'No email consent'}</span><span class="lz ${c.sms?'lz-success':'lz-danger'}">${c.sms?'Text OK':'No text consent'}</span>${l.dnc?'<span class="lz lz-danger bold">Do Not Call</span>':''}<span class="lz lz-raised">ECRM · ${esc(SRCLBL[l.source]||l.source)}</span>${lhLz(l,k)}</div>${lhSlot(l,k)}`; }
+function wfChips(l){ return chipsLz(l,'wc:'+l.id); }
 function wfPlain(l){ const d=(DRAFTS[l.scenario||'raw']||DRAFTS.raw)[l.style]; if(!d) return ''; return channel(l)==='text'?fillTokens(d.sms,l)+' Reply STOP to opt out.':'Subject: '+fillTokens(d.email.subject,l)+'\n\n'+fillTokens(d.email.body,l); }
 function wfElapsed(){ const s=wf.openAt?Math.floor((Date.now()-wf.openAt)/1000):0; return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} <small>of 5:00</small>`; }
 // the work card beneath its row: say-lines, timer and outcomes for a call; the marked draft, the coaching line and the plan for a message
@@ -1913,7 +2339,7 @@ function wfRow(l){
   return `<li class="wrow is-${st}${wf.anim.has(id)?' row-done-anim':''}${open?' is-open':''}" data-id="${id}">
     <div class="wrow-head"${live?` data-act="wf-toggle" data-id="${id}"`:''}>
       <span class="wrow-box">${wfBox(l,21)}</span>
-      <span class="wrow-who"><span class="wrow-name">${esc(l.name)}</span><span class="wchip">${esc((STYLES[l.style]||{}).label||l.style)}</span></span>
+      <span class="wrow-who"><span class="wrow-name">${esc(l.name)}</span>${styleLz(l.style)}</span>
       <span class="wrow-meta"><span class="wrow-next">${(()=>{ const a=wfWhen(l), b=wfWhen(l,true); return a===b?esc(a):`<span class="wn-l">${esc(a)}</span><span class="wn-s">${esc(b)}</span>`; })()}</span>${wfMarks(l)}</span>
     </div>${btn}${open?wfCard(l):''}
   </li>`;
@@ -1943,7 +2369,8 @@ function renderWfNow(){
   if(!n){ $('#wfnow').innerHTML = `${done}<div class="wnow"><span class="wnow-box">${timeBoxSVG({h:55,ch:'call',state:'done',title:'Nothing due · every lead has its next step set'})}</span><div class="wnow-body"><div class="wnow-name">All set</div><div class="wnow-why">Nothing due. Every lead has its next step set.</div></div></div>`; return; }
   const ch=channel(n), why=n.reason||n.why||'';
   const btn = wf.last ? `<button class="btn" data-act="wf-next" data-id="${n.id}">Next →</button>` : `<button class="btn" data-act="wf-open" data-id="${n.id}">${ch==='call'?'Call':'Check'}</button>`;
-  $('#wfnow').innerHTML = `${done}<div class="wnow" data-id="${n.id}"><span class="wnow-box">${wfBox(n,55)}</span><div class="wnow-body"><div class="wnow-name">${esc(n.name)}<span class="wchip">${esc((STYLES[n.style]||{}).label||n.style)}</span></div><div class="wnow-why" title="${esc(why)}">${esc(why)}</div><div class="wnow-act">${btn}<span class="wnow-when">${esc(wfWhen(n))}</span></div></div></div>`;
+  const lk='now:'+n.id;
+  $('#wfnow').innerHTML = `${done}<div class="wnow" data-id="${n.id}"><span class="wnow-box">${wfBox(n,55)}</span><div class="wnow-body"><div class="wnow-name">${esc(n.name)}${styleLz(n.style)}</div><div class="wnow-why" title="${esc(why)}">${esc(why)}</div><div class="wnow-act">${btn}<span class="wnow-when">${esc(wfWhen(n))}</span></div><div class="wnow-lz">${lhLz(n,lk)}</div></div></div>${lhSlot(n,lk)}`;
 }
 function wfMini(l,when){ return `<li><button class="wmini" data-act="wf-open" data-id="${l.id}"><span class="wmini-box">${wfBox(l,34)}</span><span class="wmini-txt"><span class="wmini-name">${esc(l.name)}</span><span class="wmini-when">${esc(when)}</span></span></button></li>`; }
 function renderWfFirst(){
