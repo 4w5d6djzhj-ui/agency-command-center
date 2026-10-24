@@ -7,7 +7,13 @@
 <link rel="icon" href="../favicon.svg">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Agency Command Center · Hakobian Strategic Follow-Up</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/bricolage-grotesque-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/bricolage-grotesque-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url(fonts/atkinson-hyperlegible-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/atkinson-hyperlegible-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2")}
+</style>
 <style>
 /* Layout: a work board. One status line at the top, a burn-up beside it, then three lanes (decisions, calls, messages) in a fixed order; the rest of the day folds away. One column on a phone. */
 :root{
@@ -79,6 +85,46 @@ mark{background:var(--accent-soft);color:inherit;padding:0 2px;border-radius:2px
 .thesis{font-family:var(--display);font-size:21px;line-height:1.272;color:var(--ink);margin:0 0 13px;max-width:34ch}
 .thesis small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
 .foot em{font-style:italic;color:var(--ink)}
+
+/* v2.2: the work card, folds, the demo drawer, the gate */
+.card .r1[data-act=toggle]{cursor:pointer}
+.card .caret{margin-left:auto;color:var(--muted);font-size:13px}
+.card .mins{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--accent);background:var(--accent-soft);border-radius:21px;padding:1px 8px}
+.card.open{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.card.isdone{opacity:.72}
+.say.quiet{color:var(--muted)}
+.work{border-top:1px solid var(--line2);margin-top:8px;padding-top:8px;display:grid;gap:8px}
+.workhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.workhead .timer{margin-left:auto;font-size:16.5px;font-weight:500}
+.workhead .timer small{font-size:10px;color:var(--muted);font-weight:400}
+.workhead .timer.over{color:var(--warn)}
+.script{display:grid;gap:5px}
+.script .move{position:relative;padding:5px 8px 5px 55px;font-size:16.5px;line-height:1.618}
+.script .sig{font-size:13px;color:var(--muted);margin-top:3px}
+.script .smsbox{background:var(--text-soft);border-radius:13px;padding:8px 13px;font-size:16.5px;line-height:1.618}
+.script .subj{font-weight:700;margin-bottom:3px}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:10px;letter-spacing:.04em;padding:1px 8px;border-radius:21px;border:1px solid var(--line)}
+.chip.ok{color:var(--ok);background:var(--ok-soft);border-color:transparent}
+.chip.no{color:var(--bad);background:var(--bad-soft);border-color:transparent}
+.chip.src{color:var(--muted)}
+.fold.cool>summary{color:var(--accent)}
+.demo{position:relative}
+.demobtn{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:21px;padding:5px 13px;min-height:34px;background:var(--panel)}
+.demobtn i{width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.demopanel{position:absolute;right:0;top:40px;z-index:40;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 34px rgba(0,0,0,.13);padding:13px;min-width:377px;display:grid;gap:8px}
+.demorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.demorow .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:76px}
+.demonote{font-size:13px;color:var(--muted);border-top:1px solid var(--line2);padding-top:8px}
+.gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:21px}
+.gatebox{max-width:610px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:21px 34px 34px}
+.gateband{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:13px}
+.gatebox h1{font-family:var(--display);font-size:21px;margin:0 0 8px}
+.gatebox ul{padding-left:21px}
+.gatenote{font-size:13px;color:var(--muted)}
+.gate-accept{margin:13px 0 8px}
+body.gated .wrap{filter:blur(3px);pointer-events:none}
+@media (max-width:987px){.demopanel{position:fixed;left:13px;right:13px;top:auto;bottom:21px;min-width:0}}
 
 /* tabs */
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;margin-bottom:13px;scrollbar-width:none}
@@ -255,14 +301,35 @@ select{width:100%;font:inherit;font-size:13px;padding:8px 8px;min-height:44px;bo
 
 </head>
 <body>
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle" hidden>
+  <div class="gatebox">
+    <div class="gateband">Confidential · Proprietary demonstration · Not for distribution</div>
+    <h1 id="gateTitle">Confidential demonstration</h1>
+    <p>This is a private, proprietary demonstration of the Agency Command Center. It contains unpublished work and trade secrets. By continuing, you agree to the following:</p>
+    <ul>
+      <li>Keep what you see confidential. Do not share this link, screenshots, recordings or descriptions with anyone without Aaron A. Hakobian's written permission.</li>
+      <li>Use it only to evaluate this software.</li>
+      <li>Do not copy, reverse-engineer, or build anything based on what is shown here.</li>
+    </ul>
+    <p class="gatenote">All names, numbers and conversations shown are synthetic. No customer information appears anywhere on this site. This demonstration is not affiliated with, endorsed by, or offered on behalf of any insurance carrier.</p>
+    <button class="btn gate-accept" id="gateAccept">I agree — continue</button>
+    <div class="gatenote">If you do not agree, close this page.</div>
+  </div>
+</div>
 <div class="band"><span>Confidential demonstration · proprietary follow-up process, sequences and word tracks · not for forwarding</span></div>
 <div class="wrap">
 <header class="top">
   <div class="brand"><span class="mark" id="mark" aria-hidden="true"></span><div><div class="agency" id="agencyName">Sample Agency</div><div class="product">Agency Command Center</div><div class="method">Hakobian · Strategic Follow-Up · Automated Coach</div></div></div>
   <div class="ctrls">
-    <div class="seg" role="group" aria-label="Viewing as" id="persona"><button class="on" data-p="Maya">Maya · Producer</button><button data-p="Alex">Alex · Principal</button></div>
-    <div class="seg" role="group" aria-label="Demo clock" id="clocks"></div>
-    <div class="seg" role="group" aria-label="Coaching" id="coach"><button class="on" data-c="1">Coaching on</button><button data-c="0">Off</button></div>
+    <div class="demo" id="demo">
+      <button class="demobtn" id="demoBtn" aria-expanded="false" aria-controls="demoPanel"><i aria-hidden="true"></i>Demo</button>
+      <div class="demopanel" id="demoPanel" hidden>
+        <div class="demorow"><span class="lbl">Acting as</span><div class="seg" role="group" aria-label="Viewing as" id="persona"><button class="on" data-p="Maya">Maya · Producer</button><button data-p="Alex">Alex · Principal</button></div></div>
+        <div class="demorow"><span class="lbl">Clock</span><div class="seg" role="group" aria-label="Demo clock" id="clocks"></div></div>
+        <div class="demorow"><span class="lbl">Coaching</span><div class="seg" role="group" aria-label="Coaching" id="coach"><button class="on" data-c="1">On</button><button data-c="0">Off</button></div></div>
+        <div class="demonote">Demonstration controls only. A team member's screen opens on today's plan with none of them.</div>
+      </div>
+    </div>
   </div>
 </header>
 <nav class="tabs" aria-label="Modules">
@@ -1132,7 +1199,8 @@ const esc = s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;
 const fmt = m=>{let h=Math.floor(m/60),mm=m%60,ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+String(mm).padStart(2,'0')+' '+ap};
 const first = n=>String(n||'').split(' ')[0];
 const SRCLBL = Object.fromEntries(Object.entries(XSRC).map(([k,v])=>[k,v.label]));
-const state = {clock:870, persona:'Maya', coach:true, done:new Set(), decided:{}, help:{}, log:[]};
+const state = {clock:870, persona:'Maya', coach:true, done:new Set(), decided:{}, help:{}, log:[], open:null, openAt:null};
+setInterval(()=>{ if(!state.open||!state.openAt) return; const el=document.querySelector(`[data-timer="${state.open}"]`); if(!el) return; const s=Math.floor((Date.now()-state.openAt)/1000); el.innerHTML=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} <small>of 5:00</small>`; el.classList.toggle('over', s>300); }, 1000);
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2000)}
 function rep(){return AGENCY.producers[state.persona]}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
@@ -1172,6 +1240,10 @@ function ordered(){ return ALL.slice().sort((a,b)=>{ const fa=group(a)==='now'&&
 $('#mark').innerHTML = Array.from({length:28},(_,i)=>`<i class="${i>=20?'c':''}"></i>`).join('');
 $('#thesis').append(TAGLINE); $('#foottag').textContent = TAGLINE;
 $('#clocks').innerHTML = CLOCKS.map(([l,m])=>`<button data-m="${m}" class="${m===state.clock?'on':''}">${l}</button>`).join('');
+$('#demoBtn').addEventListener('click',()=>{const o=$('#demoPanel').hidden; $('#demoPanel').hidden=!o; $('#demoBtn').setAttribute('aria-expanded',String(o));});
+document.addEventListener('pointerdown',e=>{ if(!$('#demoPanel').hidden && !e.target.closest('#demo')){ $('#demoPanel').hidden=true; $('#demoBtn').setAttribute('aria-expanded','false'); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('#demoPanel').hidden){ $('#demoPanel').hidden=true; $('#demoBtn').setAttribute('aria-expanded','false'); } });
+(function gate(){ let ok=false; try{ ok=!!localStorage.getItem('acc.confidential.v2'); }catch(e){} if(!ok){ $('#gate').hidden=false; document.body.classList.add('gated'); $('#gateAccept').focus(); } $('#gateAccept').addEventListener('click',()=>{ try{ localStorage.setItem('acc.confidential.v2', JSON.stringify({at:new Date().toISOString()})); }catch(e){} $('#gate').hidden=true; document.body.classList.remove('gated'); }); })();
 $('#clocks').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.clock=+b.dataset.m;[...$('#clocks').children].forEach(x=>x.classList.toggle('on',x===b));renderAll();});
 $('#persona').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.persona=b.dataset.p;[...$('#persona').children].forEach(x=>x.classList.toggle('on',x===b));renderAll();});
 $('#coach').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.coach=b.dataset.c==='1';document.body.classList.toggle('nocoach',!state.coach);[...$('#coach').children].forEach(x=>x.classList.toggle('on',x===b));});
@@ -1221,20 +1293,43 @@ function card(l){
   const vm = ch==='call' && st.vm ? `Voicemail allowed, ${st.vm}s` : ch==='call' ? 'No voicemail on this call' : '';
   const help = state.help[l.id]?`<span class="helpon">Help asked → Alex</span>`:`<button class="help" data-id="${l.id}" data-act="help">Stuck? One tap</button>`;
   const outs = ch==='call'?['Talked','Voicemail','No answer']:['Approve','Edit'];
-  return `<article class="card ${ch} ${l.cool?'cool':''}" data-id="${l.id}">
-    <div class="r1"><span class="when ${wcls}">${esc(when)}</span><span class="ch ${ch}">${ch}</span><div class="who">${esc(l.name)}<small>${esc(SRCLBL[l.source]||l.source)}${l.cool?' · cooler':''}</small></div><span class="pill">${esc((STYLES[l.style]||{}).label||l.style)}</span></div>
+  const open = state.open===l.id && !done;
+  const script = open ? scriptFor(l, ch) : null;
+  const consent = l.consent||{};
+  const chips = open ? `<div class="chips"><span class="chip ${consent.email?'ok':'no'}">${consent.email?'Email OK':'No email consent'}</span><span class="chip ${consent.sms?'ok':'no'}">${consent.sms?'Text OK':'No text consent'}</span>${l.dnc?'<span class="chip no">Do Not Call</span>':''}<span class="chip src">ECRM · ${esc(SRCLBL[l.source]||l.source)}</span></div>` : '';
+  return `<article class="card ${ch} ${l.cool?'cool':''} ${open?'open':''} ${done?'isdone':''}" data-id="${l.id}">
+    <div class="r1" data-id="${l.id}" data-act="toggle" role="button" tabindex="0" aria-expanded="${open}"><span class="when ${wcls}">${esc(when)}</span><span class="ch ${ch}">${ch}</span><div class="who">${esc(l.name)}<small>${esc(SRCLBL[l.source]||l.source)}${l.cool?' · cooler':''}</small></div><span class="pill">${esc((STYLES[l.style]||{}).label||l.style)}</span>${!done?`<span class="mins">5 min</span>`:''}<span class="caret" aria-hidden="true">${open?'▾':'▸'}</span></div>
     <div class="r2">${esc(l.reason||l.why||'')}${l.meta?' · '+l.meta.map(esc).join(' · '):''}${l.proposed?` · <span class="fact">$${l.proposed}/mo</span>`:''}${l.current?` vs $${l.current} now`:''}</div>
-    ${!done&&sayTxt?`<div class="say">${esc(sayTxt)}</div>`:''}
-    ${!done?`<div class="tip">${esc(st.what)}${vm?' · '+vm:''} · ${esc(XESSENCE[l.style]||'')}</div>`:''}
-    <div class="r3"><div class="acts">${done?`<span class="approved">✓ ${state.log.find(x=>x.id===l.id)?esc(state.log.find(x=>x.id===l.id).t):'done'}</span>`:outs.map(o=>`<button class="btn sm ${o==='Edit'||o==='No answer'||o==='Voicemail'?'quiet':''}" data-id="${l.id}" data-act="${o}">${o}</button>`).join('')}</div>${done?'':help}</div>
+    ${open?`<div class="work">
+      <div class="workhead"><span class="tag">${esc(st.what)}</span>${vm?`<span class="tag">${esc(vm)}</span>`:''}<span class="timer mono" data-timer="${l.id}">0:00 <small>of 5:00</small></span></div>
+      ${script}
+      ${chips}
+      ${state.coach?`<div class="tip">${esc(XESSENCE[l.style]||'')}</div>`:''}
+    </div>`:(!done&&sayTxt&&state.coach?`<div class="say quiet">${esc(sayTxt)}</div>`:'')}
+    <div class="r3"><div class="acts">${done?`<span class="approved">✓ ${state.log.find(x=>x.id===l.id)?esc(state.log.find(x=>x.id===l.id).t):'done'}</span>`:open?outs.map(o=>`<button class="btn sm ${o==='Edit'||o==='No answer'||o==='Voicemail'?'quiet':''}" data-id="${l.id}" data-act="${o}">${o}</button>`).join(''):`<button class="btn sm ghost" data-id="${l.id}" data-act="toggle">${ch==='call'?'Open the call':'Check the draft'}</button>`}</div>${done||!open?'':help}</div>
   </article>`;
 }
+// the three moves for this lead on this channel, built the same way Compose builds them
+function scriptFor(l, ch){
+  const scn=l.scenario||'raw', sty=l.style, d=(DRAFTS[scn]||DRAFTS.raw)[sty]; if(!d) return '';
+  const moves=['Match','Fit','Ask'];
+  if(ch==='call'){
+    const say = l.say ? l.say : fillTokens(d.email.body,l).split(/\n\s*\n/).slice(1);
+    return `<div class="script">${say.slice(0,3).map((t,i)=>`<div class="move" data-move="${moves[i]}">${esc(fillTokens(t,l))}</div>`).join('')}<div class="sig">If voicemail (${stepFor(l).vm?stepFor(l).vm+'s allowed':'none on this call'}): ${esc(fillTokens(XVM[scn]||XVM.raw,l))}</div></div>`;
+  }
+  if(ch==='text'){ const txt=fillTokens(d.sms,l)+' Reply STOP to opt out.'; return `<div class="script"><div class="smsbox">${markPhrases(esc(txt),scn,sty,l)}</div></div>`; }
+  const body=fillTokens(d.email.body,l).split(/\n\s*\n/); const greet=body.shift();
+  return `<div class="script"><div class="subj">Subject: ${markPhrases(esc(fillTokens(d.email.subject,l)),scn,sty,l)}</div><div>${esc(greet)}</div>${body.map((par,i)=>`<div class="move" data-move="${moves[i]||'More'}">${markPhrases(esc(par),scn,sty,l)}</div>`).join('')}</div>`;
+}
 function lane(id,title,rule,items,showN){
-  const open=items.filter(l=>!isDone(l)), done=items.filter(isDone);
+  const warm=items.filter(l=>!l.cool), cool=items.filter(l=>l.cool);
+  const open=warm.filter(l=>!isDone(l)), done=warm.filter(isDone);
   const vis=open.slice(0,showN), rest=open.slice(showN);
+  const coolOpen=cool.filter(l=>!isDone(l)), coolDone=cool.filter(isDone);
   $(id).innerHTML = `<div class="lanehead"><h2>${title}</h2><span class="rule">${esc(rule)}</span></div>
     ${vis.length?vis.map(card).join(''):`<p class="sub">Nothing due. Everything on plan looks calm.</p>`}
     ${rest.length?`<details class="fold"><summary>${rest.length} more later today</summary>${rest.map(card).join('')}</details>`:''}
+    ${cool.length?`<details class="fold cool"><summary>Cooler leads · any open minute · ${coolOpen.length}${coolDone.length?` · ${coolDone.length} done`:''}</summary><p class="sub">Not hot and not due by their plan. Five minutes each, one tap when done.</p>${coolOpen.concat(coolDone).map(card).join('')}</details>`:''}
     ${done.length?`<details class="fold"><summary>Done (${done.length})</summary>${done.map(card).join('')}</details>`:''}`;
 }
 function stopCard(id,st,l){
@@ -1251,13 +1346,16 @@ function renderLanes(){
   lane('#lane-calls','Your calls','in the order the plan sets, freshest lead first', o.filter(l=>!isStop(l)&&channel(l)==='call'&&mine(l)), 4);
   lane('#lane-msgs','Messages to check','facts marked; approve sends at its hour', o.filter(l=>!isStop(l)&&channel(l)!=='call'&&mine(l)), 3);
 }
+document.addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&e.target.matches('.r1[data-act="toggle"]')){ e.preventDefault(); e.target.click(); } });
 document.addEventListener('click',e=>{
-  const b=e.target.closest('button[data-act]'); if(!b) return;
+  const b=e.target.closest('button[data-act],[role=button][data-act]'); if(!b) return;
   const id=b.dataset.id, act=b.dataset.act, l=ALL.find(x=>x.id===id);
   if(act==='help'){ state.help[id]=rep().full; toast('Help asked: Alex is notified; the card stays marked until he answers'); renderAll(); return; }
   if(act==='decide'){ state.decided[id]=b.dataset.opt; if(b.dataset.opt==='Skip this step') state.decided[id]='skip'; toast(`${b.dataset.opt} · recorded, ${rep().full} ${fmt(state.clock)}`); renderAll(); return; }
-  if(act==='go'||act==='Edit'){ selectLead(id); go('compose'); return; }
-  if(['Talked','Voicemail','No answer','Approve'].includes(act)){ if(act!=='No answer'&&act!=='Voicemail'){ state.done.add(id); } state.log.push({id,t:`${act} · ${rep().full}, ${fmt(state.clock)}`}); if(act==='No answer'||act==='Voicemail'){ state.done.add(id); } toast(`${act} · ${l?l.name:''} · next step is set`); renderAll(); return; }
+  if(act==='toggle'){ state.open = state.open===id?null:id; state.openAt = Date.now(); renderAll(); const el=document.querySelector(`.card[data-id="${id}"]`); if(el&&state.open===id) el.scrollIntoView({block:'nearest',behavior:'smooth'}); return; }
+  if(act==='go'){ state.open=id; state.openAt=Date.now(); go('today'); renderAll(); const el=document.querySelector(`.card[data-id="${id}"]`); if(el) el.scrollIntoView({block:'center',behavior:'smooth'}); return; }
+  if(act==='Edit'){ selectLead(id); go('compose'); return; }
+  if(['Talked','Voicemail','No answer','Approve'].includes(act)){ if(act!=='No answer'&&act!=='Voicemail'){ state.done.add(id); } state.log.push({id,t:`${act} · ${rep().full}, ${fmt(state.clock)}`}); if(act==='No answer'||act==='Voicemail'){ state.done.add(id); } toast(`${act} · ${l?l.name:''} · next step is set · logged to ECRM ${fmt(state.clock)}`); const nxt=ordered().find(x=>!isDone(x)&&!isStop(x)&&x.id!==id&&channel(x)===channel(l)&&!x.cool); state.open=nxt?nxt.id:null; state.openAt=Date.now(); renderAll(); return; }
 });
 function renderPause(){
   const open=ALL.filter(l=>!isDone(l)).length, done=ALL.length-open, over=ALL.filter(l=>late(l)>30).length;
@@ -1326,12 +1424,13 @@ function renderDraft(){
     <dt>The ask</dt><dd>“${esc(S.g)}” <span class="tip">${esc(S.gWhy)}</span></dd>
     <dt>Timing</dt><dd>${esc(stepFor(l).what)} · ${l.cool?'cooler lead, next window':channel(l)} · plan: ${esc(SRCLBL[l.source]||l.source)}</dd>`;
   $('#checks').innerHTML = [[okEmail||channelSel!=='email','Consent on file: '+(l.consent?l.consent.basis:'none')],[true,'Producer license line appended ('+p.lic+')'],[l.proposed!=null,l.proposed!=null?'Premium pulled from quote: $'+l.proposed+'/mo':'No quote on file: the number is a blank, not a guess'],[true,channelSel==='sms'?'STOP line present · sends 8 AM–8 PM only':channelSel==='email'?'Unsubscribe line present':'Call window 8 AM–8 PM · Do Not Call checked'],[!/life/i.test((l.reason||'')+(l.meta||[]).join()),/life/i.test((l.reason||'')+(l.meta||[]).join())?'Life insurance: checked one at a time, never batch-approved':'Routine: can be batch-approved at a pause point']].map(([ok,t])=>`<li class="${ok?'':'no'}">${esc(t)}</li>`).join('');
-  $('#approvetip').textContent = `Approve records ${p.full} and ${fmt(state.clock)}; the message goes at ${channelSel==='email'?'the next email window':channelSel==='sms'?'the next text window (1–3 PM)':'the next call window'}.`;
+  $('#approvetip').textContent = channelSel==='call' ? `Log the outcome here or on Today; it is recorded to ECRM with ${p.full} and ${fmt(state.clock)}.` : `Approve records ${p.full} and ${fmt(state.clock)}; the message goes at ${channelSel==='email'?'the next email window':channelSel==='sms'?'the next text window (1–3 PM)':'the next call window'}.`;
+  $('#approveBtn').textContent = channelSel==='call' ? 'Talked · log it' : 'Approve · sends at its hour';
 }
 ['#c-scn','#c-sty'].forEach(s=>$(s).addEventListener('change',renderDraft));
 $('#c-lead').addEventListener('change',()=>selectLead($('#c-lead').value));
 $('#c-ch').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;channelSel=b.dataset.ch;[...$('#c-ch').children].forEach(x=>x.classList.toggle('on',x===b));renderDraft();});
-$('#approveBtn').addEventListener('click',()=>{const l=ALL.find(x=>x.id===$('#c-lead').value);if(!l)return;state.done.add(l.id);state.log.push({id:l.id,t:`Approved · ${rep().full}, ${fmt(state.clock)}`});toast('Approved: sends at its hour · recorded '+rep().full);renderAll();});
+$('#approveBtn').addEventListener('click',()=>{const l=ALL.find(x=>x.id===$('#c-lead').value);if(!l)return;const act=channelSel==='call'?'Talked':'Approved';state.done.add(l.id);state.log.push({id:l.id,t:`${act} · ${rep().full}, ${fmt(state.clock)}`});toast(act==='Talked'?'Talked · logged to ECRM '+fmt(state.clock)+' · next step is set':'Approved: sends at its hour · recorded '+rep().full);renderAll();});
 $('#copyBtn').addEventListener('click',()=>{const txt=$('#draft').innerText;const fb=()=>{const r=document.createRange();r.selectNodeContents($('#draft'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Draft selected, press copy')};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast('Draft copied')).catch(fb)}else fb();});
 
 /* ======== Plans ======== */
@@ -1426,6 +1525,8 @@ document.querySelectorAll('.tabs a').forEach(a=>a.addEventListener('click',e=>{e
 window.addEventListener('hashchange',route);
 function renderAll(){ renderNow(); renderLanes(); renderPause(); renderRail(); fillLeadPicker(); renderDraft(); renderScore(); renderCoach(); }
 fillLeadPicker('Q01'); selectLead('Q01'); renderPlans(); renderAll(); route();
+// the first due call opens by itself: the day starts on its first five minutes
+(function(){ const o=ordered(); const f=o.find(x=>!isDone(x)&&!isStop(x)&&channel(x)==='call'&&!x.cool); if(f){ state.open=f.id; state.openAt=Date.now(); renderAll(); } })();
 })();
 </script>
 
