@@ -63,7 +63,7 @@ def match_end(s, i):
 
 
 # 0. compile the components (JSX -> React.createElement on the bundle's React, `I`)
-src_files = ["moves.jsx", "compose.jsx", "engine.jsx", "compare.jsx", "today.jsx", "queue.jsx", "compliance.jsx", "charts.jsx", "protime.jsx", "daystrip.jsx", "plan.jsx", "nowbar.jsx", "evidence.jsx"]
+src_files = ["moves.jsx", "compose.jsx", "engine.jsx", "compare.jsx", "today.jsx", "queue.jsx", "compliance.jsx", "charts.jsx", "protime.jsx", "daystrip.jsx", "plan.jsx", "nowbar.jsx", "demo.jsx", "evidence.jsx"]
 src = "\n".join(open(os.path.join(HERE, "src", f), encoding="utf-8").read() for f in src_files)
 os.makedirs(os.path.join(HERE, "build"), exist_ok=True)
 open(os.path.join(HERE, "build", "ext.jsx"), "w", encoding="utf-8").write(src)
@@ -129,6 +129,13 @@ for w in ["AI-drafted", "AI-assisted", "guidance on AI", "train the recommender"
 
 # 6b. v10 lean top: the standards band moves to the footer; Compose gets a compact head
 rep('o.jsx(Ym,{persona:e,onPersonaChange:s}),o.jsx(PrincipleBand,{}),', 'o.jsx(Ym,{persona:e,onPersonaChange:s}),')
+# v13: the persona switch leaves the header for the Demo drawer; tabs carry group markers
+rep('o.jsxs("div",{className:"persona-switch",children:[o.jsx("span",{children:"Acting as"}),o.jsx("div",{className:"persona-pill",role:"group","aria-label":"Acting persona",children:["Alex","Maya"].map(n=>o.jsx("button",{className:e===n?"active":"","aria-pressed":e===n,onClick:()=>t(n),children:n},n))})]})',
+    'o.jsx(XDemoDrawer,{persona:e,onPersonaChange:t})')
+rep('{id:"retention",label:"Retention"}', '{id:"retention",label:"Retention",grp:"Book"}')
+rep('{id:"manager",label:"Manager",principalOnly:!0}', '{id:"manager",label:"Manager",principalOnly:!0,grp:"Admin"}')
+rep('className:`tab ${u?"active":""}`,onClick:()=>t(a.id)', 'className:`tab ${u?"active":""} ${a.grp?"tab-group":""}`,"data-group":a.grp||null,onClick:()=>t(a.id)')
+
 rep('o.jsx(Zf,{})]})', 'o.jsx(PrincipleBand,{}),o.jsx(Zf,{})]})')
 rep('o.jsxs("div",{className:"page-head",children:[o.jsxs("div",{children:[o.jsx("h1",{children:"Compose"}),o.jsx("div",{className:"greeting",children:"Compliance-checked."})]}),o.jsx("div",{className:"stamp",children:"Match · Fit · Ask, in that order"})]})',
     'o.jsxs("div",{className:"page-head x-compose-head",children:[o.jsxs("div",{children:[o.jsx("h1",{children:"Compose"}),o.jsx("div",{className:"greeting",children:"Pick the lead, the scenario, the style and the channel; the draft and its three moves follow. Compliance-checked."})]}),o.jsx("div",{className:"stamp",children:"Match · Fit · Ask, in that order"})]})')

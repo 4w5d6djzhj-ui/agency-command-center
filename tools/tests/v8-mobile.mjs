@@ -14,7 +14,7 @@ await p.screenshot({ path: out + 'm-compose.png' });
 const ov2 = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 await p.locator('.x-nowbar').click(); await p.waitForTimeout(500);
 const tabNow = await p.locator('.tabs button.active').innerText();
-await p.locator('.x-viewbar button', { hasText: 'Day plan' }).click(); await p.waitForTimeout(500);
+await p.locator('.x-planlink', { hasText: 'Day plan' }).click(); await p.waitForTimeout(500);
 await p.screenshot({ path: out + 'm-plan.png' });
 const ov3 = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 console.log('overflow today/compose/plan', ov, ov2, ov3, '| nowbar took us to', tabNow);

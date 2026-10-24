@@ -19,12 +19,13 @@ await gate();
 const blank = async () => (await page.evaluate(() => document.body.innerText.length)) < 200;
 const click = async (sel) => { const l = page.locator(sel).first(); if (await l.count()) { await l.click({ timeout: 2000 }); await page.waitForTimeout(80); return true; } return false; };
 const tab = (t) => click(`.tabs button:text-is("${t}")`);
+const persona_ = async (n) => { await click('.x-demo-btn'); const ok = await click(`.x-demo-panel .x-seg button:has-text("${n}")`); await page.keyboard.press('Escape'); await page.waitForTimeout(80); return ok; };
 const fonts = await page.evaluate(async () => { await document.fonts.ready; return [...new Set([...document.fonts].filter(f => f.status === 'loaded').map(f => f.family))]; });
 log.push('fonts: ' + fonts.join(', '));
 
 let clicks = 0;
 for (const persona of ['Alex', 'Maya']) {
-  await click(`.persona-pill button:text-is("${persona}")`);
+  await persona_(persona);
   const tabs = await page.$$eval('.tabs button', els => els.map(e => e.innerText.trim()));
   log.push(`${persona}: tabs = ${tabs.join(' | ')}`);
   for (const t of tabs) {
@@ -39,7 +40,7 @@ for (const persona of ['Alex', 'Maya']) {
       for (let i = 0; i < n; i++) {
         try { await btns.nth(i).click({ timeout: 1500 }); clicks++; await page.waitForTimeout(40); } catch { }
         await page.keyboard.press('Escape').catch(() => {});
-        if (await blank()) { problems.push(`BLANK after "${label}" on ${t} (${persona})`); await page.goto(BASE, { waitUntil: 'networkidle' }); await gate(); await click(`.persona-pill button:text-is("${persona}")`); await tab(t); }
+        if (await blank()) { problems.push(`BLANK after "${label}" on ${t} (${persona})`); await page.goto(BASE, { waitUntil: 'networkidle' }); await gate(); await persona_(persona); await tab(t); }
       }
     }
   }
@@ -47,7 +48,7 @@ for (const persona of ['Alex', 'Maya']) {
 log.push(`buttons clicked: ${clicks}`);
 
 // Compose matrix
-await click('.persona-pill button:text-is("Alex")'); await tab('Compose');
+await persona_('Alex'); await tab('Compose');
 const sel = page.locator('select').first();
 const opts = await sel.evaluate(s => [...s.options].map(o => o.value));
 let drafts = 0;

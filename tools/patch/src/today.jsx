@@ -151,12 +151,18 @@ function xSay(lead, persona) {
   const c = XMOVES[lead.scenario][lead.style];
   return (lead.say || [c.m.say, c.f.say, c.a.say]).map((s) => xFillSay(s, lead, persona));
 }
+// the source line a carrier's system would show: the demo names ECRM as the system of record
+function xSource(lead) {
+  const kind = lead.source === "IL" ? (lead.seen != null ? "web lead" : "internet lead") : lead.source === "RF" ? "referral" : lead.source === "PI" ? "walk-in" : lead.source === "WB" ? "former customer" : lead.source === "QN" ? "open quote" : "book of business";
+  return `ECRM \u00b7 ${kind}${lead.seen != null ? ` \u00b7 landed ${xFmt(xLanded(lead))}` : ""}`;
+}
+function xLogged(d) { return d && d.t != null ? ` \u00b7 logged to ECRM ${xFmt(Math.min(d.t + 1, (d.when != null ? d.when : d.t) + 1))}` : ""; }
 function xOutcomeText(v) {
   const d = XS.done[v.last.id], nx = xNextLabel(v.p);
   if (d.k === "signed") return `Signed · ${v.lead.lines} app${v.lead.lines > 1 ? "s" : ""}, household protected · welcome call in 7 days`;
-  if (d.k === "quoted") return "Quoted · the quote follow-up plan starts tomorrow";
+  if (d.k === "quoted") return "Quoted · the quote follow-up plan starts tomorrow" + xLogged(d);
   if (d.k === "notnow") return "Not now · a reminder is set for their renewal date";
-  if (d.k === "talked") return "Talked · " + nx;
+  if (d.k === "talked") return "Talked · " + nx + xLogged(d);
   if (d.k === "scheduled") return `Approved${d.by ? ` by ${d.by}` : ""} ${xFmt(d.when || d.t)} · sends ${xFmt(d.t)} · ${nx}`;
   if (d.k === "sent") return `Sent${d.by ? ` by ${d.by}` : ""} ${xFmt(d.when || d.t)} · ${nx}`;
   return `${XOUT[d.k]} · ${nx}`;
@@ -301,8 +307,9 @@ function XRow({ v, now, isOpen, persona, onToggle, onAct, onUndo }) {
             <Pp stage={lead.stage} />
             <span className="x-tag">{XQ_GROUPS.find((g) => g.k === v.group).tag}{lead.at ? ` ${lead.at}` : ""}</span>
             {t && <span className="x-mins" title="Five minutes: the call, the outcome, the next step is already set">5 min</span>}
+            {lead.consent && lead.consent.stop && <span className="x-chip x-chip-stop" title={lead.consent.basis}>Texted STOP {lead.consent.stop}{t ? ` · now by ${XCH[t.ch].toLowerCase()}` : ""}</span>}
           </div>
-          <div className="x-row-line2"><span>{lead.reason}</span>{lead.meta.map((m, i) => <span key={i} className="dot">{m}</span>)}</div>
+          <div className="x-row-line2"><span>{lead.reason}</span>{lead.meta.map((m, i) => <span key={i} className="dot">{m}</span>)}<span className="dot x-src" title="Where this person comes from in the agency's system">{xSource(lead)}</span></div>
           <div className="x-row-step">
             {t ? <>{t.booked ? `Booked call · ${lead.at}` : `Step ${t.step.n} of ${v.p.N} · ${xDayLabel(lead)} · ${t.step.what}`}</> : v.last ? <><span className="x-check">✓</span> {xOutcomeText(v)}</> : "Nothing due today"}
           </div>

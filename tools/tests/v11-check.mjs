@@ -10,7 +10,7 @@ const num = (s) => parseInt(s);
 // opens at 11:00 with the morning done
 ok(/demo clock 11:00 AM/.test(await txt('.x-strip-cap')), 'opens at 11 ' + await txt('.x-strip-cap'));
 ok(num(await meter('Touches')) >= 8, 'touches seeded ' + await meter('Touches'));
-ok(num(await meter('Calls made')) >= 3, 'calls seeded ' + await meter('Calls made'));
+ok(num(await meter('Calls')) >= 3, 'calls seeded ' + await meter('Calls'));
 ok(num(await meter('Quotes today')) >= 1, 'quote seeded ' + await meter('Quotes today'));
 ok(/On track|running late/.test(await txt('.x-status')), 'status ' + await txt('.x-status'));
 ok(/\d+ handled/.test(await txt('.x-queue-head .count')), 'handled seeded ' + await txt('.x-queue-head .count'));
@@ -27,9 +27,9 @@ ok((await p.locator('.x-open-block:not(.x-cool) .x-open-list li').count()) === 7
 await p.$$eval('details.x-cool', ds => ds.forEach(d => { d.open = true; })); await p.waitForTimeout(100);
 ok((await p.locator('.x-cool li').count()) === 8 && (await p.locator('details.x-cool').count()) === 3, 'cooler leads in three lanes ' + await p.locator('.x-cool li').count());
 ok((await p.locator('.x-lane:has(.x-group-title:text-is("Your calls")) .x-cool li').count()) === 3, 'cooler calls in the calls lane');
-ok(/0 \/ 8/.test(await meter('Cooler leads')), 'cooler meter ' + await meter('Cooler leads'));
+ok(/0 \/ 8/.test(await meter('Cooler')), 'cooler meter ' + await meter('Cooler'));
 await p.locator('.x-cool .x-open-check').first().click(); await p.waitForTimeout(150);
-ok(/1 \/ 8/.test(await meter('Cooler leads')) && (await p.locator('.x-cool li.is-done').count()) === 1, 'cooler lead counted ' + await meter('Cooler leads'));
+ok(/1 \/ 8/.test(await meter('Cooler')) && (await p.locator('.x-cool li.is-done').count()) === 1, 'cooler lead counted ' + await meter('Cooler'));
 ok(/x-chip-(call|email|text)/.test(await p.locator('.x-cool li').first().innerHTML()), 'cooler lead has a channel');
 const nina = p.locator('.x-cool li', { hasText: 'Nina Lorem' });
 ok((await nina.locator('.x-chip-email').count()) === 1 && (await nina.locator('.x-chip-text').count()) === 0, 'no text to a lead without text consent');
@@ -38,13 +38,13 @@ await p.locator('.x-open .x-open-check').first().click(); await p.waitForTimeout
 ok(/1 \/ 7/.test(await meter('Proactive')) && /1 of 7/.test(await txt('.x-open .count')), 'proactive counted');
 ok((await p.locator('.x-open .x-open-list li.is-done').count()) === 1, 'task marked done');
 // the clock bar reseeds: 9:00 is a fresh day, 2:30 has more done
-await p.locator('.x-viewbar button', { hasText: 'Day plan' }).click(); await p.waitForTimeout(200);
+await p.locator('.x-demo-btn').click(); await p.waitForTimeout(150);
 await p.locator('.x-clockbar button', { hasText: '2:30 PM' }).click(); await p.waitForTimeout(250);
-await p.locator('.x-viewbar button', { hasText: 'Action queue' }).click(); await p.waitForTimeout(250);
+await p.keyboard.press('Escape'); await p.waitForTimeout(150);
 const t230 = num(await meter('Touches'));
 ok(t230 >= 12, 'more done at 2:30 ' + t230);
 await p.locator('.x-queue-foot .btn', { hasText: 'Start the day over' }).click(); await p.waitForTimeout(250);
-ok(/demo clock 9:00 AM/.test(await txt('.x-strip-cap')) && num(await meter('Touches')) === 0 && /0 \/ 7/.test(await meter('Proactive')) && /0 \/ 8/.test(await meter('Cooler leads')), 'start over = fresh 9:00 ' + await txt('.x-strip-cap') + ' ' + await meter('Touches'));
+ok(/demo clock 9:00 AM/.test(await txt('.x-strip-cap')) && num(await meter('Touches')) === 0 && /0 \/ 7/.test(await meter('Proactive')) && /0 \/ 8/.test(await meter('Cooler')), 'start over = fresh 9:00 ' + await txt('.x-strip-cap') + ' ' + await meter('Touches'));
 ok(/Start the next 5 minutes/.test(await txt('.x-start-btn')), 'fresh start button');
 // phone: no overflow with the new card
 const m = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }); const q = await m.newPage();

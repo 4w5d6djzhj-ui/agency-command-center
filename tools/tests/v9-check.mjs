@@ -8,16 +8,19 @@ await p.goto(base, { waitUntil: 'networkidle' });
 const g = p.locator('button.gate-accept'); if (await g.count()) await g.click(); await p.waitForSelector('.topbar');
 const txt = async (sel) => (await p.locator(sel).first().innerText().catch(() => '')).replace(/\s+/g, ' ').trim();
 const wait = (ms = 200) => p.waitForTimeout(ms);
-const view = async (l) => { await p.locator('.x-viewbar button', { hasText: l }).click(); await wait(250); };
-const clock = async (l) => { await view('Day plan'); await p.locator('.x-clockbar button', { hasText: l }).click(); await wait(200); await view('Action queue'); };
+const demo = async () => { if (!(await p.locator('.x-demo-panel').count())) { await p.locator('.x-demo-btn').click(); await p.waitForTimeout(150); } };
+const demoClose = async () => { if (await p.locator('.x-demo-panel').count()) { await p.keyboard.press('Escape'); await wait(120); } };
+const view = async (l) => { await demo(); await p.locator('.x-viewbar button', { hasText: l }).click(); await wait(250); await demoClose(); };
+const clock = async (l) => { await demo(); await p.locator('.x-clockbar button', { hasText: l }).click(); await wait(200); await demoClose(); };
 const row = (name) => p.locator('.x-row').filter({ has: p.locator(`.x-name:text-is("${name}")`) });
 const meter = async (label) => txt(`.x-meter:has(.x-meter-k:text-is("${label}")) .x-meter-v`);
 
 // --- header and the Classic button top right
 ok((await txt('.brand-text .sub')).toLowerCase() === 'hakobian strategic follow-up · automated coach', 'sub ' + await txt('.brand-text .sub'));
 ok(/experience\s*&\s*judgment, at every team member's fingertips/.test(await txt('.brand-tagline')), 'tagline');
-const cb = await p.locator('.x-viewbar button', { hasText: 'Classic' }).boundingBox();
-ok(cb && cb.x > 1440 * 0.85, 'classic top right ' + JSON.stringify(cb));
+const cb = await p.locator('.x-demo-btn').boundingBox();
+ok(cb && cb.x > 1440 * 0.8, 'demo button top right ' + JSON.stringify(cb));
+ok((await p.locator('.x-viewbar').count()) === 0 && (await p.locator('.persona-switch').count()) === 0, 'no demo controls in the product header');
 
 // --- compliance check: visible, 5 of 5, opens to the checks and the 20 consent records
 ok(/Compliance check All clear · 5 of 5 passed/i.test(await txt('.x-comp summary')), 'comp pill ' + await txt('.x-comp summary'));
@@ -143,7 +146,7 @@ await p.mouse.move(bb.x + bb.width * 0.4, bb.y + bb.height * 0.5); await wait(15
 ok((await p.locator('.x-progress .x-tip').count()) >= 1, 'burn-up tooltip');
 
 // --- after hours: no calls, email still goes
-await p.locator('.x-clockbar button', { hasText: '8:15 PM' }).click(); await wait(300);
+await clock('8:15 PM'); await wait(100);
 ok(/Tomorrow, first thing/i.test(await txt('.x-timeline')), 'tomorrow block');
 ok(/^NOW EMAIL/i.test(await txt('.x-nowbar')) || /^NEXT/i.test(await txt('.x-nowbar')), 'nowbar after hours ' + await txt('.x-nowbar'));
 // plan vs usual + calculator
@@ -154,13 +157,13 @@ await p.locator('.x-calc-power button', { hasText: '90%' }).click(); await wait(
 ok(/918 leads per arm/.test(await txt('.x-calc-out')), '90% power');
 
 // --- Compose corner follows the hour
-await p.locator('.x-clockbar button', { hasText: '9:00 AM' }).click(); await wait(150);
+await clock('9:00 AM');
 await p.locator('.tabs button:text-is("Compose")').click(); await wait(300);
 await p.locator('#scenario-seg button', { hasText: 'Following up' }).click();
 await p.locator('#style-seg button', { hasText: 'Questioner' }).click(); await wait(200);
 ok(/^(BEST AT 10:00 AM CALL|NOW EMAIL)/i.test(await txt('.x-best')), 'corner 9:00 ' + await txt('.x-best'));
 await p.locator('.tabs button:text-is("Today")').click(); await view('Day plan');
-await p.locator('.x-clockbar button', { hasText: '11:00 AM' }).click(); await p.locator('.tabs button:text-is("Compose")').click(); await wait(300);
+await clock('11:00 AM'); await p.locator('.tabs button:text-is("Compose")').click(); await wait(300);
 ok(/^NOW (CALL|TEXT)/i.test(await txt('.x-best')), 'corner 11:00 ' + await txt('.x-best')); // calls and texts both run 10 to noon; the style breaks the tie
 await p.locator('#scenario-seg button', { hasText: 'Raw new' }).click(); await wait(200);
 ok(/^NOW CALL/i.test(await txt('.x-best')), 'corner raw ' + await txt('.x-best'));

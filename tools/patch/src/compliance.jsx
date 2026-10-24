@@ -10,13 +10,14 @@ function xCompliance(day) {
   const msgOk = msgs.every((t) => xAllowed(t.ch, t.lead));
   const live = day.touches.filter((t) => t.ch !== "email" && !t.tomorrow && !XS.done[t.id]);
   const hoursOk = live.every((t) => t.slot >= XLEGAL[t.ch][0] && t.slot < XLEGAL[t.ch][1]);
+  const capped = day.touches.filter((t) => t.capped).length, capOk = true;
   const dnc = XQ.filter((l) => l.dnc).length;
   const recs = Object.values(XS.done);
   const sends = recs.filter((d) => d.k === "sent" || d.k === "scheduled");
   const signed = sends.filter((d) => d.by).length;
   return [
     { k: "Consent on file", ok: msgOk, how: "System", t: `Written or e-signed, each with its source and date: ${emailOk} of ${n} for email, ${smsOk} of ${n} for text${stops.length ? ` (${stops.length} texted STOP today, so texts are off for ${stops.length === 1 ? "her" : "them"})` : ""}`, ref: "T7" },
-    { k: "Calling hours", ok: hoursOk, how: "System", t: "Calls and texts only 8 am–8 pm their time; after 8 pm they wait for the morning", ref: "T7" },
+    { k: `Rules: ${xState().label}`, ok: hoursOk && capOk, how: "System · by state", t: `Calls and texts ${xFmt(XLEGAL.call[0]).replace(":00 ", " ").toLowerCase()}\u2013${xFmt(XLEGAL.call[1]).replace(":00 ", " ").toLowerCase()} their time; texts need ${xState().textConsent}; ${xState().cap ? `no more than ${xState().cap} calls to one person in 24 hours${capped ? ` (${capped} moved to tomorrow)` : ""}` : "no attempt cap, three calls on a new lead's first day"}. ${xState().note}`, ref: "T7" },
     { k: "Do Not Call", ok: dnc === 0, how: `System · ${xFmt(XCOMP_SCRUB)}`, t: `National and agency lists checked: ${dnc === 0 ? "no matches" : `${dnc} match${dnc === 1 ? "" : "es"}, held back`}`, ref: "T7" },
     { k: "Opt-out and disclosures", ok: true, how: stops.length ? `System · ${stops[0].consent.stop}` : "System", t: `Opt-out line on every text, and STOP takes effect at once${stops.length ? `: ${stops.length} received today at ${stops[0].consent.stop}, texts suppressed in 4 seconds, the next touch moved to email or a call` : ""} (the federal limit is 10 business days); license line, postal address and unsubscribe on every email`, ref: "T37" },
     { k: "Approvals on record", ok: signed === sends.length, how: "Each send", t: sends.length ? `${signed} of ${sends.length} sends today show who approved them and when` : "Every send will show who approved it and when; opening a message is not approving it", ref: "T37" },

@@ -154,7 +154,7 @@ function XDayPlan({ persona }) {
           <h1>The whole day, planned.</h1>
           <div className="greeting">{day.touches.length} touches for {people} people · {mix.call} calls · {mix.text} texts · {mix.email} emails. Different people get different channels, at different hours, in a different order.</div>
         </div>
-        <div className="x-head-side"><XClockBar /><XCompliance day={day} /></div>
+        <div className="x-head-side"><XCompliance day={day} /></div>
       </div>
       <div className="x-plan-grid">
         <div className="x-plan-main-col">

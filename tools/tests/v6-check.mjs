@@ -7,11 +7,11 @@ for (const [w, h, tag] of [[1440, 900, 'd'], [390, 844, 'm']]) {
   const g = p.locator('button.gate-accept'); if (await g.count()) await g.click(); await p.waitForSelector('.topbar');
   await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(900);
   for (const persona of ['Alex', 'Maya']) {
-    await p.locator(`.persona-pill button:text-is("${persona}")`).click(); await p.locator('.tabs button:text-is("Today")').click(); await p.waitForTimeout(400);
+    await p.locator('.x-demo-btn').click(); await p.waitForTimeout(120); await p.locator(`.x-demo-panel button`, { hasText: persona }).first().click(); await p.keyboard.press('Escape'); await p.locator('.tabs button:text-is("Today")').click(); await p.waitForTimeout(400);
     const line = (await p.locator('main .x-strip-model').innerText()).trim();
     ok(line === '20 prospects · 7 quotes · 4 apps / 2 HH protected', `${tag}/${persona} today line: ${line}`);
   }
-  await p.locator('.persona-pill button:text-is("Alex")').click(); await p.locator('.tabs button:text-is("Today")').click(); await p.waitForTimeout(900);
+  await p.locator('.x-demo-btn').click(); await p.waitForTimeout(120); await p.locator('.x-demo-panel button', { hasText: 'Alex' }).first().click(); await p.keyboard.press('Escape'); await p.locator('.tabs button:text-is("Today")').click(); await p.waitForTimeout(900);
   await p.screenshot({ path: `${out}${tag}-today.png`, clip: { x: 0, y: 0, width: w, height: Math.min(h, 520) } });
   await p.locator('.tabs button:text-is("Compose")').click(); await p.waitForTimeout(900);
   const sub = (await p.locator('main .page-head .greeting').innerText()).trim();

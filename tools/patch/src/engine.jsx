@@ -7,7 +7,7 @@
 // coaching on (tips and the why on every touch) helps newer team members; experienced ones can turn it off
 function xCoachSaved() { try { const v = window.localStorage.getItem("acc.coach"); return v == null ? true : v === "1"; } catch (e) { return true; } }
 const XFRESH = (() => { try { return /[?&]fresh=1/.test(window.location.search); } catch (e) { return false; } })();
-const XS = { done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved(), seeded: false };
+const XS = { state: "WA", done: {}, chan: {}, asks: {}, help: {}, miss: {}, pro: {}, cool: {}, open: null, clock: 11 * 60, clockAt: Date.now(), focus: false, bump: {}, view: "queue", seed: 7, coach: xCoachSaved(), seeded: false };
 // The demo opens mid-morning with the morning's work already logged, so the board shows progress, not zeros.
 // Everything before (clock − 30 min) is marked done: messages sent, calls in a steady pattern of outcomes.
 const XSEED_CALLS = ["quoted", "talked", "noanswer", "talked", "quoted", "noanswer", "talked", "noanswer"];
@@ -69,7 +69,17 @@ function xParseAt(s) { const m = /(\d+):(\d+)\s*(AM|PM)/i.exec(s || ""); if (!m)
 const XREF = {};
 
 // ---- hours: legal walls first, then where each channel works best ---------------------------------
-const XLEGAL = { call: [8 * 60, 20 * 60], text: [8 * 60, 20 * 60], email: [0, 24 * 60] };
+// Rules by state: the federal TCPA floor plus the state overlay the agency sits in. The engine reads hours,
+// the text-consent rule and any attempt cap from here, so a second state is a row, not a rebuild.
+const XSTATE = {
+  WA: { label: "Washington", hours: [8 * 60, 20 * 60], textConsent: "clear, affirmative consent in advance; a quote request is not consent", cap: null, note: "$100 statutory damages per unsolicited commercial text (RCW 19.190, ESHB 2274, from June 11, 2026)" },
+  MD: { label: "Maryland", hours: [8 * 60, 20 * 60], textConsent: "prior express written consent", cap: 3, note: "Md. Code Com. Law \u00a7 14-3201 et seq., in force since Jan 1, 2024" },
+  FL: { label: "Florida", hours: [8 * 60, 20 * 60], textConsent: "written consent, a signature or checkbox", cap: 3, note: "FTSA as amended May 2023; a 15-day cure notice precedes any text suit" },
+  OK: { label: "Oklahoma", hours: [8 * 60, 20 * 60], textConsent: "prior express written consent", cap: 3, note: "Okla. Stat. tit. 15 \u00a7 775C, in force since Nov 1, 2022" },
+  TX: { label: "Texas", hours: [9 * 60, 21 * 60], textConsent: "prior express consent", cap: null, note: "Federal floor; Texas registration for telephone solicitors; 9 am\u20139 pm" },
+};
+function xState() { return XSTATE[XS.state] || XSTATE.WA; }
+const XLEGAL = { get call() { return xState().hours; }, get text() { return xState().hours; }, email: [0, 24 * 60] };
 // the office day: planned work runs 9 to 5 with lunch off; the law allows 8 am–8 pm, the plan uses 9–5
 const XDAY = { open: 9 * 60, close: 17 * 60, lunch: [12 * 60, 13 * 60] };
 const XOPEN_LABEL = "9:00 AM";
@@ -336,6 +346,15 @@ function xBuildDay(leads, clock) {
     const L = XLEGAL[t.ch];
     if (t.slot >= L[1] || (t.slot <= now && now >= L[1] - 10)) { t.tomorrow = true; t.slot = open(t.ch); t.label = tomorrowLabel; t.late = true; }
   }
+  const cap = xState().cap;
+  if (cap) {
+    const byLead = {};
+    for (const t of touches) if (t.ch === "call" && !t.tomorrow) (byLead[t.lead.id] ||= []).push(t);
+    for (const id of Object.keys(byLead)) {
+      const calls = byLead[id].sort((a, b) => a.slot - b.slot);
+      calls.slice(cap).forEach((t) => { if (!XS.done[t.id]) { t.tomorrow = true; t.slot = open("call"); t.label = tomorrowLabel; t.capped = true; } });
+    }
+  }
   touches.sort((a, b) => (a.tomorrow - b.tomorrow) || a.slot - b.slot || a.p.pri - b.p.pri);
   return { touches, plan, now };
 }
@@ -355,7 +374,7 @@ function xNextLabel(p) {
 function xTouchWhy(t) {
   if (t.booked && !t.late) return "They picked this time. Be early.";
   const w = XWIN[t.wk];
-  const parts = [t.tomorrow ? "After 8 pm, calls and texts wait for the morning: the office opens at 9" : w ? w.why : ""];
+  const parts = [t.capped ? `${xState().label} caps calls at ${xState().cap} to one person in 24 hours; this one waits for tomorrow` : t.tomorrow ? "After 8 pm, calls and texts wait for the morning: the office opens at 9" : w ? w.why : ""];
   if (t.chReason) parts.push(t.chReason);
   return parts.filter(Boolean).map((s) => s.replace(/\.$/, "")).join(". ") + ".";
 }

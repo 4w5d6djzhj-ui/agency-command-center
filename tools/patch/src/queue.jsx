@@ -45,17 +45,23 @@ function XStatusLine({ pr, next, now, onOpen }) {
 // ---- process before results: lead measures on the left, the results they drive on the right -------
 function XScoreboard({ pr, score, F, bump, onStart, fresh, pro, cool }) {
   const asks = xAsks(), wk = xWeek(score, F);
+  const s = useXS();
+  const more = !!s.boardOpen;
   return (
-    <div className="x-board">
+    <div className={"x-board" + (more ? " is-more" : "")}>
+      <div className="x-board-mini">
+        <span><b>{pr.handled}</b>/{pr.plan.length} touches</span><span><b>{pr.callsDone}</b>/{pr.calls} calls</span><span><b>{score.quotes}</b>/{F.quoted} quotes</span><span><b>{wk.apps}</b>/{wk.appsGoal} apps this week</span>
+        <button className="x-board-more" aria-expanded={more} onClick={() => xSet({ boardOpen: !more })}>{more ? "Less" : "More"}</button>
+      </div>
       <div className="x-board-group x-board-process">
         <div className="x-board-k">Process<span>what you control</span></div>
         <div className="x-board-row">
           <XMeter label="Touches" v={pr.handled} of={pr.plan.length} tick={pr.dueNow} sub={`by now ${pr.dueNow}`} />
-          <XMeter label="Calls made" v={pr.callsDone} of={pr.calls} />
+          <XMeter label="Calls" v={pr.callsDone} of={pr.calls} />
           <XMeter label="Life talks" v={asks.life} of={3} />
-          <XMeter label="Referrals asked" v={asks.ref} of={3} />
+          <XMeter label="Referrals" v={asks.ref} of={3} />
           <XMeter label="Proactive" v={pro.done} of={pro.total} />
-          <XMeter label="Cooler leads" v={cool.done} of={cool.total} />
+          <XMeter label="Cooler" v={cool.done} of={cool.total} />
         </div>
       </div>
       <div className="x-board-arrow" aria-hidden="true">→</div>
@@ -178,8 +184,8 @@ function XToday({ persona }) {
   const s = useXS();
   const [, setTick] = I.useState(0);
   I.useEffect(() => { const t = setInterval(() => setTick((x) => x + 1), 1000); return () => clearInterval(t); }, []);
-  if (s.view === "classic") return <><XViewBar view={s.view} /><Uf persona={persona} /></>;
-  if (s.view === "plan") return <><XViewBar view={s.view} /><XDayPlan persona={persona} /></>;
+  if (s.view === "classic") return <><div className="x-backbar"><button className="x-planlink" onClick={() => xSet({ view: "queue" })}>← Back to today's queue</button></div><Uf persona={persona} /></>;
+  if (s.view === "plan") return <><div className="x-backbar"><button className="x-planlink" onClick={() => xSet({ view: "queue" })}>← Back to today's queue</button></div><XDayPlan persona={persona} /></>;
 
   XS.persona = persona;
   if (!XS.seeded) { XS.seeded = true; if (!XFRESH) xSeedUpTo(XS.clock, true); }
@@ -223,7 +229,7 @@ function XToday({ persona }) {
         </div>
         <div className="x-top-right">
           <XCompliance day={day} />
-          <XViewBar view={s.view} />
+          <button className="x-planlink" onClick={() => xSet({ view: "plan" })} title="The whole day, hour by hour">Day plan →</button>
         </div>
       </div>
       <XDayStrip pr={pr} now={now} mix={mix} clock={s.clock} />
