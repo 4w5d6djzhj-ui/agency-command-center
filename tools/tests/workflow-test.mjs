@@ -12,7 +12,7 @@ async function open(site, vp) {
   p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error' && !/fonts.googleapis|gstatic|ERR_TUNNEL/.test(m.text())) errs.push(m.text()); });
   const t0 = Date.now();
   await p.goto(site === 'v1' ? `${base}/` : `${base}/v2/`, { waitUntil: 'networkidle' });
-  const g = p.locator('button.gate-accept'); if (await g.count()) await g.click();
+  const g = p.locator('button.gate-accept, #gateAccept'); if (await g.count()) await g.first().click();
   await p.waitForTimeout(400);
   const load = Date.now() - t0;
   return { p, ctx, errs, load };
@@ -36,6 +36,7 @@ for (const vp of ['desk', 'phone']) {
     // T1: first call — where is the primary Call button and the script?
     const callBtn = p.locator('.x-row.is-open .x-act, .x-row .btn:has-text("Call")').first();
     log('v1', vp, 'T1_call_button_y', await boxY(p.locator('.x-row.is-open .btn, .x-row.is-open .x-act')));
+    log('v1', vp, 'T1_nowbar_in_first_screen', (await p.locator('.x-nowbar').count()) > 0);
     log('v1', vp, 'T1_script_visible_at_load', (await p.locator('.x-row.is-open .x-say, .x-row.is-open .x-script, .x-row.is-open .x-moves').count()) > 0);
     log('v1', vp, 'T1_status_line_y', await boxY(p.locator('.x-status')));
     // T2: log an outcome
@@ -71,16 +72,17 @@ for (const vp of ['desk', 'phone']) {
     let clicks = 0;
     const go = p.locator('#nextt .btn').first();
     if (await go.count()) { await go.click(); clicks++; await p.waitForTimeout(300); }
-    const scriptVis = await p.locator('.card .say, .card .moves, .card .script, .move').first().isVisible().catch(() => false);
+    const scriptVis = await p.locator('.card.open .script .move').first().isVisible().catch(() => false);
     log('v2', vp, 'T1_clicks_to_script', scriptVis ? clicks : `${clicks}+ (no script on card)`);
-    log('v2', vp, 'T2_outcome_clicks', (await p.locator('.card .btn', { hasText: 'Talked' }).count()) ? 1 : null);
+    log('v2', vp, 'T1_script_visible_at_load', (await p.locator('.card.open .script').count()) > 0);
+    log('v2', vp, 'T2_outcome_clicks', (await p.locator('.card.open .btn', { hasText: 'Talked' }).count()) ? 1 : null);
     // T3: approve messages: per message via Compose?
     const openDraft = await p.locator('#lane-msgs .btn', { hasText: /Open draft|Approve/ }).count();
     log('v2', vp, 'T3_approve_clicks', (await p.locator('#lane-msgs .btn', { hasText: 'Approve' }).count()) ? 'per-message, in lane' : openDraft ? 'per-message, via Compose (3 each)' : 'none');
     log('v2', vp, 'T4_stop_reason_on_row', /STOP/i.test(await p.locator('#lane-stop').innerText().catch(() => '')));
     log('v2', vp, 'T5_compliance_clicks', (await p.locator('#compl li').count()) ? 0 : null);
     log('v2', vp, 'T5_compliance_records', (await p.locator('#compl').innerText()).includes('record') ? 'yes' : 'no records list');
-    log('v2', vp, 'T6_cooler_clicks', 'n/a: cooler leads are strip dots only');
+    log('v2', vp, 'T6_cooler_clicks', (await p.locator('details.fold.cool').count()) ? 3 : null);
     log('v2', vp, 'tabs', await p.locator('.tabs a').count());
     log('v2', vp, 'errors', errs.length);
     await p.screenshot({ path: `../final12/wf-v2-${vp}.png` });
