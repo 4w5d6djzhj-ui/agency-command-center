@@ -1305,8 +1305,8 @@ function renderBurn(doneN){
 }
 function card(l){
   const ch=channel(l), s=slot(l), lt=late(l), g=group(l), done=isDone(l), st=stepFor(l);
-  const when = done?'done': g==='now'||g==='referral' ? (lt>30?`${lt} min late`:`${l.seen} min`) : s==null?'—': s>state.clock?fmt(s): lt>30?`${lt} min late`:'now';
-  const wcls = done?'':(lt>30?'late':(g==='now'&&l.seen<=5)||(s!=null&&Math.abs(s-state.clock)<=15)?'now':'');
+  const when = done?'done': ch!=='call' ? (s==null?'any time':`sends ${fmt(s)}`) : g==='now'||g==='referral' ? (lt>30?`${lt} min late`:`${l.seen} min`) : s==null?'—': s>state.clock?fmt(s): lt>30?`${lt} min late`:'now';
+  const wcls = done?'':ch!=='call'?'':(lt>30?'late':(g==='now'&&l.seen<=5)||(s!=null&&Math.abs(s-state.clock)<=15)?'now':'');
   const say = l.say?l.say[0]:(l.cool?l.say:'') ;
   const sayTxt = (typeof say==='string'?say:'').replace('{rep}',first(rep().full)).replace('{first}',first(l.name)).replace('{proposed}',l.proposed?'$'+l.proposed:'').replace('{current}',l.current?'$'+l.current:'');
   const vm = ch==='call' && st.vm ? `Voicemail allowed, ${st.vm}s` : ch==='call' ? 'No voicemail on this call' : '';
@@ -1362,8 +1362,8 @@ function renderLanes(){
   const stops=[...o.filter(isStop).map(l=>stopCard(l.id,STOPS[l.id],l)), ...(state.decided.CLM?[]:[stopCard('CLM',STOPS.CLM,null)])];
   $('#lane-stop').innerHTML = `<div class="lanehead"><h2>Needs a decision</h2><span class="rule">the system stopped itself and says why</span></div>${stops.length?stops.join(''):'<p class="sub">Nothing stopped.</p>'}`;
   const mine = l=>true;
-  lane('#lane-calls','Your calls','in the order the plan sets, freshest lead first', o.filter(l=>!isStop(l)&&channel(l)==='call'&&mine(l)), 4);
-  lane('#lane-msgs','Messages to check','facts marked; approve sends at its hour', o.filter(l=>!isStop(l)&&channel(l)!=='call'&&mine(l)), 3);
+  lane('#lane-calls','Your calls · at their hour','calls happen at their hour, where the contact rate is; freshest lead first', o.filter(l=>!isStop(l)&&channel(l)==='call'&&mine(l)), 4);
+  lane('#lane-msgs','Messages · work any time','check and approve whenever you have a minute; each sends by itself at its set hour', o.filter(l=>!isStop(l)&&channel(l)!=='call'&&mine(l)).sort((a,b)=>(slot(a)||0)-(slot(b)||0)), 99);
 }
 document.addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&e.target.matches('.r1[data-act="toggle"]')){ e.preventDefault(); e.target.click(); } });
 document.addEventListener('click',e=>{
@@ -1388,7 +1388,7 @@ function renderLook(){
   const q=[
     {k:'first',t:'Needs first touch',n:firsts.length,of:null,sub:firsts.length?`oldest ${Math.max(...firsts.map(l=>l.seen||0))} min`:'none waiting',rows:firsts.slice(0,3).map(l=>[l,`${l.seen} min`]),tone:firsts.some(l=>(l.seen||0)>5)?'late':firsts.length?'now':'quiet',empty:'Every new lead has had its first call.'},
     {k:'calls',t:'Calls today',n:callsDone,of:callsDone+calls.length,sub:calls.length?`next: ${whenOf(calls[0])}`:'all done',rows:calls.slice(0,3).map(l=>[l,whenOf(l)]),tone:calls.some(l=>late(l)>0||slot(l)<=state.clock)?'now':'quiet',empty:'No calls left today.'},
-    {k:'msgs',t:'Messages to check',n:msgs.length,of:null,sub:msgs.length?`${msgs.filter(l=>channel(l)==='text').length} texts · ${msgs.filter(l=>channel(l)==='email').length} emails`:'all sent',rows:msgs.slice(0,3).map(l=>[l,channel(l)]),tone:msgs.length?'now':'quiet',empty:'Every message is checked.'},
+    {k:'msgs',t:'Messages to check',n:msgs.length,of:null,sub:msgs.length?`${msgs.filter(l=>channel(l)==='text').length} texts · ${msgs.filter(l=>channel(l)==='email').length} emails · work any time`:'all sent',rows:msgs.slice(0,3).map(l=>[l,channel(l)]),tone:msgs.length?'now':'quiet',empty:'Every message is checked.'},
     {k:'wins',t:'Small wins',n:wins.length,of:ALL.length,sub:`every touch for today done`,rows:wins.slice(0,3).map(l=>[l,(state.log.find(x=>x.id===l.id)||{t:'done'}).t.split(' · ')[0].toLowerCase()]),tone:wins.length?'win':'quiet',empty:'The first one comes with the first call.'},
   ];
   $('#look').innerHTML = q.map(c=>`<div class="lookq is-${c.tone}"><div class="lookhead"><span class="looktitle">${c.t}</span><span class="lookn"><b>${c.n}</b>${c.of!=null?`<small>/${c.of}</small>`:''}</span></div><div class="looksub">${esc(c.sub)}</div>${c.rows.length?`<ul class="looklist">${c.rows.map(([l,w])=>`<li><button class="lookname" data-id="${l.id}" data-act="${isDone(l)?'none':'go'}">${esc(l.name)}</button><span class="lookwhen">${esc(w)}</span></li>`).join('')}</ul>`:`<div class="lookempty">${esc(c.empty)}</div>`}</div>`).join('');

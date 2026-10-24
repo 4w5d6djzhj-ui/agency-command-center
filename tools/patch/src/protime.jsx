@@ -31,7 +31,9 @@ function xProContext(day) {
 function xProTasks(day) {
   const c = xProContext(day);
   const names = c.owe.slice(0, 2).map((l) => xFirst(l.name)).join(" and ");
+  const waiting = day.touches.filter((t) => t.ch !== "call" && !t.tomorrow && !XS.done[t.id] && !(t.lead.consent && t.lead.consent.stop && t.ch === "text")).length;
   const lib = [
+    ...(waiting ? [{ id: "msgs", k: `Check and approve the ${waiting} message${waiting === 1 ? "" : "s"} still waiting`, min: Math.max(2, Math.min(10, waiting * 2)), t: "They send by themselves at their set hours once approved; open time is the place to clear them.", slot: 0 }] : []),
     { id: "quotes", k: c.owe.length ? `Send the quote${c.owe.length === 1 ? "" : "s"} to ${names}` : "Send this morning's quotes", min: 5, t: c.owe.length ? `${c.owe.length === 1 ? xFirst(c.owe[0].name) + " talked this morning and has" : "Both talked this morning and have"} no quote out yet. The follow-up plan starts the moment it goes out.` : "Anyone who talked this morning and has no quote out yet; the plan starts the moment it goes out.", slot: 0 },
     { id: "consent", k: "Consent check, once", min: 2, t: c.stops ? `${c.stops} STOP came in at 7:42 today; texts are off for her and the record shows it. Read the five lines once; nothing to fix.` : "Read the five lines once; nothing to fix.", slot: 0 },
     { id: "tomorrow", k: "Pick tomorrow's first three calls", min: 5, t: "They are already first on tomorrow's plan. Read their words once now, so the first calls at 9 start warm.", slot: 1 },

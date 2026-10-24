@@ -38,7 +38,7 @@ await p.locator('.x-comp > summary').first().click(); await wait();
 await clock('11:00 AM');
 ok((await p.locator('.x-row').count()) === 20, 'rows ' + await p.locator('.x-row').count());
 const lanes = await p.$$eval('.x-lane:not(.x-lane-done)', ls => ls.map(l => [l.querySelector('.x-group-title').textContent, l.querySelectorAll('.x-row').length]));
-ok(lanes.length === 3 && lanes[0][0] === 'Your calls' && lanes[1][0] === 'Texts' && lanes[2][0] === 'Emails' && lanes[0][1] + lanes[1][1] + lanes[2][1] === 20, 'lanes ' + JSON.stringify(lanes));
+ok(lanes.length === 3 && lanes[0][0].startsWith('Your calls') && lanes[1][0] === 'Texts' && lanes[2][0] === 'Emails' && lanes[0][1] + lanes[1][1] + lanes[2][1] === 20, 'lanes ' + JSON.stringify(lanes));
 ok(/^NOW CALL Priya Placeholder/i.test(await txt('.x-nowbar')), 'nowbar first ' + await txt('.x-nowbar'));
 ok(/late|on track|ready/i.test(await txt('.x-status .x-andon')), 'status line ' + await txt('.x-status'));
 ok(/0 \/ 30/.test(await meter('Touches')), 'touches start ' + await meter('Touches'));

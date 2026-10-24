@@ -48,7 +48,7 @@ function XDayStrip({ pr, now, mix, clock }) {
         )}
       </svg>
       <div className="x-strip-cap">
-        <span><b>{touches.length}</b> touches today · {mix.call} calls · {mix.text + mix.email} messages drafted for you · {XCOOL.length} cooler leads for open time{clock != null ? ` · demo clock ${xFmt(now)}` : ""} · <span className="greeting x-strip-model" title="The day's model: 20 prospects, 7 quotes, 4 applications, 2 households protected">{`${Ef.funnel.leads} prospects · ${Ef.funnel.quoted} quotes · ${Ef.funnel.apps} apps / ${Ef.funnel.households} HH protected`}</span></span>
+        <span><b>{touches.length}</b> touches today · {mix.call} calls at their hour · {mix.text + mix.email} messages to check any time, each sends at its hour · {XCOOL.length} cooler leads for open time{clock != null ? ` · demo clock ${xFmt(now)}` : ""} · <span className="greeting x-strip-model" title="The day's model: 20 prospects, 7 quotes, 4 applications, 2 households protected">{`${Ef.funnel.leads} prospects · ${Ef.funnel.quoted} quotes · ${Ef.funnel.apps} apps / ${Ef.funnel.households} HH protected`}</span></span>
         <span className="x-strip-key"><i style={{ background: XCOL.call }} />call <i style={{ background: XCOL.email }} />email <i style={{ background: XCOL.text }} />text <em>filled = done · red ring = late</em></span>
       </div>
     </div>

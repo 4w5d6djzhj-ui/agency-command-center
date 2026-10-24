@@ -110,7 +110,7 @@ function XMsgRow({ v, now, isOpen, persona, onToggle, onAct, onUndo }) {
           <div className="x-facts">Check: {xFacts(lead, t.ch)}</div>
         </div>
         <div className="x-row-side">
-          <XWhen t={t} now={now} />
+          <div className="x-sends"><span className="x-sends-k">sends</span><XWhen t={t} now={now} /></div>
           <button className="btn primary x-approve" onClick={(e) => { e.stopPropagation(); onAct(later ? "scheduled" : "sent"); }}>{later ? "Approve" : "Send"}</button>
         </div>
       </div>
@@ -171,6 +171,12 @@ function xFold(list, now, row, open) {
   );
 }
 
+// messages are not due: they are worked any time and send at their hour, so the lane shows them all,
+// in the order they will send
+function xAllMsgs(list, now, row) {
+  const sorted = list.slice().sort((a, b) => a.current.slot - b.current.slot);
+  return <>{sorted.map(row)}</>;
+}
 function XLane({ title, n, rule, action, children, quiet, sub }) {
   return (
     <div className={"x-lane" + (quiet ? " is-quiet" : "") + (sub ? " is-sub" : "")}>
@@ -255,21 +261,21 @@ function XToday({ persona }) {
               {blocked.map(row)}
             </XLane>
           )}
-          <XLane title="Your calls" n={calls.length} rule={s.coach ? "Due now first, then by time. Your words are on each call." : null}>
+          <XLane title="Your calls · at their hour" n={calls.length} rule={s.coach ? "Calls happen at their hour: that is where the contact rate is. Due now first, then by time; your words are on each call." : null}>
             {xFold(calls, now, row, open)}
             {!calls.length && <div className="x-empty">No calls left today.</div>}
             <XCoolFold ch="call" coach={s.coach} />
           </XLane>
           <div className="x-lane-group">
-            <div className="x-group-head x-group-head-msgs"><span className="x-group-title">Messages to check and send</span><span className="x-group-n">{msgs.length}</span>{s.coach && <span className="x-group-rule">Written from your templates and timed for their hour. Check the marked parts, then approve the routine ones in one batch at a pause point; each send records that you approved it.</span>}
+            <div className="x-group-head x-group-head-msgs"><span className="x-group-title">Messages · work any time</span><span className="x-group-n">{msgs.length}</span>{s.coach && <span className="x-group-rule">Drafted from your templates. Check the marked parts and approve whenever you have a minute, in open time or at a pause point; each one sends by itself at its set hour, and the send records who approved it.</span>}
               {batch.length > 1 ? <button className="btn x-approve-all" onClick={() => xApproveAll(msgs)} title={batch.length < msgs.length ? `${msgs.length - batch.length} marked “Check by itself” stay for you to approve one at a time` : undefined}>Approve {batch.length === msgs.length ? `all ${batch.length}` : `${batch.length} routine`}</button> : null}</div>
             <XLane title="Texts" n={texts.length} sub>
-              {xFold(texts, now, row, open)}
+              {xAllMsgs(texts, now, row)}
               {!texts.length && <div className="x-empty">Every text is checked. They send at their hours.</div>}
               <XCoolFold ch="text" coach={s.coach} />
             </XLane>
             <XLane title="Emails" n={emails.length} sub>
-              {xFold(emails, now, row, open)}
+              {xAllMsgs(emails, now, row)}
               {!emails.length && <div className="x-empty">Every email is checked. They send at their hours.</div>}
               <XCoolFold ch="email" coach={s.coach} />
             </XLane>

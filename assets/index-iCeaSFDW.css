@@ -731,3 +731,7 @@ details.x-later[open]>summary::before{content:"▾ "}
   .x-topright .x-board{grid-template-columns:1fr;grid-template-areas:"process" "results" "start"}
   .x-topright .x-board-arrow{display:none}
 }
+
+/* v16: messages are worked any time and send at their hour */
+.x-sends{display:flex;align-items:baseline;gap:5px;justify-content:flex-end}
+.x-sends-k{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
