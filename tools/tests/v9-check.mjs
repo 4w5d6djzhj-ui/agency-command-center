@@ -16,7 +16,7 @@ const row = (name) => p.locator('.x-row').filter({ has: p.locator(`.x-name:text-
 const meter = async (label) => txt(`.x-meter:has(.x-meter-k:text-is("${label}")) .x-meter-v`);
 
 // --- header and the Classic button top right
-ok((await txt('.brand-text .sub')).toLowerCase() === 'hakobian strategic follow-up · automated coach', 'sub ' + await txt('.brand-text .sub'));
+ok((await txt('.brand-text .sub')).toLowerCase() === 'hakobian strategic follow-up · hakobian automated coach', 'sub ' + await txt('.brand-text .sub'));
 ok(/experience\s*&\s*judgment, at every team member's fingertips/.test(await txt('.brand-tagline')), 'tagline');
 const cb = await p.locator('.x-demo-btn').boundingBox();
 ok(cb && cb.x > 1440 * 0.8, 'demo button top right ' + JSON.stringify(cb));
@@ -59,9 +59,9 @@ const openName = await txt('.x-row.is-open .x-name');
 ok(openName === 'Ben Fixture', 'next open ' + openName);
 
 // --- Ben: Signed (2 lines) -> handled, apps +2, households +1, quote +1
-const apps0 = parseInt(await meter('Apps this week')), hh0 = parseInt(await meter('HH this week'));
+const apps0 = parseInt(await meter('Apps · week')), hh0 = parseInt(await meter('HH · week'));
 await p.locator('.x-row.is-open .x-outs .btn', { hasText: 'Signed' }).click(); await wait(300);
-ok(parseInt(await meter('Apps this week')) === apps0 + 2 && parseInt(await meter('HH this week')) === hh0 + 1, `signed apps ${await meter('Apps this week')} hh ${await meter('HH this week')}`);
+ok(parseInt(await meter('Apps · week')) === apps0 + 2 && parseInt(await meter('HH · week')) === hh0 + 1, `signed apps ${await meter('Apps · week')} hh ${await meter('HH · week')}`);
 ok(/^1 \//.test(await meter('Quotes today')), 'quote counted ' + await meter('Quotes today'));
 ok((await row('Ben Fixture').count()) === 0, 'ben left the lanes');
 ok(/Ben Fixture.*Signed/.test(await p.locator('.x-lane-done').textContent()), 'ben in handled');

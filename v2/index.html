@@ -126,6 +126,23 @@ mark{background:var(--accent-soft);color:inherit;padding:0 2px;border-radius:2px
 body.gated .wrap{filter:blur(3px);pointer-events:none}
 @media (max-width:987px){.demopanel{position:fixed;left:13px;right:13px;top:auto;bottom:21px;min-width:0}}
 
+/* v2.3: today's look */
+.nowstat .wins{font-family:var(--mono);font-size:13px;color:var(--ok);background:var(--ok-soft);border-radius:21px;padding:2px 8px}
+.look{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}
+.lookq{border:1px solid var(--line);border-left-width:3px;border-radius:5px;padding:8px 13px;display:flex;flex-direction:column;gap:3px;min-width:0;background:var(--panel)}
+.lookq.is-now{border-left-color:var(--accent)}.lookq.is-late{border-left-color:var(--bad)}.lookq.is-win{border-left-color:var(--ok)}.lookq.is-quiet{border-left-color:var(--line)}
+.lookhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.looktitle{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.lookn{font-family:var(--display);font-size:21px;line-height:1;font-weight:700}
+.lookn small{font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:500}
+.looksub{font-size:13px;color:var(--muted)}
+.looklist{list-style:none;margin:2px 0 0;padding:0;display:grid;gap:2px}
+.looklist li{display:flex;justify-content:space-between;gap:8px;font-size:13px;min-width:0}
+.lookname{background:none;border:0;padding:0;color:var(--ink);font:inherit;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;min-height:0}
+.lookname:hover{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.lookwhen{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+.lookempty{font-size:13px;color:var(--muted);font-style:italic}
+
 /* tabs */
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;margin-bottom:13px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
@@ -319,7 +336,7 @@ select{width:100%;font:inherit;font-size:13px;padding:8px 8px;min-height:44px;bo
 <div class="band"><span>Confidential demonstration · proprietary follow-up process, sequences and word tracks · not for forwarding</span></div>
 <div class="wrap">
 <header class="top">
-  <div class="brand"><span class="mark" id="mark" aria-hidden="true"></span><div><div class="agency" id="agencyName">Sample Agency</div><div class="product">Agency Command Center</div><div class="method">Hakobian · Strategic Follow-Up · Automated Coach</div></div></div>
+  <div class="brand"><span class="mark" id="mark" aria-hidden="true"></span><div><div class="agency" id="agencyName">Sample Agency</div><div class="product">Agency Command Center</div><div class="method">Hakobian Strategic Follow-Up · Hakobian Automated Coach</div></div></div>
   <div class="ctrls">
     <div class="demo" id="demo">
       <button class="demobtn" id="demoBtn" aria-expanded="false" aria-controls="demoPanel"><i aria-hidden="true"></i>Demo</button>
@@ -351,6 +368,7 @@ select{width:100%;font:inherit;font-size:13px;padding:8px 8px;min-height:44px;bo
         <div class="nextt" id="nextt"></div>
         <div class="strip" id="strip" aria-label="28 leads today"></div>
         <div class="striplegend"><span><i class="sw d"></i>touched</span><span><i class="sw"></i>planned, 20 warm</span><span><i class="sw c"></i>planned, 8 cooler</span><span id="helpcount"></span></div>
+        <div class="look" id="look" role="group" aria-label="Today's look"></div>
       </div>
       <div style="min-width:0;width:377px;max-width:100%"><svg class="burn" id="burn" viewBox="0 0 300 185" role="img" aria-label="Burn-up: touches done against the hour-by-hour plan"></svg><div class="tip" style="text-align:center">Done against the plan, hour by hour.</div></div>
     </div>
@@ -429,7 +447,7 @@ select{width:100%;font:inherit;font-size:13px;padding:8px 8px;min-height:44px;bo
 
 <!-- WHY -->
 <section id="view-why" class="view">
-  <p class="thesis" id="thesis"><small>Hakobian Strategic Follow-Up · Automated Coach</small></p>
+  <p class="thesis" id="thesis"><small>Hakobian Strategic Follow-Up · Hakobian Automated Coach</small></p>
   <div class="ccols">
     <div class="panel"><div class="lanehead"><h2>The rules this board runs on</h2><span class="rule" id="princN"></span></div><div class="princ" id="princ"></div></div>
     <aside class="rail"><div class="panel"><div class="lanehead"><h2>Evidence</h2><span class="rule" id="evN"></span></div><ul class="evid" id="evid"></ul></div></aside>
@@ -1254,8 +1272,9 @@ function renderNow(){
   const half=state.clock>=780;
   const next=ordered().find(l=>!isDone(l)&&!isStop(l));
   const diff=done-plan;
-  $('#nowstat').innerHTML = `<b>${half?left:done}</b><span class="lbl">${half?'touches left':'touches done'} of 28</span>
+  $('#nowstat').innerHTML = `<b>${ALL.length}</b><span class="lbl">today's prospects</span><span class="wins">${done} small win${done===1?'':'s'}</span><span class="lbl">· ${left} to go</span>
     <span class="plan ${diff>=0?'ahead':'behind'}">${done} done · ${plan} planned by ${fmt(state.clock)}</span>`;
+  renderLook();
   if(next){
     const ch=channel(next), s=slot(next), lt=late(next), g=group(next);
     const whenTxt = g==='now'||g==='referral' ? `${next.seen} min ago` : s!=null && s>state.clock ? `at ${fmt(s)}` : lt>0 ? `past due ${lt} min` : 'now';
@@ -1357,6 +1376,23 @@ document.addEventListener('click',e=>{
   if(act==='Edit'){ selectLead(id); go('compose'); return; }
   if(['Talked','Voicemail','No answer','Approve'].includes(act)){ if(act!=='No answer'&&act!=='Voicemail'){ state.done.add(id); } state.log.push({id,t:`${act} · ${rep().full}, ${fmt(state.clock)}`}); if(act==='No answer'||act==='Voicemail'){ state.done.add(id); } toast(`${act} · ${l?l.name:''} · next step is set · logged to ECRM ${fmt(state.clock)}`); const nxt=ordered().find(x=>!isDone(x)&&!isStop(x)&&x.id!==id&&channel(x)===channel(l)&&!x.cool); state.open=nxt?nxt.id:null; state.openAt=Date.now(); renderAll(); return; }
 });
+// Today's look: four compartments read in five seconds; a name opens its card
+function renderLook(){
+  const o=ordered();
+  const firsts=o.filter(l=>group(l)==='now'&&!isDone(l)&&!isStop(l));
+  const calls=o.filter(l=>!isDone(l)&&!isStop(l)&&channel(l)==='call'&&!l.cool&&!firsts.includes(l));
+  const callsDone=ALL.filter(l=>isDone(l)&&channel(l)==='call'&&!l.cool).length;
+  const msgs=o.filter(l=>!isDone(l)&&!isStop(l)&&channel(l)!=='call'&&!l.cool);
+  const wins=ALL.filter(isDone).slice().sort((a,b)=>state.log.findIndex(x=>x.id===b.id)-state.log.findIndex(x=>x.id===a.id));
+  const whenOf=l=>{ const s=slot(l); return group(l)==='now'?`${l.seen} min`: s==null?'': s>state.clock?fmt(s): 'due now'; };
+  const q=[
+    {k:'first',t:'Needs first touch',n:firsts.length,of:null,sub:firsts.length?`oldest ${Math.max(...firsts.map(l=>l.seen||0))} min`:'none waiting',rows:firsts.slice(0,3).map(l=>[l,`${l.seen} min`]),tone:firsts.some(l=>(l.seen||0)>5)?'late':firsts.length?'now':'quiet',empty:'Every new lead has had its first call.'},
+    {k:'calls',t:'Calls today',n:callsDone,of:callsDone+calls.length,sub:calls.length?`next: ${whenOf(calls[0])}`:'all done',rows:calls.slice(0,3).map(l=>[l,whenOf(l)]),tone:calls.some(l=>late(l)>0||slot(l)<=state.clock)?'now':'quiet',empty:'No calls left today.'},
+    {k:'msgs',t:'Messages to check',n:msgs.length,of:null,sub:msgs.length?`${msgs.filter(l=>channel(l)==='text').length} texts · ${msgs.filter(l=>channel(l)==='email').length} emails`:'all sent',rows:msgs.slice(0,3).map(l=>[l,channel(l)]),tone:msgs.length?'now':'quiet',empty:'Every message is checked.'},
+    {k:'wins',t:'Small wins',n:wins.length,of:ALL.length,sub:`every touch for today done`,rows:wins.slice(0,3).map(l=>[l,(state.log.find(x=>x.id===l.id)||{t:'done'}).t.split(' · ')[0].toLowerCase()]),tone:wins.length?'win':'quiet',empty:'The first one comes with the first call.'},
+  ];
+  $('#look').innerHTML = q.map(c=>`<div class="lookq is-${c.tone}"><div class="lookhead"><span class="looktitle">${c.t}</span><span class="lookn"><b>${c.n}</b>${c.of!=null?`<small>/${c.of}</small>`:''}</span></div><div class="looksub">${esc(c.sub)}</div>${c.rows.length?`<ul class="looklist">${c.rows.map(([l,w])=>`<li><button class="lookname" data-id="${l.id}" data-act="${isDone(l)?'none':'go'}">${esc(l.name)}</button><span class="lookwhen">${esc(w)}</span></li>`).join('')}</ul>`:`<div class="lookempty">${esc(c.empty)}</div>`}</div>`).join('');
+}
 function renderPause(){
   const open=ALL.filter(l=>!isDone(l)).length, done=ALL.length-open, over=ALL.filter(l=>late(l)>30).length;
   const pts=[{at:540,k:'Start · huddle',t:`28 touches planned, the first at 9:00; 3 new leads, 3 booked calls. Read your two commitments. Nothing to sort or set up.`,ref:['T26','T35']},

@@ -63,7 +63,7 @@ def match_end(s, i):
 
 
 # 0. compile the components (JSX -> React.createElement on the bundle's React, `I`)
-src_files = ["moves.jsx", "compose.jsx", "engine.jsx", "compare.jsx", "today.jsx", "queue.jsx", "compliance.jsx", "charts.jsx", "protime.jsx", "daystrip.jsx", "plan.jsx", "nowbar.jsx", "demo.jsx", "classic.jsx", "evidence.jsx"]
+src_files = ["moves.jsx", "compose.jsx", "engine.jsx", "compare.jsx", "today.jsx", "queue.jsx", "compliance.jsx", "charts.jsx", "protime.jsx", "daystrip.jsx", "plan.jsx", "nowbar.jsx", "demo.jsx", "classic.jsx", "look.jsx", "evidence.jsx"]
 src = "\n".join(open(os.path.join(HERE, "src", f), encoding="utf-8").read() for f in src_files)
 os.makedirs(os.path.join(HERE, "build"), exist_ok=True)
 open(os.path.join(HERE, "build", "ext.jsx"), "w", encoding="utf-8").write(src)
@@ -108,7 +108,7 @@ js = js[:nav_call_start] + 'o.jsxs("div",{className:"tabs-wrap",children:[' + na
 
 # 5. header: the descriptor line and the tagline
 rep('o.jsx("div",{className:"sub",children:"Hakobian Follow-Up · Automated Coach"})]})]})',
-    'o.jsx("div",{className:"sub",children:"Hakobian Strategic Follow-Up · Automated Coach"})]}),o.jsx(XBrandTagline,{})]})')
+    'o.jsx("div",{className:"sub",children:"Hakobian Strategic Follow-Up · Hakobian Automated Coach"})]}),o.jsx(XBrandTagline,{})]})')
 
 # 6. Compose: hover state, marked draft, rebuilt Why panel (v7) and the best-now corner (v8)
 rep("[d,m]=I.useState({}),y=hp[a]||Dl[0]", "[d,m]=I.useState({}),[xHv,xSetHv]=I.useState(0),y=hp[a]||Dl[0]")

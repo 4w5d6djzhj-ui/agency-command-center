@@ -69,8 +69,8 @@ function XScoreboard({ pr, score, F, bump, onStart, fresh, pro, cool }) {
         <div className="x-board-k">Results<span>they follow · apps and households week to date (demo history)</span></div>
         <div className="x-board-row">
           <XUnits label="Quotes today" v={score.quotes} of={F.quoted} bump={bump.quotes} />
-          <XMeter label="Apps this week" v={wk.apps} of={wk.appsGoal} tick={wk.appsTick} sub={wk.prior ? `plan so far ${wk.appsTick}` : "week starts today"} />
-          <XMeter label="HH this week" v={wk.hh} of={wk.hhGoal} tick={wk.hhTick} sub={wk.prior ? `plan so far ${wk.hhTick}` : "week starts today"} />
+          <XMeter label="Apps · week" v={wk.apps} of={wk.appsGoal} tick={wk.appsTick} sub={wk.prior ? `plan so far ${wk.appsTick}` : "week starts today"} />
+          <XMeter label="HH · week" v={wk.hh} of={wk.hhGoal} tick={wk.hhTick} sub={wk.prior ? `plan so far ${wk.hhTick}` : "week starts today"} />
         </div>
       </div>
       <div className="x-start">
@@ -233,12 +233,17 @@ function XToday({ persona }) {
           <button className="x-planlink" onClick={() => xSet({ view: "plan" })} title="The whole day, hour by hour">Day plan →</button>
         </div>
       </div>
-      <XDayStrip pr={pr} now={now} mix={mix} clock={s.clock} />
-      <XScoreboard pr={pr} score={score} F={F} bump={s.bump} onStart={start} fresh={fresh} pro={xProCount(day)} cool={xCoolCount()} />
+      <div className="x-topgrid">
+        <XLook views={views} order={order} now={now} handled={handled} score={score} onOpen={openLead} />
+        <div className="x-topright">
+          <XDayStrip pr={pr} now={now} mix={mix} clock={s.clock} />
+          <XScoreboard pr={pr} score={score} F={F} bump={s.bump} onStart={start} fresh={fresh} pro={xProCount(day)} cool={xCoolCount()} />
+        </div>
+      </div>
       <div className="x-grid">
         <div className="card x-queue">
           <div className="card-head x-queue-head">
-            <span className="title">Today's {XQ.length} + {XCOOL.length} cooler</span>
+            <span className="title">Today's prospects · {XQ.length} + {XCOOL.length} cooler</span>
             <div className="x-seg x-coach" role="group" aria-label="Coaching">
               <span className="x-viewbar-label">Coaching</span>
               {[[true, "On"], [false, "Off"]].map(([v, l]) => <button key={l} className={s.coach === v ? "active" : ""} aria-pressed={s.coach === v} onClick={() => xSetCoach(v)} title={v ? "Tips and the why on every touch: best for newer team members" : "Just the work: for experienced team members"}>{l}</button>)}

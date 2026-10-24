@@ -86,8 +86,12 @@ function XClassic({ persona }) {
           <button className="x-planlink" onClick={() => xSet({ view: "plan" })} title="The whole day, hour by hour">Day plan →</button>
         </div>
       </div>
-      <XDayStrip pr={pr} now={now} mix={mix} clock={s.clock} />
-      <XScoreboard pr={pr} score={score} F={F} bump={s.bump} onStart={start} fresh={fresh} pro={xProCount(day)} cool={xCoolCount()} />
+      <div className="x-topgrid x-topgrid-classic">
+        <div className="x-topright">
+          <XDayStrip pr={pr} now={now} mix={mix} clock={s.clock} />
+          <XScoreboard pr={pr} score={score} F={F} bump={s.bump} onStart={start} fresh={fresh} pro={xProCount(day)} cool={xCoolCount()} />
+        </div>
+      </div>
       <div className="x-classic-grid" onClick={onBoardClick}>
         <div className="x-classic-board"><Uf persona={persona} /></div>
         <XClassicWork views={views} order={order} now={now} persona={persona} />

@@ -3,7 +3,7 @@ const base = process.argv[2]; const b = await chromium.launch(); const p = await
 const bad = []; const ok = (c, m) => { if (!c) bad.push(m); };
 await p.goto(base, { waitUntil: 'networkidle' });
 const g = p.locator('button.gate-accept'); if (await g.count()) await g.click(); await p.waitForSelector('.topbar');
-ok((await p.locator('.brand-text .sub').innerText()).trim().toLowerCase() === 'hakobian strategic follow-up · automated coach', 'sub line');
+ok((await p.locator('.brand-text .sub').innerText()).trim().toLowerCase() === 'hakobian strategic follow-up · hakobian automated coach', 'sub line');
 const band = (await p.locator('.principle-band').innerText()).replace(/\s+/g, ' ').trim();
 ok(/^OUR STANDARD Plain, respectful, needs-based communication: meet each customer where they are, explain what’s happening, and ask for one small next step\.$/i.test(band), 'band text: ' + band);
 const tabs = await p.$$eval('.tabs button', els => els.map(e => e.innerText.trim()));
