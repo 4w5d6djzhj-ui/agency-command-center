@@ -184,7 +184,7 @@ function XToday({ persona }) {
   const s = useXS();
   const [, setTick] = I.useState(0);
   I.useEffect(() => { const t = setInterval(() => setTick((x) => x + 1), 1000); return () => clearInterval(t); }, []);
-  if (s.view === "classic") return <><div className="x-backbar"><button className="x-planlink" onClick={() => xSet({ view: "queue" })}>← Back to today's queue</button></div><Uf persona={persona} /></>;
+  if (s.view === "classic") return <XClassic persona={persona} />;
   if (s.view === "plan") return <><div className="x-backbar"><button className="x-planlink" onClick={() => xSet({ view: "queue" })}>← Back to today's queue</button></div><XDayPlan persona={persona} /></>;
 
   XS.persona = persona;
@@ -229,6 +229,7 @@ function XToday({ persona }) {
         </div>
         <div className="x-top-right">
           <XCompliance day={day} />
+          <XViewSwitch view="queue" />
           <button className="x-planlink" onClick={() => xSet({ view: "plan" })} title="The whole day, hour by hour">Day plan →</button>
         </div>
       </div>
